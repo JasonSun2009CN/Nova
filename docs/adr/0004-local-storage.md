@@ -1,0 +1,116 @@
+# ADR-0004: 本地持久化方案 - IndexedDB (Dexie.js)
+
+- 状态: Accepted
+- 日期: 2026-07-29
+- 决策者: 项目初始团队
+
+## 背景与问题陈述
+
+Nova 需要离线优先（Offline-First）的本地数据持久化，存储以下数据：
+
+| 数据类型 | 预估量级 | 读写频率 | 说明 |
+|---------|---------|---------|------|
+| 航行记录 | 每条 ~1KB，用户累计可达 10k+ 条 | 写：每次专注结束；读：每次进入日志页 | 结构化，需要按时间/距离/目的地查询 |
+| 星图缓存 | 初始 ~1MB，扩展版 ~50MB | 写：首次加载或更新；读：每次缩放星图 | 大数据量，需要按距离分块查询 |
+| 用户设置 | ~10KB | 低（仅设置变更时） | KV 结构 |
+| 成就进度 | ~50KB | 中（到达天体时更新） | KV + 列表混合 |
+| 临时航行状态 | ~1KB | 极高（专注中每 10s 写一次快照） | 用于崩溃恢复 |
+
+要求：浏览器刷新/关闭后数据不丢失、支持结构化查询、支持大数据量、异步无阻塞。
+
+## 考虑过的方案
+
+### 方案 A: IndexedDB（通过 Dexie.js 封装）+ localStorage 辅助
+
+**分工：**
+- **Dexie.js (IndexedDB)**：航行记录、星图缓存、成就进度等结构化 / 大量数据
+- **localStorage**：用户设置（KV 小数据）、崩溃恢复快照（简单 JSON）
+
+**优点:**
+- IndexedDB 浏览器原生支持，容量上限通常 > 50MB（取决于磁盘空间）
+- 支持索引查询、范围查询、游标遍历，适合星图分块加载和航行记录筛选
+- 全异步 API，不阻塞主线程（专注中持久化不能掉帧）
+- Dexie.js 提供友好的 Promise API + TypeScript 类型，极大降低 IndexedDB 使用门槛
+- 支持版本迁移（升级 schema 不丢旧数据）
+
+**缺点:**
+- 原生 IndexedDB API 复杂（需要 Dexie 封装）
+- 跨浏览器数据不一致（但 Nova 是本地优先，暂无跨端同步需求）
+- SSR 环境不可用（Nova 纯客户端，不影响）
+
+### 方案 B: localStorage 纯方案
+
+**优点:**
+- API 最简单，一行 `getItem / setItem`
+
+**缺点:**
+- 容量上限 5MB，星图扩展版数据（50MB）完全放不下
+- 同步 API，写入大数据时会阻塞主线程（专注中写入可能导致掉帧）
+- 不支持结构化查询，航行记录搜索需要全量加载到内存再 filter，性能差
+- **不适用**：数据规模和查询需求均超出能力范围
+
+### 方案 C: OPFS (Origin Private File System)
+
+**优点:**
+- 最新 W3C 标准，类似本地文件系统
+- 容量上限高（可到数 GB）
+- 读写性能接近本地文件
+
+**缺点:**
+- 浏览器兼容性差（2026 年 Safari 仍有限制，Firefox 不完整支持）
+- API 偏底层，没有结构化查询能力
+- 适合存储二进制大文件（如星空纹理图），不适合频繁更新的结构化小记录
+- **结论**：可作为未来补充，但 v1.0 主力存储不用
+
+### 方案 D: PouchDB（CouchDB 同步协议）
+
+**优点:**
+- 内置同步协议，未来做云端同步方便
+- 封装了 IndexedDB，API 友好
+
+**缺点:**
+- 包体积大（~50KB gzip，Dexie 仅 ~10KB）
+- 引入 CouchDB 模型（文档 ID、_rev 冲突解决）对项目是过度设计
+- 当前阶段无同步需求，引入复杂度不值得
+
+## 决策
+
+采用 **Dexie.js (IndexedDB) + localStorage** 的分层持久化方案。
+
+存储分工如下：
+
+| 数据 | 存储位置 | Dexie Table / localStorage Key |
+|------|---------|-------------------------------|
+| 用户设置（主题、默认时长等） | localStorage | `nova:settings` |
+| 临时航行快照（崩溃恢复） | localStorage | `nova:snapshot` |
+| 航行记录 | Dexie: `voyages` | 索引：startTime, distance, fromId, toId |
+| 星表缓存 | Dexie: `stars` | 索引：distance, mag, spectralType, ra, dec |
+| 成就进度 | Dexie: `achievements` | 索引：unlockedAt, rarity |
+| 已发现天体 | Dexie: `discovered` | 索引：starId, discoveredAt |
+
+## 决策依据
+
+1. **容量与查询**：星表数据（50MB+）和航行记录（结构化查询）是 localStorage 无法处理的，IndexedDB 是唯一原生可行方案
+2. **异步性能**：专注过程中每 10s 写一次快照不阻塞 UI，保证航行视图流畅
+3. **开发效率**：Dexie.js 把 IndexedDB 的复杂度降低到了 ORM 级别，TypeScript 支持优秀
+4. **可扩展**：Dexie 支持 DB Version 迁移，后续 v1.x 升级 schema 不丢失用户数据
+
+## 后果
+
+### 正面影响
+- 航行记录可支持复杂筛选：「本月完成的所有 1h+ 航行」「所有到达半人马座α的旅行」
+- 星图数据可按需分块加载，不阻塞首屏
+- 与 Service Worker 配合，可实现完全离线可用
+
+### 负面影响
+- 首次使用 IndexedDB 的同学需要学习 Dexie API
+- 需要编写 schema 版本迁移脚本（每次升级表结构）
+- 隐身模式 / 隐私模式下 IndexedDB 容量受限（通常接受，需文档说明）
+
+### 风险与缓解措施
+
+| 风险 | 影响 | 概率 | 缓解措施 |
+|------|------|------|---------|
+| IndexedDB 写入失败（配额超出） | 航行记录丢失 | 低 | 监听 `QuotaExceededError`，提示用户清理旧记录；重要记录先写 localStorage 兜底 |
+| Dexie schema 迁移出错（升级版本） | 用户数据不可用 | 中 | 每个版本迁移脚本写单元测试；提供「导出数据 → 重装 → 导入」应急方案 |
+| localStorage 与 IndexedDB 状态不一致 | 设置项丢失 | 低 | 启动时做一致性校验，以 IndexedDB 为准同步到 localStorage |

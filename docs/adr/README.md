@@ -1,0 +1,62 @@
+# ADR 索引 (Architecture Decision Records)
+
+> 架构决策记录 - 记录项目中关键技术选型的决策过程与背景。
+
+## 什么是 ADR？
+
+ADR (Architecture Decision Record) 是一种轻量级文档，用于记录重要的架构决策。每个 ADR 描述：
+- **背景**：我们面临什么问题？
+- **决策**：我们决定怎么做？
+- **后果**：这样做带来了什么影响（正面 + 负面）？
+
+## ADR 格式
+
+每个 ADR 文件遵循以下结构：
+```
+# ADR-XXXX: 决策标题
+
+- 状态: {Proposed | Accepted | Deprecated | Superseded by ADR-YYYY}
+- 日期: YYYY-MM-DD
+- 决策者: 参与决策的人员
+
+## 背景与问题陈述
+
+## 考虑过的方案
+- 方案 A
+- 方案 B
+- 方案 C
+
+## 决策
+
+## 决策依据
+
+## 后果
+### 正面影响
+### 负面影响
+### 风险与缓解
+```
+
+---
+
+## 决策列表
+
+| 编号 | 标题 | 状态 | 日期 |
+|------|------|------|------|
+| [ADR-0001](0001-frontend-framework.md) | 前端框架选择：React + TypeScript | Accepted | 2026-07-29 |
+| [ADR-0002](0002-graphics-renderer.md) | 图形渲染方案：Three.js + WebGL 2.0 | Accepted | 2026-07-29 |
+| [ADR-0003](0003-state-management.md) | 状态管理方案：Zustand | Accepted | 2026-07-29 |
+| [ADR-0004](0004-local-storage.md) | 本地持久化方案：IndexedDB (Dexie) | Accepted | 2026-07-29 |
+| [ADR-0005](0005-architecture-style.md) | 架构风格：引擎层与 UI 层分离 | Accepted | 2026-07-29 |
+| [ADR-0006](0006-star-data-strategy.md) | 星图数据策略：分层加载 + LOD | Accepted | 2026-07-29 |
+| [ADR-0007](0007-styling-solution.md) | 样式方案：Tailwind CSS + CSS Variables | Accepted | 2026-07-29 |
+| [ADR-0008](0008-build-tool.md) | 构建工具：Vite + pnpm | Accepted | 2026-07-29 |
+
+---
+
+## 新增 ADR 流程
+
+1. 复制 [adr-template.md](adr-template.md) 为新文件，命名为 `NNNN-title.md`（NNNN 为四位递增编号）
+2. 填写所有章节
+3. 在本索引文件的决策列表中添加新条目
+4. 提交 PR，在 PR 描述中解释该 ADR 的必要性
+5. 至少 1 名核心成员 Review 后合入
