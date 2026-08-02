@@ -41,7 +41,7 @@ function resetHistoryStore(): void {
 
 describe('useVoyageStore (Zustand · VoyageController 桥接 + Dexie 自动保存)', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] });
     vi.setSystemTime(Date.UTC(2025, 0, 1, 12, 0, 0));
     resetVoyageStore();
     resetHistoryStore();
