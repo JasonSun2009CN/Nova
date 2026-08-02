@@ -8,7 +8,7 @@ module.exports = {
     ],
     "type-case": [2, "always", "lower-case"],
     "type-empty": [2, "never"],
-    "subject-case": [2, "always", "lower-case"],
+    "subject-case": [2, "never", ["sentence-case", "start-case", "pascal-case", "upper-case"]],
     "subject-empty": [2, "never"],
     "subject-max-length": [2, "always", 72],
     "body-leading-blank": [1, "always"],
