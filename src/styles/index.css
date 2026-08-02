@@ -32,6 +32,7 @@
     --color-surface: #050817;
     --color-surface-elevated: #0a0e27;
     --color-surface-muted: rgba(26, 15, 61, 0.5);
+    --color-foreground: var(--color-deep-100);
 
     --color-border: rgba(164, 178, 255, 0.15);
     --color-border-strong: rgba(164, 178, 255, 0.35);
@@ -74,6 +75,7 @@
     --color-surface: #04000b;
     --color-surface-elevated: #0d0221;
     --color-surface-muted: rgba(242, 0, 137, 0.12);
+    --color-foreground: var(--color-deep-100);
 
     --color-border: rgba(242, 0, 137, 0.3);
     --color-border-strong: rgba(0, 240, 255, 0.5);
@@ -116,6 +118,7 @@
     --color-surface: #f4e8d0;
     --color-surface-elevated: #fbf3e0;
     --color-surface-muted: rgba(200, 159, 106, 0.15);
+    --color-foreground: var(--color-deep-800);
 
     --color-border: rgba(94, 60, 27, 0.2);
     --color-border-strong: rgba(94, 60, 27, 0.5);
@@ -158,6 +161,7 @@
     --color-surface: #fafafa;
     --color-surface-elevated: #ffffff;
     --color-surface-muted: rgba(229, 231, 235, 0.5);
+    --color-foreground: var(--color-deep-800);
 
     --color-border: rgba(75, 85, 99, 0.12);
     --color-border-strong: rgba(75, 85, 99, 0.3);
@@ -182,23 +186,10 @@
   body {
     @apply font-sans;
     background-color: var(--color-surface);
-    color: var(--color-deep-100);
+    color: var(--color-foreground);
     transition:
       background-color 500ms ease,
       color 500ms ease;
-  }
-
-  [data-theme='deep-space'],
-  [data-theme='cyberpunk'] {
-    color: var(--color-deep-100);
-  }
-
-  [data-theme='retro'] {
-    color: var(--color-deep-800);
-  }
-
-  [data-theme='minimal-light'] {
-    color: var(--color-deep-800);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -237,13 +228,7 @@
 
 @layer utilities {
   .text-foreground {
-    color: var(--color-deep-100);
-  }
-
-  [data-theme='minimal-light'] & {
-    .text-foreground {
-      color: var(--color-deep-800);
-    }
+    color: var(--color-foreground);
   }
 
   .gradient-aurora {
