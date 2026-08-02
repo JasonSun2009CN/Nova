@@ -317,3 +317,9 @@ export function resetVoyageControllerForTest(): void {
     activeController = null;
   }
 }
+
+export function fastForwardVoyageForTest(ms: number): void {
+  if (activeController != null) {
+    activeController.tick(Date.now() + ms);
+  }
+}
