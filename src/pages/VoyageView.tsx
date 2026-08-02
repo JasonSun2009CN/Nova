@@ -7,7 +7,7 @@ import { formatDurationMs, formatGamma, formatLy, formatVOverC } from '@/utils/f
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-surface-elevated/70 px-2 py-2.5 backdrop-blur-sm">
+    <div className="glass-card rounded-xl px-2 py-2.5 text-center shadow-glass">
       <div className="font-mono text-base text-foreground tabular-nums">{value}</div>
       <div className="mt-0.5 text-[10px] text-deep-400">{label}</div>
     </div>
@@ -35,12 +35,19 @@ export function VoyageView() {
   return (
     <section
       data-testid="voyage-view"
-      className="relative flex h-full w-full flex-1 flex-col overflow-hidden"
+      className="relative flex h-full w-full flex-1 animate-fade-up flex-col overflow-hidden"
     >
       <div className="absolute inset-0">
         <VoyageStarFlow speed={progress.vOverC} active={active} />
       </div>
-      <div className="pointer-events-none absolute inset-0 bg-gradient-aurora opacity-50" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-aurora opacity-40" />
+      <div
+        className="pointer-events-none absolute bottom-0 left-1/2 h-44 w-[130%] -translate-x-1/2 rounded-full blur-3xl"
+        style={{
+          background: 'radial-gradient(ellipse, var(--color-star-gold) 0%, transparent 62%)',
+          opacity: 0.22,
+        }}
+      />
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-between px-5 pb-6 pt-4">
         <div className="flex w-full items-center justify-between">
@@ -55,7 +62,7 @@ export function VoyageView() {
 
         <div className="text-center">
           {resumedFromSnapshot && (
-            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-star-blue/50 bg-star-blue/10 px-3 py-1 text-xs text-star-blue">
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-star-blue/50 bg-star-blue/10 px-3 py-1 text-xs text-star-blue backdrop-blur">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -71,12 +78,12 @@ export function VoyageView() {
               已恢复上次航行
             </div>
           )}
-          <div className="font-mono text-[68px] font-bold leading-none tracking-tight text-foreground tabular-nums">
+          <div className="font-display text-[72px] font-bold leading-none tracking-tight text-foreground tabular-nums [text-shadow:0_0_32px_var(--shadow-glow)]">
             {formatDurationMs(remaining)}
           </div>
           <div className="mt-3 text-sm text-deep-300">剩余专注时间</div>
           {status === 'paused' && (
-            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-star-gold/50 bg-star-gold/10 px-4 py-1.5 text-sm text-star-gold">
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-star-gold/50 bg-star-gold/10 px-4 py-1.5 text-sm text-star-gold backdrop-blur">
               <span className="h-1.5 w-1.5 rounded-full bg-star-gold" aria-hidden="true" />
               已暂停
             </div>
@@ -91,16 +98,18 @@ export function VoyageView() {
           </div>
 
           <div
-            className="h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated"
+            className="h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated/60"
             role="progressbar"
             aria-valuenow={pct}
             aria-valuemin={0}
             aria-valuemax={100}
           >
             <div
-              className="h-full rounded-full bg-star-gold transition-[width] duration-500 ease-out"
+              className="relative h-full overflow-hidden rounded-full bg-gradient-to-r from-star-blue via-star-gold to-star-gold transition-[width] duration-500 ease-out"
               style={{ width: `${pct}%` }}
-            />
+            >
+              <div className="shimmer-overlay" />
+            </div>
           </div>
 
           <div className="flex items-stretch gap-3">
@@ -108,10 +117,10 @@ export function VoyageView() {
               type="button"
               onClick={() => (active ? pause() : resume())}
               className={twMerge(
-                'flex h-14 flex-1 cursor-pointer items-center justify-center rounded-lg border text-lg font-semibold tracking-widest transition-colors duration-200',
+                'flex h-14 flex-1 cursor-pointer items-center justify-center rounded-xl font-display text-lg font-semibold tracking-widest transition-all duration-200',
                 active
-                  ? 'border-border text-deep-200 hover:border-border-strong hover:bg-surface-muted'
-                  : 'border-star-gold bg-star-gold/15 text-star-gold shadow-glow-sm hover:bg-star-gold/25',
+                  ? 'glass-card text-deep-200 hover:text-foreground'
+                  : 'bg-star-gold text-[#0a1032] shadow-glow-sm hover:shadow-glow hover:brightness-110 active:scale-[0.99]',
               )}
             >
               {active ? '暂停' : '继续'}
@@ -119,7 +128,7 @@ export function VoyageView() {
             <button
               type="button"
               onClick={() => abort()}
-              className="flex h-14 w-28 cursor-pointer items-center justify-center rounded-lg border border-star-red/50 text-base text-star-red transition-colors duration-200 hover:bg-star-red/10"
+              className="glass-card flex h-14 w-28 cursor-pointer items-center justify-center rounded-xl text-base text-star-red transition-colors duration-200 hover:bg-star-red/10"
             >
               结束
             </button>

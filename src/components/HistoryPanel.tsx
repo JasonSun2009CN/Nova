@@ -20,7 +20,7 @@ export function HistoryPanel() {
   return (
     <section data-testid="history-panel" className="mx-auto w-full max-w-md px-5 pb-10">
       <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-lg font-medium">
+        <h2 className="font-display flex items-center gap-2 text-lg font-semibold tracking-wide">
           <span className="text-star-blue">✦</span>
           <span>航行日志</span>
         </h2>
@@ -38,13 +38,18 @@ export function HistoryPanel() {
       {loading && records.length === 0 ? (
         <p className="py-8 text-center text-sm text-deep-400">加载中…</p>
       ) : records.length === 0 ? (
-        <p className="py-8 text-center text-sm text-deep-400">还没有航行记录，开启第一次专注吧。</p>
+        <p className="glass-card rounded-2xl py-8 text-center text-sm text-deep-400 shadow-glass">
+          还没有航行记录，开启第一次专注吧。
+        </p>
       ) : (
-        <ul className="mt-3 divide-y divide-border rounded-lg border border-border bg-surface-elevated/60">
+        <ul className="mt-3 space-y-2">
           {records.map((r) => {
             const destName = getDestinationName(r.destStarId);
             return (
-              <li key={r.id} className="flex items-center gap-3 px-4 py-3">
+              <li
+                key={r.id}
+                className="glass-card flex items-center gap-3 rounded-2xl px-4 py-3 shadow-glass"
+              >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm text-foreground tabular-nums">
@@ -52,7 +57,7 @@ export function HistoryPanel() {
                     </span>
                     <span
                       className={twMerge(
-                        'rounded px-1.5 py-0.5 text-[10px]',
+                        'rounded-full px-2 py-0.5 text-[10px]',
                         r.status === 'completed'
                           ? 'bg-star-gold/15 text-star-gold'
                           : 'bg-star-red/15 text-star-red',
@@ -72,7 +77,7 @@ export function HistoryPanel() {
                   type="button"
                   aria-label="删除这条记录"
                   onClick={() => void deleteRecord(r.id)}
-                  className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-deep-400 transition-colors hover:text-star-red"
+                  className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl text-deep-400 transition-colors hover:text-star-red"
                 >
                   <svg
                     viewBox="0 0 24 24"
@@ -94,7 +99,7 @@ export function HistoryPanel() {
       )}
 
       {stats != null && records.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 rounded-lg border border-border bg-surface-muted/40 px-4 py-3 text-xs text-deep-300">
+        <div className="glass-card mt-4 flex flex-wrap gap-x-4 gap-y-1 rounded-2xl px-4 py-3 text-xs text-deep-300 shadow-glass">
           <span>累计专注 {stats.totalFocusHours.toFixed(1)} 小时</span>
           <span>累计航行 {formatLy(stats.totalTraveledLy)}</span>
           <span>完成 {stats.completedVoyages} 次</span>

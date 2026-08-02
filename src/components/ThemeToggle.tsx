@@ -66,10 +66,10 @@ export function ThemeToggle() {
           title={opt.label}
           onClick={() => void setTheme(opt.key)}
           className={twMerge(
-            'flex h-11 w-11 cursor-pointer items-center justify-center rounded-md border transition-colors duration-200',
+            'flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border transition-all duration-200',
             theme === opt.key
-              ? 'border-star-gold bg-star-gold/10 text-star-gold shadow-glow-sm'
-              : 'border-border text-deep-400 hover:border-border-strong hover:text-deep-200',
+              ? 'border-star-gold/60 bg-star-gold/15 text-star-gold shadow-glow-sm'
+              : 'border-[var(--color-glass-border)] bg-[var(--color-glass)] text-deep-400 hover:text-foreground',
           )}
         >
           <ThemeGlyph themeKey={opt.key} />

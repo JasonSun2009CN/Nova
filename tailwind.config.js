@@ -43,6 +43,7 @@ export default {
         },
       },
       fontFamily: {
+        display: ['"Space Grotesk"', 'Inter', 'sans-serif'],
         sans: [
           'Inter',
           '-apple-system',
@@ -66,12 +67,17 @@ export default {
       boxShadow: {
         'glow': '0 0 20px var(--shadow-glow)',
         'glow-sm': '0 0 8px var(--shadow-glow)',
+        'glow-lg': '0 0 40px var(--shadow-glow)',
         'card': '0 4px 20px var(--shadow-card)',
+        'glass': '0 8px 32px var(--shadow-card)',
       },
       animation: {
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'float-slow': 'float 8s ease-in-out infinite',
         'twinkle': 'twinkle 3s ease-in-out infinite',
+        'fade-up': 'fade-up 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
+        'drift': 'drift 24s ease-in-out infinite alternate',
+        'shimmer': 'shimmer 2.4s ease-in-out infinite',
       },
       keyframes: {
         float: {

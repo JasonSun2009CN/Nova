@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/space-grotesk-latin.woff2') format('woff2');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -33,6 +41,8 @@
     --color-surface-elevated: #0a0e27;
     --color-surface-muted: rgba(26, 15, 61, 0.5);
     --color-foreground: var(--color-deep-100);
+    --color-glass: rgba(255, 255, 255, 0.045);
+    --color-glass-border: rgba(255, 255, 255, 0.09);
 
     --color-border: rgba(164, 178, 255, 0.15);
     --color-border-strong: rgba(164, 178, 255, 0.35);
@@ -76,6 +86,8 @@
     --color-surface-elevated: #0d0221;
     --color-surface-muted: rgba(242, 0, 137, 0.12);
     --color-foreground: var(--color-deep-100);
+    --color-glass: rgba(255, 255, 255, 0.05);
+    --color-glass-border: rgba(255, 255, 255, 0.1);
 
     --color-border: rgba(242, 0, 137, 0.3);
     --color-border-strong: rgba(0, 240, 255, 0.5);
@@ -119,6 +131,8 @@
     --color-surface-elevated: #fbf3e0;
     --color-surface-muted: rgba(200, 159, 106, 0.15);
     --color-foreground: var(--color-deep-800);
+    --color-glass: rgba(255, 251, 240, 0.55);
+    --color-glass-border: rgba(94, 60, 27, 0.12);
 
     --color-border: rgba(94, 60, 27, 0.2);
     --color-border-strong: rgba(94, 60, 27, 0.5);
@@ -162,6 +176,8 @@
     --color-surface-elevated: #ffffff;
     --color-surface-muted: rgba(229, 231, 235, 0.5);
     --color-foreground: var(--color-deep-800);
+    --color-glass: rgba(255, 255, 255, 0.66);
+    --color-glass-border: rgba(75, 85, 99, 0.1);
 
     --color-border: rgba(75, 85, 99, 0.12);
     --color-border-strong: rgba(75, 85, 99, 0.3);
@@ -231,6 +247,33 @@
     color: var(--color-foreground);
   }
 
+  .glass-card {
+    background: var(--color-glass);
+    border: 1px solid var(--color-glass-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(
+      135deg,
+      var(--color-star-gold),
+      var(--color-star-white) 50%,
+      var(--color-star-blue)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .shimmer-overlay {
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    animation: shimmer 2.4s ease-in-out infinite;
+  }
+
   .gradient-aurora {
     background: radial-gradient(
         circle at 20% 20%,
@@ -247,5 +290,44 @@
         color-mix(in oklab, var(--color-star-gold) 15%, transparent) 0%,
         transparent 60%
       );
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(6%, 8%) scale(1.15);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
   }
 }

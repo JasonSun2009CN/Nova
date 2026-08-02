@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import { HistoryPanel } from '@/components/HistoryPanel';
+import { SpaceBackdrop } from '@/components/SpaceBackdrop';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ResultView } from '@/pages/ResultView';
 import { SetupPanel } from '@/pages/SetupPanel';
@@ -26,13 +27,17 @@ function App() {
   const status = progress?.status ?? 'idle';
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col bg-surface text-foreground transition-colors duration-500">
-      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border px-5 py-3 backdrop-blur-sm">
-        <h1 className="text-xl font-bold tracking-[0.3em] text-star-gold">NOVA</h1>
+    <div className="relative flex min-h-dvh w-full flex-col text-foreground transition-colors duration-500">
+      <SpaceBackdrop />
+
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--color-glass-border)] bg-[var(--color-glass)] px-5 py-3 backdrop-blur-xl">
+        <h1 className="font-display text-xl font-bold tracking-[0.35em]">
+          <span className="text-gradient-gold drop-shadow-[0_0_14px_var(--shadow-glow)]">NOVA</span>
+        </h1>
         <ThemeToggle />
       </header>
 
-      <main className="flex min-h-0 flex-1 flex-col">
+      <main className="relative z-10 flex min-h-0 flex-1 flex-col">
         {status === 'running' || status === 'paused' ? (
           <VoyageView />
         ) : (
