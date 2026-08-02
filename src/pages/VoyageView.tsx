@@ -17,6 +17,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 export function VoyageView() {
   const progress = useVoyageStore((s) => s.progress);
   const destStarId = useVoyageStore((s) => s.destStarId);
+  const resumedFromSnapshot = useVoyageStore((s) => s.resumedFromSnapshot);
   const pause = useVoyageStore((s) => s.pause);
   const resume = useVoyageStore((s) => s.resume);
   const abort = useVoyageStore((s) => s.abort);
@@ -53,6 +54,23 @@ export function VoyageView() {
         </div>
 
         <div className="text-center">
+          {resumedFromSnapshot && (
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-star-blue/50 bg-star-blue/10 px-3 py-1 text-xs text-star-blue">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-3.5 w-3.5"
+                aria-hidden="true"
+              >
+                <path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6" />
+              </svg>
+              已恢复上次航行
+            </div>
+          )}
           <div className="font-mono text-[68px] font-bold leading-none tracking-tight text-foreground tabular-nums">
             {formatDurationMs(remaining)}
           </div>

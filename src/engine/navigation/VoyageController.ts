@@ -28,6 +28,7 @@ type EngineState = {
   vOverC: number;
   tickIntervalMs: number;
   infinite: boolean;
+  externalTicker: boolean;
   tickHandle: ReturnType<typeof setInterval> | null;
   abortListener: (() => void) | null;
 };
@@ -50,6 +51,7 @@ export class VoyageController extends EventEmitter<VoyageEventMap> {
       vOverC,
       tickIntervalMs,
       infinite,
+      externalTicker: false,
       tickHandle: null,
       abortListener: null,
     };
@@ -226,6 +228,7 @@ export class VoyageController extends EventEmitter<VoyageEventMap> {
   }
 
   private scheduleTick(): void {
+    if (this.s.externalTicker) return;
     if (this.s.tickHandle != null) return;
     this.s.tickHandle = setInterval(() => this.tick(), this.s.tickIntervalMs);
     if (typeof this.s.tickHandle === 'object' && 'unref' in this.s.tickHandle) {
@@ -240,8 +243,8 @@ export class VoyageController extends EventEmitter<VoyageEventMap> {
     }
   }
 
-  private tick(): void {
-    this.flushTick();
+  tick(wallTime?: number): void {
+    this.flushTick(wallTime);
     if (this.s.focusTotalMs != null && this.s.elapsedFocusMs >= this.s.focusTotalMs) {
       this.s.status = 'completed';
       this.stopTick();
@@ -253,9 +256,18 @@ export class VoyageController extends EventEmitter<VoyageEventMap> {
     }
   }
 
-  private flushTick(): void {
+  setExternalTicker(enabled: boolean): void {
+    this.s.externalTicker = enabled;
+    if (enabled) {
+      this.stopTick();
+    } else if (this.s.status === 'running') {
+      this.scheduleTick();
+    }
+  }
+
+  private flushTick(wallTime?: number): void {
     if (this.s.status !== 'running' || this.s.lastTickWallTime == null) return;
-    const now = wallNow();
+    const now = wallTime ?? wallNow();
     const deltaMs = now - this.s.lastTickWallTime;
     if (deltaMs <= 0) return;
     const focusSeconds = deltaMs / 1000;

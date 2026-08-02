@@ -19,6 +19,7 @@ function resetStores() {
     destStarId: null,
     lastSavedRecord: null,
     controllerReady: false,
+    resumedFromSnapshot: false,
   });
   useSettingsStore.setState({
     settings: { ...DEFAULT_SETTINGS },

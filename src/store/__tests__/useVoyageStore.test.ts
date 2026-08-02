@@ -27,6 +27,7 @@ function resetVoyageStore(): void {
     destStarId: null,
     lastSavedRecord: null,
     controllerReady: false,
+    resumedFromSnapshot: false,
   });
 }
 

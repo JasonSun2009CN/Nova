@@ -29,6 +29,7 @@ function resetStores() {
     destStarId: null,
     lastSavedRecord: null,
     controllerReady: false,
+    resumedFromSnapshot: false,
   });
   useHistoryStore.setState({
     records: [],

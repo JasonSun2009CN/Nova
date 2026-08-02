@@ -16,6 +16,7 @@ function App() {
   useEffect(() => {
     void useSettingsStore.getState().load();
     void useHistoryStore.getState().load();
+    void useVoyageStore.getState().resumeFromLiveVoyage();
   }, []);
 
   useEffect(() => {
