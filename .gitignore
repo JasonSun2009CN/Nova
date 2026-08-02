@@ -56,3 +56,6 @@ temp/
 .parcel-cache/
 .eslintcache
 .stylelintcache
+
+# pnpm store
+.pnpm-store/
