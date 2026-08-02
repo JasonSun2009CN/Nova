@@ -7,6 +7,7 @@
 ## 背景与问题陈述
 
 Nova 有多个需要全局共享的状态：
+
 1. **航行状态**：当前模式（idle/voyaging/paused/arrived）、开始时间、剩余时间、速度、当前位置、目标天体
 2. **用户偏好**：主题、默认引擎、白噪音设置、通知偏好
 3. **星图状态**：当前缩放级别、视图中心、选中天体、搜索过滤条件
@@ -20,6 +21,7 @@ Nova 有多个需要全局共享的状态：
 ### 方案 A: Zustand
 
 **优点:**
+
 - 极简 API，学习成本低（~5 分钟入门）
 - 无需 Provider，组件外也可调用（对 Web Worker、非 React 模块极友好）
 - 包体积极小（< 2KB gzip）
@@ -28,6 +30,7 @@ Nova 有多个需要全局共享的状态：
 - 异步 action 直接写 async/await，无样板代码
 
 **缺点:**
+
 - 相比 Redux Toolkit，缺少规范化/标准化的数据操作模式
 - 缺少 action 追踪，调试大型复杂状态流不如 Redux DevTools 全面
 - 社区相对小（但增长迅速）
@@ -35,11 +38,13 @@ Nova 有多个需要全局共享的状态：
 ### 方案 B: Redux Toolkit (RTK)
 
 **优点:**
+
 - 工业级方案，模式标准化，团队协作成本低
 - DevTools 体验最佳（时间旅行调试）
 - RTK Query 可覆盖未来 API 请求需求
 
 **缺点:**
+
 - Boilerplate 仍然较多（slice、reducer、extraReducer）
 - 概念重：需理解 Store / Dispatch / Selector / Middleware / Thunk
 - 跨模块调用需要额外处理
@@ -48,10 +53,12 @@ Nova 有多个需要全局共享的状态：
 ### 方案 C: Context + useReducer
 
 **优点:**
+
 - React 原生方案，无第三方依赖
 - 概念简单
 
 **缺点:**
+
 - Context 变更会导致所有子组件 re-render，需要大量 memo 优化
 - 组件外无法调用（Web Worker 通知 UI 更新需要额外桥接）
 - 异步 action 需要自己写包装
@@ -61,10 +68,12 @@ Nova 有多个需要全局共享的状态：
 ### 方案 D: Jotai / Recoil（原子化状态）
 
 **优点:**
+
 - 原子化模型适合细粒度状态，可避免 prop drilling
 - 按需更新，性能优秀
 
 **缺点:**
+
 - 对于"块状"状态（如整个航行状态对象）不如 Zustand 直觉
 - Recoil 已停止维护（Meta 放弃）
 - Jotai 派生状态（derived atom）对于新手心智负担较重
@@ -85,19 +94,21 @@ Nova 有多个需要全局共享的状态：
 ## 后果
 
 ### 正面影响
+
 - Web Worker 中可直接 `import { useVoyageStore } from '@/store'` 并调用 `useVoyageStore.setState(...)`，无需 postMessage 复杂桥接
 - 状态切片（store 按领域拆分：voyage / settings / starmap / achievements）清晰
 - 代码量比 Redux 方案少 30% 以上
 
 ### 负面影响
+
 - 需要约定"状态更新的单一数据源"原则（避免多个地方随意 setState 导致调试困难）
 - DevTools 需要手动开启（配置 middleware）
 - 大团队协作时，如果不严格遵守约定，store 容易变成"上帝对象"
 
 ### 风险与缓解措施
 
-| 风险 | 影响 | 概率 | 缓解措施 |
-|------|------|------|---------|
-| store 拆分不当导致循环依赖 | 中 | 中 | 强制按领域拆分 store（voyage / starmap / user）；store 之间通过订阅而非直接 import |
-| 高频更新引发性能问题 | 高 | 中 | 时间更新走 `subscribe` + `requestAnimationFrame`；UI 组件用 `shallow` 选择精确字段；每 250ms 更新而非每 16ms |
-| 缺少严格 action 导致 bug 难追踪 | 中 | 低 | 约定：所有更新操作封装在 store 的 action 方法中，禁止外部直接 setState；关键 action 打 console.debug 日志 |
+| 风险                            | 影响 | 概率 | 缓解措施                                                                                                     |
+| ------------------------------- | ---- | ---- | ------------------------------------------------------------------------------------------------------------ |
+| store 拆分不当导致循环依赖      | 中   | 中   | 强制按领域拆分 store（voyage / starmap / user）；store 之间通过订阅而非直接 import                           |
+| 高频更新引发性能问题            | 高   | 中   | 时间更新走 `subscribe` + `requestAnimationFrame`；UI 组件用 `shallow` 选择精确字段；每 250ms 更新而非每 16ms |
+| 缺少严格 action 导致 bug 难追踪 | 中   | 低   | 约定：所有更新操作封装在 store 的 action 方法中，禁止外部直接 setState；关键 action 打 console.debug 日志    |

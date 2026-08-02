@@ -7,20 +7,24 @@
 ## 1. 前置要求
 
 ### 1.1 环境准备
-| 工具 | 最低版本 | 验证命令 |
-|------|---------|---------|
-| Node.js | 18.17+ | `node -v` |
-| pnpm | 8.6+ | `pnpm -v` |
-| Git | 2.40+ | `git --version` |
+
+| 工具    | 最低版本 | 验证命令        |
+| ------- | -------- | --------------- |
+| Node.js | 18.17+   | `node -v`       |
+| pnpm    | 8.6+     | `pnpm -v`       |
+| Git     | 2.40+    | `git --version` |
 
 **推荐使用 nvm 管理 Node.js 版本**：
+
 ```bash
 # 项目根目录有 .nvmrc，直接切换
 nvm use
 ```
 
 ### 1.2 IDE 配置
+
 推荐使用 **VS Code**，并安装以下插件：
+
 - **ESLint**（dbaeumer.vscode-eslint）- 实时语法检查
 - **Prettier**（esbenp.prettier-vscode）- 代码格式化
 - **Tailwind CSS IntelliSense**（bradlc.vscode-tailwindcss）- Tailwind 补全
@@ -100,6 +104,7 @@ Push → 提交 PR
 ### 3.1 TypeScript 规范
 
 #### 3.1.1 类型定义原则
+
 - **默认启用 strict 模式**（tsconfig 已配置），禁止 `any`
 - **宁可类型复杂，不可使用 any**。实在需要时用 `unknown` + 类型守卫
 - **导出的类型**放在 `src/types/` 对应模块文件中
@@ -148,6 +153,7 @@ function isStar(v: unknown): v is Star {
 ```
 
 #### 3.1.2 函数签名
+
 - **参数不超过 3 个**，超过时用对象参数（options pattern）
 - **返回 Promise 的函数必须标注 async**（即使内部没用 await，保持语义一致）
 - 函数式组件使用 `React.FC<Props>` 或直接标注 props
@@ -179,6 +185,7 @@ async function startVoyage(
 ```
 
 #### 3.1.3 枚举与联合类型
+
 - 有限集合**优先用联合类型 + as const**，次选 enum（避免 TS 生成额外代码）
 
 ```typescript
@@ -205,6 +212,7 @@ export enum VoyageMode {
 ### 3.2 React 规范
 
 #### 3.2.1 组件结构
+
 每个组件一个文件，文件名 `PascalCase.tsx`。组件内部结构顺序：
 
 ```typescript
@@ -264,6 +272,7 @@ export function StarCard({
 ```
 
 #### 3.2.2 Hooks 规范
+
 - **Hook 命名 `usePascalCase`**，放在 `src/hooks/` 目录
 - 自定义 Hook 必须返回 **对象**（便于未来扩展，不破坏调用方）
 - 不要在条件 / 循环中调用 Hook
@@ -276,7 +285,10 @@ export function useVoyageTimer() {
 
   const start = useCallback(() => setRunning(true), []);
   const pause = useCallback(() => setRunning(false), []);
-  const reset = useCallback(() => { setElapsed(0); setRunning(false); }, []);
+  const reset = useCallback(() => {
+    setElapsed(0);
+    setRunning(false);
+  }, []);
 
   return { elapsed, running, start, pause, reset };
 }
@@ -290,6 +302,7 @@ return [elapsed, running, start, pause, reset];
 ```
 
 #### 3.2.3 性能注意事项
+
 - 航行视图（每帧更新）的组件，**不要让 React 每帧 re-render**：
   - 高频更新的值用 `useRef` 存储，用 Canvas / WebGL 渲染
   - 低频显示（如剩余时间）：每 250ms 同步一次到 state 即可
@@ -298,19 +311,19 @@ return [elapsed, running, start, pause, reset];
 
 ### 3.3 命名规范速查表
 
-| 类型 | 规范 | 示例 |
-|------|------|------|
-| React 组件文件 | PascalCase.tsx | `StarMap.tsx`, `VoyageDashboard.tsx` |
-| Hook 文件 | camelCase.ts（use 开头） | `useVoyageTimer.ts`, `useStarSearch.ts` |
-| Store 文件 | camelCase.ts（store 结尾） | `voyageStore.ts`, `settingsStore.ts` |
-| 工具函数文件 | camelCase.ts | `formatTime.ts`, `lorentz.ts` |
-| 类型文件 | camelCase.ts | `star.types.ts` 或放在 `src/types/` |
-| 组件名 / Class | PascalCase | `StarCard`, `StarRenderer` |
-| 函数 / 变量 | camelCase | `calculateDistance`, `currentSpeed` |
-| 常量（primitive） | UPPER_SNAKE_CASE | `MAX_STARS_RENDERED`, `LIGHT_SPEED` |
-| 常量（对象/数组） | camelCase + as const | `spectralColors` as const |
-| 布尔变量 | is/has/should/can 前缀 | `isSelected`, `hasStarted`, `canJump` |
-| 事件处理函数 | onXxx / handleXxx | `onClick`, `handleStarSelected` |
+| 类型              | 规范                       | 示例                                    |
+| ----------------- | -------------------------- | --------------------------------------- |
+| React 组件文件    | PascalCase.tsx             | `StarMap.tsx`, `VoyageDashboard.tsx`    |
+| Hook 文件         | camelCase.ts（use 开头）   | `useVoyageTimer.ts`, `useStarSearch.ts` |
+| Store 文件        | camelCase.ts（store 结尾） | `voyageStore.ts`, `settingsStore.ts`    |
+| 工具函数文件      | camelCase.ts               | `formatTime.ts`, `lorentz.ts`           |
+| 类型文件          | camelCase.ts               | `star.types.ts` 或放在 `src/types/`     |
+| 组件名 / Class    | PascalCase                 | `StarCard`, `StarRenderer`              |
+| 函数 / 变量       | camelCase                  | `calculateDistance`, `currentSpeed`     |
+| 常量（primitive） | UPPER_SNAKE_CASE           | `MAX_STARS_RENDERED`, `LIGHT_SPEED`     |
+| 常量（对象/数组） | camelCase + as const       | `spectralColors` as const               |
+| 布尔变量          | is/has/should/can 前缀     | `isSelected`, `hasStarted`, `canJump`   |
+| 事件处理函数      | onXxx / handleXxx          | `onClick`, `handleStarSelected`         |
 
 ### 3.4 注释规范
 
@@ -326,7 +339,7 @@ const gamma = approximateLorentzFactor(v, c);
 
 // ❌ 垃圾注释：重复代码内容
 // 开根号计算 gamma
-const gamma = Math.sqrt(1 - v*v/(c*c));
+const gamma = Math.sqrt(1 - (v * v) / (c * c));
 
 // ✅ 公共 API JSDoc
 /**
@@ -381,25 +394,27 @@ className="
 ```
 
 **禁止反向依赖**：
+
 - ❌ `src/engine/physics/` import React 组件或 Zustand store
 - ❌ `src/utils/` import 来自 `components` / `pages` 的东西
 - ❌ 跨层直接 import 内部实现：`components/StarMap` 直接 `import from '@/engine/renderer/internal/StarShader.glsl'`（只能走 `@/engine` 的公开出口）
 
 ### 4.2 路径别名
+
 项目已配置以下别名（tsconfig + vite 同步）：
 
-| 别名 | 指向 | 用途 |
-|------|------|------|
-| `@/` | `src/` | 通用根别名 |
-| `@/components/*` | `src/components/*` | UI 组件 |
-| `@/engine/*` | `src/engine/*` | 引擎层（纯 TS） |
-| `@/hooks/*` | `src/hooks/*` | 自定义 Hooks |
-| `@/store/*` | `src/store/*` | Zustand stores |
-| `@/utils/*` | `src/utils/*` | 工具函数 |
-| `@/types/*` | `src/types/*` | 类型定义 |
-| `@/data/*` | `src/data/*` | 静态数据 |
-| `@/styles/*` | `src/styles/*` | 全局样式 |
-| `@/assets/*` | `src/assets/*` | 资源文件 |
+| 别名             | 指向               | 用途            |
+| ---------------- | ------------------ | --------------- |
+| `@/`             | `src/`             | 通用根别名      |
+| `@/components/*` | `src/components/*` | UI 组件         |
+| `@/engine/*`     | `src/engine/*`     | 引擎层（纯 TS） |
+| `@/hooks/*`      | `src/hooks/*`      | 自定义 Hooks    |
+| `@/store/*`      | `src/store/*`      | Zustand stores  |
+| `@/utils/*`      | `src/utils/*`      | 工具函数        |
+| `@/types/*`      | `src/types/*`      | 类型定义        |
+| `@/data/*`       | `src/data/*`       | 静态数据        |
+| `@/styles/*`     | `src/styles/*`     | 全局样式        |
+| `@/assets/*`     | `src/assets/*`     | 资源文件        |
 
 **永远使用别名，禁止相对路径 `../../components/...`**。
 
@@ -440,7 +455,9 @@ useEffect(() => {
   controller.on('progress', (e, p) => setProgress(p));
   controller.on('arrived', handleArrived);
   controller.start();
-  return () => { controller.dispose(); };
+  return () => {
+    controller.dispose();
+  };
 }, []);
 ```
 
@@ -460,6 +477,7 @@ useEffect(() => {
 ```
 
 ### 5.2 单元测试（Vitest）
+
 - 文件命名：`<被测试文件>.test.ts`，放在 `__tests__/` 目录或同目录
 - **覆盖率要求**：
   - `src/engine/`（物理 / 导航 / 算法）：≥ 90%
@@ -490,7 +508,7 @@ describe('lorentzFactor', () => {
     // 数值精度的属性化测试
     for (const factor of [0.5, 0.9, 0.99, 0.999, 0.9999]) {
       const v = factor * LIGHT_SPEED;
-      const naive = 1 / Math.sqrt(1 - v * v / (LIGHT_SPEED * LIGHT_SPEED));
+      const naive = 1 / Math.sqrt(1 - (v * v) / (LIGHT_SPEED * LIGHT_SPEED));
       const computed = lorentzFactor(v);
       const relErr = Math.abs(computed - naive) / naive;
       expect(relErr).toBeLessThan(1e-9);
@@ -500,6 +518,7 @@ describe('lorentzFactor', () => {
 ```
 
 ### 5.3 E2E 测试（Playwright）
+
 - 放在 `tests/e2e/` 目录
 - 只覆盖**关键用户旅程**，不要覆盖 UI 细节（那是单测的事）
 - 每个 spec 一个用户场景：
@@ -534,6 +553,7 @@ test.describe('专注航行主流程', () => {
 ```
 
 ### 5.4 测试命令
+
 ```bash
 # 只跑某个文件
 pnpm test src/engine/physics/lorentz.test.ts
@@ -552,15 +572,16 @@ pnpm test:e2e:trace
 
 ### 6.1 性能预算（Performance Budget）
 
-| 指标 | 目标值 | 测量方式 |
-|------|--------|---------|
-| 首屏加载 (LCP) | < 2.0s（4G 网络） | Lighthouse |
-| JS Bundle gzip | < 300KB（v1.0） | `pnpm build` 输出 |
-| 航行视图帧率 | ≥ 60fps (MBP 2019) / ≥ 30fps (中端手机) | Chrome DevTools Performance |
-| 星图交互（缩放/平移） | 无明显卡顿（帧时间 < 32ms） | 手动测试 |
-| 专注过程中主线程空闲 | ≥ 90%（计时器不卡 UI） | Performance 面板 |
+| 指标                  | 目标值                                  | 测量方式                    |
+| --------------------- | --------------------------------------- | --------------------------- |
+| 首屏加载 (LCP)        | < 2.0s（4G 网络）                       | Lighthouse                  |
+| JS Bundle gzip        | < 300KB（v1.0）                         | `pnpm build` 输出           |
+| 航行视图帧率          | ≥ 60fps (MBP 2019) / ≥ 30fps (中端手机) | Chrome DevTools Performance |
+| 星图交互（缩放/平移） | 无明显卡顿（帧时间 < 32ms）             | 手动测试                    |
+| 专注过程中主线程空闲  | ≥ 90%（计时器不卡 UI）                  | Performance 面板            |
 
 ### 6.2 WebGL / 渲染性能 Checklist
+
 - [ ] 同一时刻渲染点不超过 20,000（LOD + 距离裁剪）
 - [ ] 使用 `BufferGeometry` 而非手工 `Geometry`，使用 InstancedMesh 绘制大量恒星
 - [ ] Shader 中避免分支（`if/else`），改用 `mix` / `step` 等函数
@@ -569,6 +590,7 @@ pnpm test:e2e:trace
 - [ ] Three.js `dispose()` 所有不再使用的 geometry / material / texture，避免内存泄漏
 
 ### 6.3 React 性能 Checklist
+
 - [ ] 航行视图中**绝不**每帧 setState（用 useRef + requestAnimationFrame）
 - [ ] 大列表（航行记录 > 100 条）必须虚拟化（react-window / 自研 Canvas 列表）
 - [ ] `React.memo` 只在有明确性能数据证明需要时才加（不要过度 memo）

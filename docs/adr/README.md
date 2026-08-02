@@ -5,6 +5,7 @@
 ## 什么是 ADR？
 
 ADR (Architecture Decision Record) 是一种轻量级文档，用于记录重要的架构决策。每个 ADR 描述：
+
 - **背景**：我们面临什么问题？
 - **决策**：我们决定怎么做？
 - **后果**：这样做带来了什么影响（正面 + 负面）？
@@ -12,6 +13,7 @@ ADR (Architecture Decision Record) 是一种轻量级文档，用于记录重要
 ## ADR 格式
 
 每个 ADR 文件遵循以下结构：
+
 ```
 # ADR-XXXX: 决策标题
 
@@ -40,16 +42,16 @@ ADR (Architecture Decision Record) 是一种轻量级文档，用于记录重要
 
 ## 决策列表
 
-| 编号 | 标题 | 状态 | 日期 |
-|------|------|------|------|
-| [ADR-0001](0001-frontend-framework.md) | 前端框架选择：React + TypeScript | Accepted | 2026-07-29 |
-| [ADR-0002](0002-graphics-renderer.md) | 图形渲染方案：Three.js + WebGL 2.0 | Accepted | 2026-07-29 |
-| [ADR-0003](0003-state-management.md) | 状态管理方案：Zustand | Accepted | 2026-07-29 |
-| [ADR-0004](0004-local-storage.md) | 本地持久化方案：IndexedDB (Dexie) | Accepted | 2026-07-29 |
-| [ADR-0005](0005-architecture-style.md) | 架构风格：引擎层与 UI 层分离 | Accepted | 2026-07-29 |
-| [ADR-0006](0006-star-data-strategy.md) | 星图数据策略：分层加载 + LOD | Accepted | 2026-07-29 |
-| [ADR-0007](0007-styling-solution.md) | 样式方案：Tailwind CSS + CSS Variables | Accepted | 2026-07-29 |
-| [ADR-0008](0008-build-tool.md) | 构建工具：Vite + pnpm | Accepted | 2026-07-29 |
+| 编号                                   | 标题                                   | 状态     | 日期       |
+| -------------------------------------- | -------------------------------------- | -------- | ---------- |
+| [ADR-0001](0001-frontend-framework.md) | 前端框架选择：React + TypeScript       | Accepted | 2026-07-29 |
+| [ADR-0002](0002-graphics-renderer.md)  | 图形渲染方案：Three.js + WebGL 2.0     | Accepted | 2026-07-29 |
+| [ADR-0003](0003-state-management.md)   | 状态管理方案：Zustand                  | Accepted | 2026-07-29 |
+| [ADR-0004](0004-local-storage.md)      | 本地持久化方案：IndexedDB (Dexie)      | Accepted | 2026-07-29 |
+| [ADR-0005](0005-architecture-style.md) | 架构风格：引擎层与 UI 层分离           | Accepted | 2026-07-29 |
+| [ADR-0006](0006-star-data-strategy.md) | 星图数据策略：分层加载 + LOD           | Accepted | 2026-07-29 |
+| [ADR-0007](0007-styling-solution.md)   | 样式方案：Tailwind CSS + CSS Variables | Accepted | 2026-07-29 |
+| [ADR-0008](0008-build-tool.md)         | 构建工具：Vite + pnpm                  | Accepted | 2026-07-29 |
 
 ---
 

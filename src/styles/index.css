@@ -1,0 +1,266 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root,
+  [data-theme='deep-space'] {
+    --color-deep-50: #f0f2ff;
+    --color-deep-100: #d9dfff;
+    --color-deep-200: #a5b4fc;
+    --color-deep-300: #7184e3;
+    --color-deep-400: #4c5aa3;
+    --color-deep-500: #2a3472;
+    --color-deep-600: #1a2256;
+    --color-deep-700: #111844;
+    --color-deep-800: #0a1032;
+    --color-deep-900: #0a0e27;
+    --color-deep-950: #050817;
+
+    --color-nebula-50: #f7efff;
+    --color-nebula-100: #e5cfff;
+    --color-nebula-300: #b58aff;
+    --color-nebula-500: #7c3aed;
+    --color-nebula-700: #4c1d95;
+    --color-nebula-900: #1a0f3d;
+
+    --color-star-gold: #ffd700;
+    --color-star-white: #f8fafc;
+    --color-star-blue: #8ab4ff;
+    --color-star-red: #ff6b6b;
+
+    --color-surface: #050817;
+    --color-surface-elevated: #0a0e27;
+    --color-surface-muted: rgba(26, 15, 61, 0.5);
+
+    --color-border: rgba(164, 178, 255, 0.15);
+    --color-border-strong: rgba(164, 178, 255, 0.35);
+
+    --shadow-glow: rgba(255, 215, 0, 0.35);
+    --shadow-card: rgba(10, 14, 39, 0.6);
+
+    --radius-lg: 0.75rem;
+    --radius-md: 0.5rem;
+    --radius-sm: 0.375rem;
+
+    color-scheme: dark;
+  }
+
+  [data-theme='cyberpunk'] {
+    --color-deep-50: #fff0fa;
+    --color-deep-100: #ffccef;
+    --color-deep-200: #ff8adf;
+    --color-deep-300: #f20089;
+    --color-deep-400: #9a0058;
+    --color-deep-500: #5c0034;
+    --color-deep-600: #3a0022;
+    --color-deep-700: #1f0014;
+    --color-deep-800: #0d0221;
+    --color-deep-900: #080116;
+    --color-deep-950: #04000b;
+
+    --color-nebula-50: #e6ffff;
+    --color-nebula-100: #b0ffff;
+    --color-nebula-300: #2de2e6;
+    --color-nebula-500: #00c2c7;
+    --color-nebula-700: #087e8b;
+    --color-nebula-900: #053c4a;
+
+    --color-star-gold: #fcee09;
+    --color-star-white: #ffffff;
+    --color-star-blue: #00f0ff;
+    --color-star-red: #ff003c;
+
+    --color-surface: #04000b;
+    --color-surface-elevated: #0d0221;
+    --color-surface-muted: rgba(242, 0, 137, 0.12);
+
+    --color-border: rgba(242, 0, 137, 0.3);
+    --color-border-strong: rgba(0, 240, 255, 0.5);
+
+    --shadow-glow: rgba(242, 0, 137, 0.5);
+    --shadow-card: rgba(45, 226, 230, 0.15);
+
+    --radius-lg: 0;
+    --radius-md: 0;
+    --radius-sm: 0;
+
+    color-scheme: dark;
+  }
+
+  [data-theme='retro'] {
+    --color-deep-50: #fbf3e0;
+    --color-deep-100: #f4e8d0;
+    --color-deep-200: #e6d2a8;
+    --color-deep-300: #c89f6a;
+    --color-deep-400: #a57743;
+    --color-deep-500: #8a5a2b;
+    --color-deep-600: #5e3c1b;
+    --color-deep-700: #3c250f;
+    --color-deep-800: #2a1810;
+    --color-deep-900: #1a0f08;
+    --color-deep-950: #0e0805;
+
+    --color-nebula-50: #ffe9cf;
+    --color-nebula-100: #f4c88a;
+    --color-nebula-300: #d88a34;
+    --color-nebula-500: #b56414;
+    --color-nebula-700: #7c3f07;
+    --color-nebula-900: #4a2404;
+
+    --color-star-gold: #e7a635;
+    --color-star-white: #f4e8d0;
+    --color-star-blue: #7a98c8;
+    --color-star-red: #c85a3c;
+
+    --color-surface: #f4e8d0;
+    --color-surface-elevated: #fbf3e0;
+    --color-surface-muted: rgba(200, 159, 106, 0.15);
+
+    --color-border: rgba(94, 60, 27, 0.2);
+    --color-border-strong: rgba(94, 60, 27, 0.5);
+
+    --shadow-glow: rgba(231, 166, 53, 0.4);
+    --shadow-card: rgba(60, 37, 15, 0.15);
+
+    --radius-lg: 2px;
+    --radius-md: 2px;
+    --radius-sm: 2px;
+
+    color-scheme: light;
+  }
+
+  [data-theme='minimal-light'] {
+    --color-deep-50: #ffffff;
+    --color-deep-100: #fafafa;
+    --color-deep-200: #f3f4f6;
+    --color-deep-300: #e5e7eb;
+    --color-deep-400: #9ca3af;
+    --color-deep-500: #6b7280;
+    --color-deep-600: #4b5563;
+    --color-deep-700: #374151;
+    --color-deep-800: #1f2937;
+    --color-deep-900: #111827;
+    --color-deep-950: #030712;
+
+    --color-nebula-50: #eff6ff;
+    --color-nebula-100: #dbeafe;
+    --color-nebula-300: #93c5fd;
+    --color-nebula-500: #2563eb;
+    --color-nebula-700: #1d4ed8;
+    --color-nebula-900: #1e3a8a;
+
+    --color-star-gold: #d97706;
+    --color-star-white: #ffffff;
+    --color-star-blue: #2563eb;
+    --color-star-red: #dc2626;
+
+    --color-surface: #fafafa;
+    --color-surface-elevated: #ffffff;
+    --color-surface-muted: rgba(229, 231, 235, 0.5);
+
+    --color-border: rgba(75, 85, 99, 0.12);
+    --color-border-strong: rgba(75, 85, 99, 0.3);
+
+    --shadow-glow: rgba(37, 99, 235, 0.15);
+    --shadow-card: rgba(0, 0, 0, 0.06);
+
+    --radius-lg: 0.875rem;
+    --radius-md: 0.625rem;
+    --radius-sm: 0.375rem;
+
+    color-scheme: light;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    width: 100%;
+  }
+
+  body {
+    @apply font-sans;
+    background-color: var(--color-surface);
+    color: var(--color-deep-100);
+    transition:
+      background-color 500ms ease,
+      color 500ms ease;
+  }
+
+  [data-theme='deep-space'],
+  [data-theme='cyberpunk'] {
+    color: var(--color-deep-100);
+  }
+
+  [data-theme='retro'] {
+    color: var(--color-deep-800);
+  }
+
+  [data-theme='minimal-light'] {
+    color: var(--color-deep-800);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  ::selection {
+    background: var(--color-nebula-500);
+    color: #fff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-deep-500);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-deep-400);
+  }
+}
+
+@layer utilities {
+  .text-foreground {
+    color: var(--color-deep-100);
+  }
+
+  [data-theme='minimal-light'] & {
+    .text-foreground {
+      color: var(--color-deep-800);
+    }
+  }
+
+  .gradient-aurora {
+    background: radial-gradient(
+        circle at 20% 20%,
+        color-mix(in oklab, var(--color-nebula-500) 40%, transparent) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        color-mix(in oklab, var(--color-star-blue) 25%, transparent) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 50%,
+        color-mix(in oklab, var(--color-star-gold) 15%, transparent) 0%,
+        transparent 60%
+      );
+  }
+}
