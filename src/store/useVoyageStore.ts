@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import type { VoyageRecord } from '@/contract/storage-types';
+import type { VoyageTimerWorkerResponse } from '@/contract/worker-types';
 import type {
   VoyageAbortReason,
   VoyageOptions,
@@ -8,6 +9,7 @@ import type {
   VoyageSnapshot,
 } from '@/engine/contract/voyage-types';
 import { VoyageController } from '@/engine/navigation/VoyageController';
+import { clearLiveVoyage, loadLiveVoyage, saveLiveVoyage } from '@/storage/live-voyage-storage';
 import { getStoreDeps } from '@/store/store-deps';
 import { useHistoryStore } from '@/store/useHistoryStore';
 
@@ -18,6 +20,7 @@ type VoyageStoreState = {
   destStarId: string | null;
   lastSavedRecord: VoyageRecord | null;
   controllerReady: boolean;
+  resumedFromSnapshot: boolean;
 };
 
 type VoyageStoreActions = {
@@ -36,11 +39,57 @@ type VoyageStoreActions = {
   ) => void;
   dispose: () => void;
   saveToHistory: () => Promise<VoyageRecord | null>;
+  resumeFromLiveVoyage: () => boolean;
 };
 
 export type VoyageStore = VoyageStoreState & VoyageStoreActions;
 
+const WORKER_TICK_MS = 250;
+const LIVE_PERSIST_THROTTLE_MS = 1000;
+
 let activeController: VoyageController | null = null;
+let activeWorker: Worker | null = null;
+let lastLivePersistAt = 0;
+
+function isWorkerSupported(): boolean {
+  return typeof Worker !== 'undefined';
+}
+
+function startWorker(): void {
+  if (!isWorkerSupported()) return;
+  if (activeWorker != null) return;
+  const worker = new Worker(new URL('../workers/voyage-timer.worker.ts', import.meta.url), {
+    type: 'module',
+  });
+  worker.onmessage = (message: MessageEvent) => {
+    const data = message.data as VoyageTimerWorkerResponse;
+    if (data.type === 'tick') {
+      activeController?.tick(data.ts);
+    }
+  };
+  worker.postMessage({ type: 'start', intervalMs: WORKER_TICK_MS });
+  activeWorker = worker;
+}
+
+function stopWorker(): void {
+  if (activeWorker == null) return;
+  activeWorker.postMessage({ type: 'stop' });
+  activeWorker.terminate();
+  activeWorker = null;
+}
+
+function persistLiveVoyageIfDue(controller: VoyageController): void {
+  const now = Date.now();
+  if (now - lastLivePersistAt < LIVE_PERSIST_THROTTLE_MS) return;
+  lastLivePersistAt = now;
+  const { originStarId, destStarId } = useVoyageStore.getState();
+  saveLiveVoyage({
+    snapshot: controller.snapshot(),
+    originStarId,
+    destStarId,
+    savedAt: now,
+  });
+}
 
 function attachControllerListeners(
   controller: VoyageController,
@@ -51,9 +100,12 @@ function attachControllerListeners(
       progress,
       snapshot: controller.snapshot(),
     });
+    persistLiveVoyageIfDue(controller);
   });
 
   controller.on('complete', (progress) => {
+    stopWorker();
+    clearLiveVoyage();
     set({
       progress,
       snapshot: controller.snapshot(),
@@ -62,6 +114,8 @@ function attachControllerListeners(
   });
 
   controller.on('abort', (progress) => {
+    stopWorker();
+    clearLiveVoyage();
     set({
       progress,
       snapshot: controller.snapshot(),
@@ -107,12 +161,15 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
   destStarId: null,
   lastSavedRecord: null,
   controllerReady: false,
+  resumedFromSnapshot: false,
 
   prepare: (opts) => {
     const { originStarId = null, destStarId = null, ...voyageOpts } = opts;
     const controller = new VoyageController(voyageOpts);
+    controller.setExternalTicker(isWorkerSupported());
     bindController(controller, set);
-    set({ originStarId, destStarId, lastSavedRecord: null });
+    lastLivePersistAt = 0;
+    set({ originStarId, destStarId, lastSavedRecord: null, resumedFromSnapshot: false });
   },
 
   start: () => {
@@ -125,6 +182,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
       progress,
       snapshot: controller.snapshot(),
     });
+    if (isWorkerSupported()) startWorker();
     return progress;
   },
 
@@ -134,6 +192,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
       throw new Error('VoyageStore.pause: controller not prepared');
     }
     const progress = controller.pause();
+    stopWorker();
     set({
       progress,
       snapshot: controller.snapshot(),
@@ -151,6 +210,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
       progress,
       snapshot: controller.snapshot(),
     });
+    if (isWorkerSupported()) startWorker();
     return progress;
   },
 
@@ -186,15 +246,22 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
 
   restoreFromSnapshot: (snapshot, meta) => {
     const controller = VoyageController.fromSnapshot(snapshot);
+    controller.setExternalTicker(isWorkerSupported());
     bindController(controller, set);
+    lastLivePersistAt = 0;
     set({
       originStarId: meta?.originStarId ?? get().originStarId,
       destStarId: meta?.destStarId ?? get().destStarId,
       lastSavedRecord: null,
+      resumedFromSnapshot: true,
     });
+    if (isWorkerSupported() && controller.getProgress().status === 'running') {
+      startWorker();
+    }
   },
 
   dispose: () => {
+    stopWorker();
     if (activeController != null) {
       activeController.dispose();
       activeController = null;
@@ -205,6 +272,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
       originStarId: null,
       destStarId: null,
       controllerReady: false,
+      resumedFromSnapshot: false,
     });
   },
 
@@ -223,11 +291,35 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
     void useHistoryStore.getState().refresh();
     return record;
   },
+
+  resumeFromLiveVoyage: () => {
+    if (useVoyageStore.getState().controllerReady) return false;
+    const live = loadLiveVoyage();
+    if (live == null) return false;
+    try {
+      useVoyageStore.getState().restoreFromSnapshot(live.snapshot, {
+        originStarId: live.originStarId ?? null,
+        destStarId: live.destStarId ?? null,
+      });
+      return true;
+    } catch {
+      clearLiveVoyage();
+      return false;
+    }
+  },
 }));
 
 export function resetVoyageControllerForTest(): void {
+  stopWorker();
+  lastLivePersistAt = 0;
   if (activeController != null) {
     activeController.dispose();
     activeController = null;
+  }
+}
+
+export function fastForwardVoyageForTest(ms: number): void {
+  if (activeController != null) {
+    activeController.tick(Date.now() + ms);
   }
 }

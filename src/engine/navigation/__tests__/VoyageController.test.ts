@@ -271,4 +271,61 @@ describe('VoyageController (引擎层 · 纯 TS · 无 React 依赖)', () => {
       ctrl.dispose();
     });
   });
+
+  describe('外部 wallClock 注入 (S13 worker)', () => {
+    it('tick(ts) 注入后台 5 分钟空档 → elapsed 精确 +5 分钟', () => {
+      const ctrl = make25m();
+      const start = Date.now();
+      ctrl.start();
+
+      ctrl.tick(start + 5 * 60_000);
+
+      const p = ctrl.getProgress();
+      expect(p.status).toBe('running');
+      expect(p.elapsedFocusMs).toBe(5 * 60_000);
+      expect(p.remainingFocusMs).toBe(TWENTY_FIVE_MIN_MS - 5 * 60_000);
+      expect(p.traveledLy).toBeCloseTo(expectedLy(5, V_OVER_C, GAMMA), 9);
+      ctrl.dispose();
+    });
+
+    it('一次 tick 跨过终点 → 自动 complete', () => {
+      const ctrl = make25m();
+      const start = Date.now();
+      ctrl.start();
+
+      ctrl.tick(start + 30 * 60_000);
+
+      expect(ctrl.getProgress().status).toBe('completed');
+      ctrl.dispose();
+    });
+
+    it('setExternalTicker(true) 后不自 tick，需手动 tick(ts) 推进', () => {
+      const ctrl = make25m();
+      ctrl.setExternalTicker(true);
+      const events: VoyageProgress[] = [];
+      ctrl.on('progress', (p) => events.push(p));
+      const start = Date.now();
+      ctrl.start();
+
+      vi.advanceTimersByTime(1000);
+      expect(events.length).toBe(1);
+      expect(ctrl.getProgress().elapsedFocusMs).toBe(0);
+
+      ctrl.tick(start + 1000);
+      expect(events.length).toBe(2);
+      expect(ctrl.getProgress().elapsedFocusMs).toBe(1000);
+      ctrl.dispose();
+    });
+
+    it('setExternalTicker(false) 恢复自 tick', () => {
+      const ctrl = make25m();
+      ctrl.setExternalTicker(true);
+      ctrl.start();
+      ctrl.setExternalTicker(false);
+
+      vi.advanceTimersByTime(500);
+      expect(ctrl.getProgress().elapsedFocusMs).toBeGreaterThan(0);
+      ctrl.dispose();
+    });
+  });
 });
