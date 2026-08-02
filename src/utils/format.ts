@@ -1,0 +1,47 @@
+export function formatDurationMs(ms: number): string {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const mm = String(minutes).padStart(2, '0');
+  const ss = String(seconds).padStart(2, '0');
+  if (hours > 0) {
+    return `${String(hours).padStart(2, '0')}:${mm}:${ss}`;
+  }
+  return `${mm}:${ss}`;
+}
+
+export function formatLy(ly: number): string {
+  if (ly >= 100) return `${ly.toFixed(0)} ly`;
+  if (ly >= 1) return `${ly.toFixed(2)} ly`;
+  return `${ly.toFixed(3)} ly`;
+}
+
+export function formatGamma(gamma: number): string {
+  return `×${gamma.toFixed(2)}`;
+}
+
+export function formatVOverC(vOverC: number): string {
+  return `${vOverC.toFixed(3)}c`;
+}
+
+export function formatDateTime(ts: number): string {
+  const d = new Date(ts);
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${month}-${day} ${hh}:${mm}`;
+}
+
+export function formatMinuteLabel(totalMinutes: number): string {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0 && minutes > 0) {
+    return `${hours}小时${minutes}分`;
+  }
+  if (hours > 0) {
+    return `${hours}小时`;
+  }
+  return `${minutes}分钟`;
+}

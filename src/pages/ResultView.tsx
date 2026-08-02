@@ -1,0 +1,119 @@
+import { twMerge } from 'tailwind-merge';
+
+import { getDestinationName } from '@/data/destination-stars';
+import { useVoyageStore } from '@/store/useVoyageStore';
+import { formatDurationMs, formatGamma, formatLy, formatVOverC } from '@/utils/format';
+
+function StatRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <span className="text-sm text-deep-400">{label}</span>
+      <span className="font-mono text-sm text-foreground tabular-nums">{value}</span>
+    </div>
+  );
+}
+
+export function ResultView() {
+  const progress = useVoyageStore((s) => s.progress);
+  const originStarId = useVoyageStore((s) => s.originStarId);
+  const destStarId = useVoyageStore((s) => s.destStarId);
+  const dispose = useVoyageStore((s) => s.dispose);
+  const prepare = useVoyageStore((s) => s.prepare);
+  const start = useVoyageStore((s) => s.start);
+
+  if (progress == null) return null;
+
+  const completed = progress.status === 'completed';
+  const destName = getDestinationName(destStarId);
+  const originName = getDestinationName(originStarId) ?? '太阳系';
+  const coordinateHours = (progress.elapsedFocusMs * progress.gamma) / (60 * 60 * 1000);
+
+  const handleRestart = () => {
+    prepare({
+      focusMinutes: progress.focusTotalMs != null ? progress.focusTotalMs / 60_000 : 25,
+      vOverC: progress.vOverC,
+      originStarId: 'hip-sol',
+      destStarId,
+    });
+    start();
+  };
+
+  const handleHome = () => {
+    dispose();
+  };
+
+  return (
+    <section
+      data-testid="result-view"
+      className="mx-auto flex w-full max-w-md flex-1 flex-col items-stretch justify-center gap-8 px-5 pb-10 pt-6"
+    >
+      <div className="text-center">
+        <div
+          className={twMerge(
+            'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2',
+            completed ? 'border-star-gold text-star-gold' : 'border-star-red text-star-red',
+          )}
+        >
+          {completed ? (
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-8 w-8"
+              aria-hidden="true"
+            >
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          ) : (
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-8 w-8"
+              aria-hidden="true"
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          )}
+        </div>
+        <h2 className="text-2xl font-bold tracking-wide">
+          {completed ? '本次航行完成' : '航行已中止'}
+        </h2>
+        <p className="mt-2 text-sm text-deep-400">
+          {destName != null ? `从 ${originName} 出发，目标 ${destName}` : '本次为自由漂流航行'}
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-border bg-surface-elevated/70 px-5 py-2 backdrop-blur-sm">
+        <StatRow label="主观专注时长" value={formatDurationMs(progress.elapsedFocusMs)} />
+        <StatRow label="时间膨胀 γ" value={formatGamma(progress.gamma)} />
+        <StatRow label="航行速度" value={formatVOverC(progress.vOverC)} />
+        <StatRow label="实际航行距离" value={formatLy(progress.traveledLy)} />
+        <StatRow label="宇宙时间（客观）" value={`${coordinateHours.toFixed(1)} 小时`} />
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={handleRestart}
+          className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-lg border border-star-gold bg-star-gold/15 text-lg font-semibold tracking-widest text-star-gold shadow-glow-sm transition-colors duration-200 hover:bg-star-gold/25"
+        >
+          再来一次
+        </button>
+        <button
+          type="button"
+          onClick={handleHome}
+          className="flex h-14 w-28 cursor-pointer items-center justify-center rounded-lg border border-border text-base text-deep-200 transition-colors duration-200 hover:border-border-strong hover:bg-surface-muted"
+        >
+          回到首页
+        </button>
+      </div>
+    </section>
+  );
+}
