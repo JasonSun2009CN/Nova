@@ -1,0 +1,22 @@
+[package]
+name = "nova"
+version = "0.1.0"
+description = "Nova · 星际专注 - 让每一次专注都成为一次星际航行"
+authors = ["Jason"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[lib]
+name = "nova_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "nova"
+path = "src/main.rs"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
