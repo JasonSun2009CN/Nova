@@ -250,46 +250,15 @@
   .glass-card {
     background: var(--color-glass);
     border: 1px solid var(--color-glass-border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .text-gradient-gold {
-    background: linear-gradient(
-      135deg,
-      var(--color-star-gold),
-      var(--color-star-white) 50%,
-      var(--color-star-blue)
-    );
+    background: linear-gradient(135deg, var(--color-star-gold), var(--color-star-white));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-  }
-
-  .shimmer-overlay {
-    position: absolute;
-    inset: 0;
-    width: 40%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-    animation: shimmer 2.4s ease-in-out infinite;
-  }
-
-  .gradient-aurora {
-    background: radial-gradient(
-        circle at 20% 20%,
-        color-mix(in oklab, var(--color-nebula-500) 40%, transparent) 0%,
-        transparent 50%
-      ),
-      radial-gradient(
-        circle at 80% 80%,
-        color-mix(in oklab, var(--color-star-blue) 25%, transparent) 0%,
-        transparent 50%
-      ),
-      radial-gradient(
-        circle at 50% 50%,
-        color-mix(in oklab, var(--color-star-gold) 15%, transparent) 0%,
-        transparent 60%
-      );
   }
 }
 
@@ -301,33 +270,5 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes drift {
-  from {
-    transform: translate(0, 0) scale(1);
-  }
-  to {
-    transform: translate(6%, 8%) scale(1.15);
-  }
-}
-
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes shimmer {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(100%);
   }
 }

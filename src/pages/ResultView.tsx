@@ -6,7 +6,7 @@ import { formatDurationMs, formatGamma, formatLy, formatVOverC } from '@/utils/f
 
 function StatRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--color-glass-border)] py-2.5 last:border-b-0">
+    <div className="flex items-center justify-between border-b border-[var(--color-glass-border)] py-3 last:border-b-0">
       <span className="text-sm text-deep-400">{label}</span>
       <span className="font-mono text-sm text-foreground tabular-nums">{value}</span>
     </div>
@@ -45,13 +45,13 @@ export function ResultView() {
   return (
     <section
       data-testid="result-view"
-      className="mx-auto flex w-full max-w-md animate-fade-up flex-1 flex-col items-stretch justify-center gap-6 px-5 pb-10 pt-6"
+      className="mx-auto flex w-full max-w-md animate-fade-up flex-1 flex-col items-stretch justify-center gap-8 px-6 pb-12 pt-6"
     >
       <div className="text-center">
         <div
           className={twMerge(
-            'glass-card mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full',
-            completed ? 'text-star-gold' : 'text-star-red',
+            'mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border',
+            completed ? 'border-star-gold/40 text-star-gold' : 'border-star-red/40 text-star-red',
           )}
         >
           {completed ? (
@@ -59,10 +59,10 @@ export function ResultView() {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-8 w-8"
+              className="h-7 w-7"
               aria-hidden="true"
             >
               <path d="M20 6L9 17l-5-5" />
@@ -72,17 +72,17 @@ export function ResultView() {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-8 w-8"
+              className="h-7 w-7"
               aria-hidden="true"
             >
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           )}
         </div>
-        <h2 className="font-display text-2xl font-semibold tracking-wide">
+        <h2 className="font-display text-2xl font-medium tracking-wide">
           {completed ? '本次航行完成' : '航行已中止'}
         </h2>
         <p className="mt-2 text-sm text-deep-400">
@@ -90,7 +90,7 @@ export function ResultView() {
         </p>
       </div>
 
-      <div className="glass-card rounded-2xl px-5 py-2 shadow-glass">
+      <div className="glass-card rounded-2xl px-6 py-2">
         <StatRow label="主观专注时长" value={formatDurationMs(progress.elapsedFocusMs)} />
         <StatRow label="时间膨胀 γ" value={formatGamma(progress.gamma)} />
         <StatRow label="航行速度" value={formatVOverC(progress.vOverC)} />
@@ -102,7 +102,7 @@ export function ResultView() {
         <button
           type="button"
           onClick={handleRestart}
-          className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-xl bg-star-gold font-display text-lg font-semibold tracking-widest text-[#0a1032] shadow-glow-sm transition-all duration-200 hover:shadow-glow hover:brightness-110 active:scale-[0.99]"
+          className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-xl bg-star-gold font-display text-base font-medium tracking-wider text-[#0a1032] transition-colors duration-200 hover:opacity-85"
         >
           再来一次
         </button>

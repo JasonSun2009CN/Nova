@@ -30,9 +30,9 @@ function App() {
     <div className="relative flex min-h-dvh w-full flex-col text-foreground transition-colors duration-500">
       <SpaceBackdrop />
 
-      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--color-glass-border)] bg-[var(--color-glass)] px-5 py-3 backdrop-blur-xl">
-        <h1 className="font-display text-xl font-bold tracking-[0.35em]">
-          <span className="text-gradient-gold drop-shadow-[0_0_14px_var(--shadow-glow)]">NOVA</span>
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--color-glass-border)] bg-[var(--color-glass)] px-6 py-4 backdrop-blur-sm">
+        <h1 className="font-display text-lg font-semibold tracking-[0.3em]">
+          <span className="text-gradient-gold">NOVA</span>
         </h1>
         <ThemeToggle />
       </header>
