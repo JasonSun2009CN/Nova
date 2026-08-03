@@ -144,6 +144,25 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/engine/renderer/**/*.{ts,tsx}'],
+    rules: {
+      'react/no-unknown-property': [
+        'error',
+        {
+          ignore: [
+            'attach',
+            'args',
+            'vertexShader',
+            'fragmentShader',
+            'uniforms',
+            'transparent',
+            'depthWrite',
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.test.{ts,tsx}', 'src/test/**/*.{ts,tsx}'],
     rules: {
       'no-console': 'off',
