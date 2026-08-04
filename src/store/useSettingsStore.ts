@@ -39,6 +39,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         SETTINGS_KEYS.map(async (key) => [key, await settingsRepo.getOrDefault(key)] as const),
       );
       const settings = Object.fromEntries(entries) as SettingsValueMap;
+      if (settings.theme !== 'neutral') {
+        settings.theme = 'neutral';
+        await settingsRepo.set('theme', 'neutral');
+      }
       set({ settings, hydrated: true, loading: false });
     } catch (err) {
       set({

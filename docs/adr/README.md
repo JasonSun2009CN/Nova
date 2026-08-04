@@ -42,16 +42,17 @@ ADR (Architecture Decision Record) 是一种轻量级文档，用于记录重要
 
 ## 决策列表
 
-| 编号                                   | 标题                                   | 状态     | 日期       |
-| -------------------------------------- | -------------------------------------- | -------- | ---------- |
-| [ADR-0001](0001-frontend-framework.md) | 前端框架选择：React + TypeScript       | Accepted | 2026-07-29 |
-| [ADR-0002](0002-graphics-renderer.md)  | 图形渲染方案：Three.js + WebGL 2.0     | Accepted | 2026-07-29 |
-| [ADR-0003](0003-state-management.md)   | 状态管理方案：Zustand                  | Accepted | 2026-07-29 |
-| [ADR-0004](0004-local-storage.md)      | 本地持久化方案：IndexedDB (Dexie)      | Accepted | 2026-07-29 |
-| [ADR-0005](0005-architecture-style.md) | 架构风格：引擎层与 UI 层分离           | Accepted | 2026-07-29 |
-| [ADR-0006](0006-star-data-strategy.md) | 星图数据策略：分层加载 + LOD           | Accepted | 2026-07-29 |
-| [ADR-0007](0007-styling-solution.md)   | 样式方案：Tailwind CSS + CSS Variables | Accepted | 2026-07-29 |
-| [ADR-0008](0008-build-tool.md)         | 构建工具：Vite + pnpm                  | Accepted | 2026-07-29 |
+| 编号                                                   | 标题                                   | 状态     | 日期       |
+| ------------------------------------------------------ | -------------------------------------- | -------- | ---------- |
+| [ADR-0001](0001-frontend-framework.md)                 | 前端框架选择：React + TypeScript       | Accepted | 2026-07-29 |
+| [ADR-0002](0002-graphics-renderer.md)                  | 图形渲染方案：Three.js + WebGL 2.0     | Accepted | 2026-07-29 |
+| [ADR-0003](0003-state-management.md)                   | 状态管理方案：Zustand                  | Accepted | 2026-07-29 |
+| [ADR-0004](0004-local-storage.md)                      | 本地持久化方案：IndexedDB (Dexie)      | Accepted | 2026-07-29 |
+| [ADR-0005](0005-architecture-style.md)                 | 架构风格：引擎层与 UI 层分离           | Accepted | 2026-07-29 |
+| [ADR-0006](0006-star-data-strategy.md)                 | 星图数据策略：分层加载 + LOD           | Accepted | 2026-07-29 |
+| [ADR-0007](0007-styling-solution.md)                   | 样式方案：Tailwind CSS + CSS Variables | Accepted | 2026-07-29 |
+| [ADR-0008](0008-build-tool.md)                         | 构建工具：Vite + pnpm                  | Accepted | 2026-07-29 |
+| [ADR-0009](0009-single-neutral-theme-starmap-modal.md) | 单一 Neutral 主题 + 星图弹窗           | Accepted | 2026-08-03 |
 
 ---
 

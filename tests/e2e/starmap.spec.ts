@@ -33,4 +33,43 @@ test.describe('星图视图 (S16 R3F)', () => {
     await page.waitForTimeout(400);
     expect(errors).toHaveLength(0);
   });
+
+  test('弹窗点星 → 确认 → 设为目的地 → 完成关闭 → 设置页预选', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: '星图' }).click();
+    await expect(page.getByTestId('starmap-dialog')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('starmap-view')).toBeVisible();
+
+    await page.waitForFunction(
+      () => window.__TEST_ONLY__?.getStarScreenPosition('hip-102098') != null,
+      undefined,
+      { timeout: 20_000 },
+    );
+
+    await page.evaluate(() => window.__TEST_ONLY__!.setAutoRotate(false));
+    await page.waitForTimeout(100);
+
+    const pos = await page.evaluate(() =>
+      window.__TEST_ONLY__!.getStarScreenPosition('hip-102098'),
+    );
+    expect(pos).not.toBeNull();
+
+    await page.mouse.click(pos!.clientX, pos!.clientY);
+    await expect(page.getByTestId('star-info-card')).toBeVisible();
+    await expect(page.getByTestId('star-info-card').getByText(/织女/)).toBeVisible();
+
+    await page.getByRole('button', { name: '取消' }).click();
+    await expect(page.getByTestId('star-info-card')).not.toBeVisible();
+
+    await page.mouse.click(pos!.clientX, pos!.clientY);
+    await expect(page.getByTestId('star-info-card')).toBeVisible();
+
+    await page.getByRole('button', { name: '设为目的地' }).click();
+    await expect(page.getByText('已设为目的地')).toBeVisible();
+
+    await page.getByRole('button', { name: '完成' }).click();
+    await expect(page.getByTestId('starmap-dialog')).not.toBeVisible();
+    await expect(page.getByTestId('setup-panel')).toBeVisible();
+    await expect(page.getByLabel('目的地')).toHaveValue('hip-102098');
+  });
 });

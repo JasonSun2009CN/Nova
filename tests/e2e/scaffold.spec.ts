@@ -9,22 +9,12 @@ test.describe('Nova S12 UI 验证', () => {
     await expect(page.getByRole('button', { name: '启动航行' })).toBeVisible();
   });
 
-  test('主题切换：4 个按钮可点，data-theme 正确变化', async ({ page }) => {
+  test('单一 neutral 主题：data-theme=neutral，无主题切换按钮', async ({ page }) => {
     await page.goto('/');
 
-    const themes = ['深空', '赛博朋克', '复古', '极简白'];
-    for (const label of themes) {
-      await expect(page.getByRole('button', { name: label })).toBeVisible();
-    }
-
-    await page.getByRole('button', { name: '赛博朋克' }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'cyberpunk');
-
-    await page.getByRole('button', { name: '极简白' }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'minimal-light');
-
-    await page.getByRole('button', { name: '深空' }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'deep-space');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'neutral');
+    await expect(page.getByRole('button', { name: '深空' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '星图' })).toBeVisible();
   });
 
   test('点击启动航行 → 进入航行视图', async ({ page }) => {

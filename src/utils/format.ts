@@ -1,3 +1,5 @@
+import type { SpectralClass } from '@/engine/contract/catalog-types';
+
 export function formatDurationMs(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
   const hours = Math.floor(totalSeconds / 3600);
@@ -44,4 +46,18 @@ export function formatMinuteLabel(totalMinutes: number): string {
     return `${hours}小时`;
   }
   return `${minutes}分钟`;
+}
+
+export function formatSpectral(spectral: SpectralClass): string {
+  const subclass = spectral.subclass != null ? String(spectral.subclass) : '';
+  const luminosity = spectral.luminosityClass ?? '';
+  return `${spectral.type}${subclass}${luminosity}`;
+}
+
+export function formatMagnitude(m: number): string {
+  return m.toFixed(2);
+}
+
+export function formatKelvin(k: number): string {
+  return `${Math.round(k).toLocaleString('en-US')} K`;
 }

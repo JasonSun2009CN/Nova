@@ -1,7 +1,7 @@
 # Nova · 工程交接须知（Agent 接手必读）
 
 > 项目名称：**Nova · 星际专注软件**
-> 技术栈：**Vite 5 + React 18 + TypeScript strict（noUncheckedIndexedAccess）+ Tailwind CSS 4 主题 + R3F/Three.js + Zustand + Dexie IndexedDB + Vitest + fake-indexeddb + Playwright + ESLint 9 Flat Config + Tauri 2（骨架已配）**
+> 技术栈：**Vite 5 + React 18 + TypeScript strict（noUncheckedIndexedAccess）+ Tailwind CSS 4（单一暗色 Neutral 主题）+ R3F/Three.js + Zustand + Dexie IndexedDB + Vitest + fake-indexeddb + Playwright + ESLint 9 Flat Config + Tauri 2（骨架已配）**
 > 本文件只讲「读哪里 / 怎么继续 / 注意事项」，不讲业务背景（背景去 README / ROADMAP / ADR）。
 
 ---
@@ -9,10 +9,10 @@
 ## ⚠️ 当前进度（2026-08-03 交接）
 
 - **Phase 1 MVP（S11~S15）已全部完成**：Zustand 状态层 / React UI / Web Worker 计时 + 崩溃恢复 / CI + e2e / PWA 离线。
-- **Phase 2 已起步（S16 完成）**：R3F 3D 星空渲染器 + 星图视图（`feature/S16-starmap-renderer` 分支）。
-- **另加了两个用户驱动的增量**：UI 极简克制化重设计、星际航行术语弹窗。
+- **Phase 2 已交付（S16+S17）**：R3F 3D 星空渲染器 + **星图弹窗交互**（点星 → 确认设目的地 + 当前位置标记）。
+- **用户驱动变更**：UI 极简克制化重设计、星际航行术语弹窗、**单一暗色 Neutral 主题（删除原 4 套主题，见 ADR-0009）**。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
-- **当前分支**：`feature/S16-starmap-renderer`，工作树干净，所有改动已提交（最新 `6edb9ad`）。
+- **当前分支**：`feature/S16-starmap-renderer`；S17 改动已完成并本地验证（`pnpm check` 4/4、e2e 全绿、143 单测），**未 commit（等用户确认）**。
 
 ---
 
@@ -20,7 +20,8 @@
 
 1. **不要自动 git commit** —— 写完代码、跑完验证后，把改动/截图展示给用户，等用户确认后再提交。用户经常自己提交（用 GUI），所以不要抢着 commit。
 2. **UI 方向 = 极简克制**（用户明确选择，Linear/Apple 风）：大留白、细字重、零装饰、平按钮、发丝线分隔。**不要**加星云光斑/辉光/shimmer 之类花哨背景元素——用户明确说"背景圆圈干扰视线，都去掉"。
-3. 用户不是大众用户，审美有要求，UI 改动做完要展示截图等确认。
+3. **单一暗色 Neutral 主题，无主题切换**（ADR-0009）：近黑灰阶 + 金色强调色；`data-theme` 恒为 `neutral`。用户因「暖色背景 + 黑色星图不搭」砍掉 4 套主题，别再加回主题切换。
+4. 用户不是大众用户，审美有要求，UI 改动做完要展示截图等确认。
 
 ---
 
@@ -83,17 +84,19 @@ src/
 │   ├── SetupPanel 相关的…      （见 pages）
 │   ├── VoyageStarFlow.tsx     ✅ Canvas 2D 星流（航行视图背景）
 │   ├── SpaceBackdrop.tsx      ✅ 纯渐变背景层（用户要求极简，**不要加装饰**）
-│   ├── ThemeToggle.tsx        ✅ 4 主题切换
 │   ├── HistoryPanel.tsx       ✅ 航行日志列表
-│   └── GlossaryDialog.tsx     ✅ 星际航行术语弹窗（γ/光年/时间膨胀等 8 词条）
+│   ├── GlossaryDialog.tsx     ✅ 星际航行术语弹窗（γ/光年/时间膨胀等 8 词条）
+│   └── StarMap/
+│       └── StarInfoCard.tsx   ✅ 点星确认卡（详情 + 设为目的地/取消/完成）
 ├── pages/
 │   ├── SetupPanel.tsx         ✅ 设置面板（时长/目的地/速度 + 启动）
 │   ├── VoyageView.tsx         ✅ 航行视图（倒计时/指标/进度/暂停结束）
 │   ├── ResultView.tsx         ✅ 结果视图
-│   └── StarMapView.tsx        ✅ S16 3D 星图（Canvas + OrbitControls + StarField）
-├── test/                      ✅ setup.ts（fake-indexeddb + canvas stub）+ dev-hooks.ts（__TEST_ONLY__.fastForward）
-├── styles/index.css           ✅ 4 主题 tokens + --color-foreground/--color-glass + Space Grotesk @font-face
-├── main.tsx / App.tsx         ✅ App：idle 视图切换（设置/星图）+ 术语弹窗 + 4 主题
+│   ├── StarMapDialog.tsx      ✅ S17 星图弹窗外壳（顶栏 + 当前位置图例 + Esc 关闭）
+│   └── StarMapView.tsx        ✅ S16+S17 3D 星图（Canvas + 分层渲染 + 拾取 + 标记，弹窗内）
+├── test/                      ✅ setup.ts（fake-indexeddb + canvas stub + matchMedia stub）+ dev-hooks.ts（__TEST_ONLY__.fastForward / getStarScreenPosition / setAutoRotate）+ star-map-hooks.ts
+├── styles/index.css           ✅ 单一 Neutral 主题 tokens（暗色灰阶 + 金色强调）+ Space Grotesk @font-face
+├── main.tsx / App.tsx         ✅ App：idle 主视图（设置/日志）+ 星图弹窗 + 术语弹窗 + data-theme=neutral
 ├── utils/format.ts            ✅ formatDurationMs/formatLy/formatGamma/... + 17 tests
 └── vite-env.d.ts              ✅ Window.__TEST_ONLY__ 增强（declare global interface Window）
 ```
@@ -102,7 +105,7 @@ src/
 
 ---
 
-## 二、怎么继续开发（当前阶段：Phase 2 星图导航，S16 已完成）
+## 二、怎么继续开发（当前阶段：Phase 2 星图导航，S16+S17 已完成）
 
 ### 2.1 标准开发循环
 
@@ -120,30 +123,31 @@ pnpm vitest src/engine/renderer --reporter=verbose
 pnpm test:e2e
 ```
 
-### 2.2 当前已完成（S11~S15 + S16 + UI 重设计 + 术语弹窗）
+### 2.2 当前已完成（S11~S17 + 用户驱动增量）
 
-| Sprint | 内容                                               | 状态                     |
-| ------ | -------------------------------------------------- | ------------------------ |
-| S11    | Zustand 3 stores                                   | ✅ 7/10/6 actions + 测试 |
-| S12    | React UI（Setup/Voyage/Result/History + App 路由） | ✅                       |
-| S13    | Web Worker 计时 + localStorage 崩溃恢复            | ✅                       |
-| S14    | GitHub Actions CI + mvp.e2e（3 浏览器）            | ✅                       |
-| S15    | PWA 离线 + manifest + README 指引                  | ✅                       |
-| S16    | R3F 3D 星空渲染器 + 星图视图（懒加载）             | ✅                       |
-| 增量   | UI 极简克制化重设计 + 术语弹窗                     | ✅                       |
+| Sprint | 内容                                                      | 状态                     |
+| ------ | --------------------------------------------------------- | ------------------------ |
+| S11    | Zustand 3 stores                                          | ✅ 7/10/6 actions + 测试 |
+| S12    | React UI（Setup/Voyage/Result/History + App 路由）        | ✅                       |
+| S13    | Web Worker 计时 + localStorage 崩溃恢复                   | ✅                       |
+| S14    | GitHub Actions CI + mvp.e2e（3 浏览器）                   | ✅                       |
+| S15    | PWA 离线 + manifest + README 指引                         | ✅                       |
+| S16    | R3F 3D 星空渲染器 + 星图视图（懒加载）                    | ✅                       |
+| S17    | 星图弹窗 + 点星确认设目的地 + 当前位置标记（+ 拾取/分层） | ✅                       |
+| 增量   | UI 极简克制化重设计 + 术语弹窗 + 单一暗色 Neutral 主题    | ✅                       |
 
-**验证基线**：`pnpm check` 4/4（**127 单测**，18 test files）；e2e 3 浏览器全过（starmap 仅 chromium）；`pnpm build` 主包 59KB（three 967KB 懒加载）。
+**验证基线**：`pnpm check` 4/4（**143 单测**，19 test files）；e2e 3 浏览器全过（starmap 仅 chromium）；`pnpm build` 主包 ~64KB（three 967KB 懒加载进星图弹窗 chunk）。
 
 ### 2.3 下一步（Phase 2 星图导航，按 ROADMAP）
 
-Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。已完成的 S16 只做了「3D 星野渲染」。接下来按 ROADMAP 2.1/2.2 推进，建议顺序：
+Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16 渲染 + S17 弹窗交互已完成。接下来按 ROADMAP 2.1/2.2 推进，建议顺序：
 
-| 顺序 | 内容                                                                                     | 说明                                                               |
-| ---- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| 1    | **星图交互**：点星弹出信息卡（名称/距离/光谱/视星等）→「设为目的地」；星图里显示当前位置 | 用 `StarCatalog.findById` / `findNearest`；星图上 hover/click 拾取 |
-| 2    | **星表数据集成**：内嵌 50ly 内完整星表（~1800 颗）替代 500 fixture                       | 数据分块 JSON + IndexedDB 缓存（ROADMAP 2.1）                      |
-| 3    | **导航系统**：选目的地 → 反推所需专注时长 / 推荐目的地                                   | 复用 `travelDistance` + γ                                          |
-| 4    | 搜索、定位当前、多级跃迁                                                                 | 远期                                                               |
+| 顺序 | 内容                                                                   | 说明                                                                              |
+| ---- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 1    | ~~星图交互：点星信息卡 + 设为目的地 + 当前位置标记~~（**已交付 S17**） | 弹窗内拾取 + 确认卡；`__TEST_ONLY__.getStarScreenPosition` 驱动 e2e               |
+| 2    | **星表数据集成**：内嵌 50ly 内完整星表（~1800 颗）替代 500 fixture     | 数据分块 JSON + IndexedDB 缓存（ROADMAP 2.1）；`DESTINATION_STARS` 届时改用真星表 |
+| 3    | **导航系统**：选目的地 → 反推所需专注时长 / 推荐目的地                 | 复用 `travelDistance` + γ；确认卡里可显示预计专注时长                             |
+| 4    | 搜索、定位当前、多级跃迁                                               | 远期                                                                              |
 
 **远期**：S20 γ 视觉（Doppler 红移蓝移 uniform）；S29 Gaia 百万星（tier3 单独 KDTree + GPU BufferGeometry）。
 
@@ -153,23 +157,25 @@ Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注�
 
 ### 3.1 踩过的坑（绝对不要重复）
 
-| #   | 坑现象                                              | 根因                                                                      | 现在怎么规避                                                                                                     |
-| --- | --------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| 1   | `git push` 报 No remote                             | 之前没 origin                                                             | `https://github.com/JasonSun2009CN/Nova.git` 已设                                                                |
-| 2   | ESLint import-x invalid interface                   | import-x peer 冲突                                                        | `import/order`/`import/no-cycle`/`import/no-duplicates` 全置 `off`，**别再启用**                                 |
-| 3   | ESLint 9 `--ext not supported`                      | 脚本残留 `--ext`                                                          | 只用 `eslint .`                                                                                                  |
-| 4   | Vitest fakeTimers 时间不流动                        | wallNow 用了 performance.now()                                            | **VoyageController.wallNow 永远只用 Date.now()**，别碰                                                           |
-| 5   | TS `noUncheckedIndexedAccess` 一堆 type error       | 数组访问不判空                                                            | `arr[i]!` 或 helper `as const`                                                                                   |
-| 6   | StarCatalog 泛型约束不满足                          | Star 没有 x/y/z                                                           | 内部 `CatalogPoint` 包装，别给 Star 加 x/y/z                                                                     |
-| 7   | findNearest k=8 第 0 名是太阳                       | fixture 太阳在原点                                                        | 假星 tier1 下限 70ly；「第 0 = hip-sol，第 1 = Proxima」是业务真理                                               |
-| 8   | findByHip 返回 undefined                            | 只填 id 没填 hipId                                                        | `protoToStar()` 自动抽 hipId                                                                                     |
-| 9   | manualChunks 改乱后首屏 2MB+                        | 没按分包策略                                                              | vite.config.ts 4 包；**别把 three 塞进主包**                                                                     |
-| 10  | Playwright e2e 报 page closed                       | webServer 启动超时                                                        | webServer.timeout 120s 已设                                                                                      |
-| 11  | **fake-indexeddb + vi.useFakeTimers 挂起**          | fake-indexeddb 用 setImmediate/setTimeout 提交事务，被 fakeTimers mock 掉 | **测试里用 `vi.useFakeTimers({ toFake: ['setInterval','clearInterval','Date'] })`**，Dexie 的 macrotask 保持真实 |
-| 12  | **jsdom 里 canvas.getContext 抛 "Not implemented"** | jsdom 无 canvas 包                                                        | `src/test/setup.ts` 已 stub getContext 返回 null；组件里也 try/catch                                             |
-| 13  | **R3F Canvas 只占屏幕顶部一小条**                   | Canvas 的 `height:100%` 对 flex 撑起的高度解析失败 → canvas 默认 150px    | **把 `<Canvas>` 包进 `<div className="absolute inset-0">`**（有确定高度可解析）；见 StarMapView.tsx              |
-| 14  | **星图 e2e 首次跑超时**                             | Vite 首次按需优化 three 很慢（冷加载）                                    | starmap.spec 断言给 20s timeout；`test.skip` 非 chromium（WebGL 无头仅 chromium 可用）                           |
-| 15  | **GUI 提交后其实没 commit**                         | 用户用 GUI commit 有时只 stage 没 commit                                  | 接手时先 `git log -1` + `git status` 确认；发现 staged 未提交要提醒用户                                          |
+| #   | 坑现象                                               | 根因                                                                      | 现在怎么规避                                                                                                     |
+| --- | ---------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| 1   | `git push` 报 No remote                              | 之前没 origin                                                             | `https://github.com/JasonSun2009CN/Nova.git` 已设                                                                |
+| 2   | ESLint import-x invalid interface                    | import-x peer 冲突                                                        | `import/order`/`import/no-cycle`/`import/no-duplicates` 全置 `off`，**别再启用**                                 |
+| 3   | ESLint 9 `--ext not supported`                       | 脚本残留 `--ext`                                                          | 只用 `eslint .`                                                                                                  |
+| 4   | Vitest fakeTimers 时间不流动                         | wallNow 用了 performance.now()                                            | **VoyageController.wallNow 永远只用 Date.now()**，别碰                                                           |
+| 5   | TS `noUncheckedIndexedAccess` 一堆 type error        | 数组访问不判空                                                            | `arr[i]!` 或 helper `as const`                                                                                   |
+| 6   | StarCatalog 泛型约束不满足                           | Star 没有 x/y/z                                                           | 内部 `CatalogPoint` 包装，别给 Star 加 x/y/z                                                                     |
+| 7   | findNearest k=8 第 0 名是太阳                        | fixture 太阳在原点                                                        | 假星 tier1 下限 70ly；「第 0 = hip-sol，第 1 = Proxima」是业务真理                                               |
+| 8   | findByHip 返回 undefined                             | 只填 id 没填 hipId                                                        | `protoToStar()` 自动抽 hipId                                                                                     |
+| 9   | manualChunks 改乱后首屏 2MB+                         | 没按分包策略                                                              | vite.config.ts 4 包；**别把 three 塞进主包**                                                                     |
+| 10  | Playwright e2e 报 page closed                        | webServer 启动超时                                                        | webServer.timeout 120s 已设                                                                                      |
+| 11  | **fake-indexeddb + vi.useFakeTimers 挂起**           | fake-indexeddb 用 setImmediate/setTimeout 提交事务，被 fakeTimers mock 掉 | **测试里用 `vi.useFakeTimers({ toFake: ['setInterval','clearInterval','Date'] })`**，Dexie 的 macrotask 保持真实 |
+| 12  | **jsdom 里 canvas.getContext 抛 "Not implemented"**  | jsdom 无 canvas 包                                                        | `src/test/setup.ts` 已 stub getContext 返回 null；组件里也 try/catch                                             |
+| 13  | **R3F Canvas 只占屏幕顶部一小条**                    | Canvas 的 `height:100%` 对 flex 撑起的高度解析失败 → canvas 默认 150px    | **把 `<Canvas>` 包进 `<div className="absolute inset-0">`**（有确定高度可解析）；见 StarMapView.tsx              |
+| 14  | **星图 e2e 首次跑超时**                              | Vite 首次按需优化 three 很慢（冷加载）                                    | starmap.spec 断言给 20s timeout；`test.skip` 非 chromium（WebGL 无头仅 chromium 可用）                           |
+| 15  | **GUI 提交后其实没 commit**                          | 用户用 GUI commit 有时只 stage 没 commit                                  | 接手时先 `git log -1` + `git status` 确认；发现 staged 未提交要提醒用户                                          |
+| 16  | **星图弹窗 e2e 的 `getByText(/织女/)` 命中多个元素** | 弹窗模式下 SetupPanel 仍渲染在 DOM 后面，其目的地下拉 option 也有「织女」 | 星图断言**限定在 `getByTestId('star-info-card')` 内**；别裸用 getByText 匹配星名                                 |
+| 17  | **旧主题值（retro 等）残留 IndexedDB**               | 主题收敛为单一 `neutral`                                                  | `useSettingsStore.load()` 迁移 coerce 为 `neutral` 并回写（有单测覆盖）                                          |
 
 ### 3.2 严格的分层禁令（ESLint 卡死别硬绕）
 
@@ -207,6 +213,7 @@ Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注�
 - [ ] Storage 层只 import contract + dexie
 - [ ] 没破坏 `findNearest(origin, 9)` 的「第 0=太阳，第 1=Proxima」断言
 - [ ] 命名遵循 3.4，无中文变量
+- [ ] `data-theme` 恒为 `neutral`，无主题切换 UI（ThemeToggle 已删）
 - [ ] commit message 过 commitlint
 - [ ] `git status` 确认没误 add node_modules/dist
 - [ ] **UI 改动做完给用户看截图，等确认再提交**（见「〇、用户偏好」）

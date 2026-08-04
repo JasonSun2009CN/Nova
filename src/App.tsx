@@ -3,7 +3,6 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { GlossaryDialog } from '@/components/GlossaryDialog';
 import { HistoryPanel } from '@/components/HistoryPanel';
 import { SpaceBackdrop } from '@/components/SpaceBackdrop';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { ResultView } from '@/pages/ResultView';
 import { SetupPanel } from '@/pages/SetupPanel';
 import { VoyageView } from '@/pages/VoyageView';
@@ -11,16 +10,14 @@ import { useHistoryStore } from '@/store/useHistoryStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
 
-const StarMapView = lazy(() =>
-  import('@/pages/StarMapView').then((m) => ({ default: m.StarMapView })),
+const StarMapDialog = lazy(() =>
+  import('@/pages/StarMapDialog').then((m) => ({ default: m.StarMapDialog })),
 );
-
-type IdleView = 'setup' | 'starmap';
 
 function App() {
   const progress = useVoyageStore((s) => s.progress);
   const theme = useSettingsStore((s) => s.settings.theme);
-  const [idleView, setIdleView] = useState<IdleView>('setup');
+  const [starMapOpen, setStarMapOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
 
   useEffect(() => {
@@ -48,10 +45,10 @@ function App() {
           {status === 'idle' && (
             <button
               type="button"
-              onClick={() => setIdleView((v) => (v === 'setup' ? 'starmap' : 'setup'))}
+              onClick={() => setStarMapOpen(true)}
               className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
             >
-              {idleView === 'setup' ? '星图' : '设置'}
+              星图
             </button>
           )}
           <button
@@ -74,23 +71,12 @@ function App() {
               <path d="M12 11v5M12 8v0.01" />
             </svg>
           </button>
-          <ThemeToggle />
         </div>
       </header>
 
       <main className="relative z-10 flex min-h-0 flex-1 flex-col">
         {voyaging ? (
           <VoyageView />
-        ) : status === 'idle' && idleView === 'starmap' ? (
-          <Suspense
-            fallback={
-              <div className="flex flex-1 items-center justify-center text-sm text-deep-400">
-                加载星图…
-              </div>
-            }
-          >
-            <StarMapView />
-          </Suspense>
         ) : status === 'idle' ? (
           <div className="flex-1 overflow-y-auto">
             <SetupPanel />
@@ -102,6 +88,18 @@ function App() {
           </div>
         )}
       </main>
+
+      {starMapOpen && (
+        <Suspense
+          fallback={
+            <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 text-sm text-deep-400">
+              加载星图…
+            </div>
+          }
+        >
+          <StarMapDialog onClose={() => setStarMapOpen(false)} />
+        </Suspense>
+      )}
 
       <GlossaryDialog open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
     </div>

@@ -16,7 +16,7 @@ export function SetupPanel() {
 
   const [minutes, setMinutes] = useState<number>(defaultMinutes);
   const [vOverC, setVOverC] = useState<number>(defaultVOverC);
-  const [destStarId, setDestStarId] = useState<string | null>(null);
+  const destStarId = useVoyageStore((s) => s.destStarId);
   const touchedRef = useRef(false);
 
   useEffect(() => {
@@ -43,9 +43,7 @@ export function SetupPanel() {
   };
 
   const handleDestChange = (value: string) => {
-    const next = value === '' ? null : value;
-    setDestStarId(next);
-    useVoyageStore.getState().selectDestination(next);
+    useVoyageStore.getState().selectDestination(value === '' ? null : value);
   };
 
   const handleStart = () => {

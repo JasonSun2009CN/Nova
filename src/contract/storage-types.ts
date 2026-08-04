@@ -1,7 +1,7 @@
 import type { VoyageSnapshot, VoyageStatus } from '@/engine/contract/voyage-types';
 import type { Cartesian3, CatalogTier, Star } from '@/engine/contract/catalog-types';
 
-export type ThemeKey = 'deep-space' | 'cyberpunk' | 'retro' | 'minimal-light';
+export type ThemeKey = 'neutral';
 
 export type VoyageRecord = Readonly<{
   id: string;
