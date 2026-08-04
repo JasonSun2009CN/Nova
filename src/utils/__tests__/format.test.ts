@@ -57,6 +57,10 @@ describe('formatGamma', () => {
   it('γ=1 → ×1.00', () => {
     expect(formatGamma(1)).toBe('×1.00');
   });
+
+  it('γ=89326 → ×89,326.00（千分位）', () => {
+    expect(formatGamma(89_326.000_005_6)).toBe('×89,326.00');
+  });
 });
 
 describe('formatVOverC', () => {
@@ -66,6 +70,14 @@ describe('formatVOverC', () => {
 
   it('0.999 → 0.999c', () => {
     expect(formatVOverC(0.999)).toBe('0.999c');
+  });
+
+  it('接近光速不显示成 1.000c：0.99999994 → 0.9999999c', () => {
+    expect(formatVOverC(0.99999994)).toBe('0.9999999c');
+  });
+
+  it('1-1e-12 → 0.999999999999c', () => {
+    expect(formatVOverC(1 - 1e-12)).toBe('0.999999999999c');
   });
 });
 

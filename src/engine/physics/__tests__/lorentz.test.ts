@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   LIGHT_SPEED,
+  cruisePlan,
   lorentzFactor,
   requiredFocusMinutes,
   travelDistance,
@@ -117,6 +118,46 @@ describe('engine/physics/lorentz', () => {
       expect(() => requiredFocusMinutes(-1, 0.99)).toThrow(RangeError);
       expect(() => requiredFocusMinutes(10, 0)).toThrow(RangeError);
       expect(() => requiredFocusMinutes(10, 1)).toThrow(RangeError);
+    });
+  });
+
+  describe('cruisePlan()', () => {
+    it('是 travelDistance 的逆运算：推算速度后往返还原距离', () => {
+      const plan = cruisePlan({ focusMinutes: 25, distanceLy: 4.246 });
+      const dist = travelDistance({ focusMinutes: 25, vOverC: plan.vOverC });
+      expect(dist).toBeCloseTo(4.246, 3);
+    });
+
+    it('25 分钟 → 比邻星：γ=√(1+R²)，β 略小于 1，地球历时≈距离', () => {
+      const focusYears = (25 * 60) / (365.25 * 24 * 3600);
+      const rapidity = 4.246 / focusYears;
+      const expectedGamma = Math.sqrt(1 + rapidity * rapidity);
+      const plan = cruisePlan({ focusMinutes: 25, distanceLy: 4.246 });
+      expect(plan.gamma).toBeCloseTo(expectedGamma, 5);
+      expect(plan.vOverC).toBeLessThan(1);
+      expect(plan.vOverC).toBeGreaterThan(0.999_999_999);
+      expect(plan.earthYears).toBeCloseTo(4.246, 3);
+    });
+
+    it('距离更远 → 需更快、γ 更大', () => {
+      const near = cruisePlan({ focusMinutes: 25, distanceLy: 4.246 });
+      const far = cruisePlan({ focusMinutes: 25, distanceLy: 25.04 });
+      expect(far.gamma).toBeGreaterThan(near.gamma);
+      expect(far.vOverC).toBeGreaterThan(near.vOverC);
+    });
+
+    it('专注更短 → 需更快、γ 更大', () => {
+      const long = cruisePlan({ focusMinutes: 60, distanceLy: 4.246 });
+      const short = cruisePlan({ focusMinutes: 15, distanceLy: 4.246 });
+      expect(short.gamma).toBeGreaterThan(long.gamma);
+      expect(short.vOverC).toBeGreaterThan(long.vOverC);
+    });
+
+    it('focusMinutes 或 distanceLy 非正抛 RangeError', () => {
+      expect(() => cruisePlan({ focusMinutes: 0, distanceLy: 4.246 })).toThrow(RangeError);
+      expect(() => cruisePlan({ focusMinutes: -1, distanceLy: 4.246 })).toThrow(RangeError);
+      expect(() => cruisePlan({ focusMinutes: 25, distanceLy: 0 })).toThrow(RangeError);
+      expect(() => cruisePlan({ focusMinutes: 25, distanceLy: Number.NaN })).toThrow(RangeError);
     });
   });
 });

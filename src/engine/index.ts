@@ -1,6 +1,7 @@
 export type * from './physics/lorentz';
 export {
   LIGHT_SPEED,
+  cruisePlan,
   lorentzFactor,
   requiredFocusMinutes,
   travelDistance,

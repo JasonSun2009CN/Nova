@@ -65,6 +65,32 @@ export function requiredFocusMinutes(distanceLy: number, vOverC: number): number
   return meters / (v * gamma * 60);
 }
 
+export type CruisePlanInput = {
+  focusMinutes: number;
+  distanceLy: number;
+};
+
+export type CruisePlan = {
+  vOverC: number;
+  gamma: number;
+  earthYears: number;
+};
+
+export function cruisePlan(input: CruisePlanInput): CruisePlan {
+  const { focusMinutes, distanceLy } = input;
+  if (!(Number.isFinite(focusMinutes) && focusMinutes > 0)) {
+    throw new RangeError('cruisePlan: focusMinutes 必须为正数。');
+  }
+  if (!(Number.isFinite(distanceLy) && distanceLy > 0)) {
+    throw new RangeError('cruisePlan: distanceLy 必须为正数。');
+  }
+  const focusYears = (focusMinutes * 60) / SECONDS_PER_YEAR;
+  const rapidity = distanceLy / focusYears;
+  const gamma = Math.sqrt(1 + rapidity * rapidity);
+  const vOverC = Math.sqrt(1 - 1 / (gamma * gamma));
+  return { vOverC, gamma, earthYears: focusYears * gamma };
+}
+
 export const __internal = {
   SECONDS_PER_YEAR,
   METERS_PER_LIGHT_YEAR,

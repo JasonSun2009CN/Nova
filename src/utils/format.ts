@@ -20,11 +20,19 @@ export function formatLy(ly: number): string {
 }
 
 export function formatGamma(gamma: number): string {
-  return `×${gamma.toFixed(2)}`;
+  return `×${gamma.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 export function formatVOverC(vOverC: number): string {
-  return `${vOverC.toFixed(3)}c`;
+  for (let decimals = 3; decimals <= 15; decimals += 1) {
+    if (Number(vOverC.toFixed(decimals)) < 1) {
+      return `${vOverC.toFixed(decimals)}c`;
+    }
+  }
+  return `${vOverC.toPrecision(16)}c`;
 }
 
 export function formatDateTime(ts: number): string {

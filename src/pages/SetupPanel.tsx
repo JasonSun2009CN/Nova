@@ -1,24 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
+import { DurationScrubber } from '@/components/DurationScrubber';
 import {
   DESTINATION_STARS,
   destinationOptionsFromStars,
   findDestinationOption,
 } from '@/data/destination-stars';
-import { LIGHT_SPEED, lorentzFactor, requiredFocusMinutes } from '@/engine';
+import { LIGHT_SPEED, cruisePlan, lorentzFactor } from '@/engine';
 import { useCatalogStore } from '@/store/useCatalogStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
-import {
-  formatFocusEstimate,
-  formatGamma,
-  formatLy,
-  formatMinuteLabel,
-  formatVOverC,
-} from '@/utils/format';
-
-const PRESETS = [5, 15, 25, 45] as const;
+import { formatGamma, formatLy, formatMinuteLabel, formatVOverC } from '@/utils/format';
 
 export function SetupPanel() {
   const defaultMinutes = useSettingsStore((s) => s.settings.defaultFocusMinutes);
@@ -39,7 +32,6 @@ export function SetupPanel() {
   }, [hydrated, defaultMinutes]);
 
   const valid = Number.isFinite(minutes) && minutes > 0;
-  const gamma = lorentzFactor(vOverC * LIGHT_SPEED);
   const destinationOptions = useMemo(
     () =>
       catalogStatus === 'ready' && catalogStars.length > 0
@@ -51,6 +43,15 @@ export function SetupPanel() {
     () => findDestinationOption(destStarId, catalogStars),
     [destStarId, catalogStars],
   );
+  const plan = useMemo(
+    () =>
+      destStar != null && destStar.distanceLy > 0
+        ? cruisePlan({ focusMinutes: minutes, distanceLy: destStar.distanceLy })
+        : null,
+    [destStar, minutes],
+  );
+  const gamma = plan?.gamma ?? lorentzFactor(vOverC * LIGHT_SPEED);
+  const speed = plan?.vOverC ?? vOverC;
 
   const handleCustomChange = (raw: string) => {
     touchedRef.current = true;
@@ -60,9 +61,9 @@ export function SetupPanel() {
     }
   };
 
-  const handlePreset = (p: number) => {
+  const handleScrub = (value: number) => {
     touchedRef.current = true;
-    setMinutes(p);
+    setMinutes(value);
   };
 
   const handleDestChange = (value: string) => {
@@ -73,7 +74,7 @@ export function SetupPanel() {
     if (!valid) return;
     useVoyageStore.getState().prepare({
       focusMinutes: minutes,
-      vOverC,
+      vOverC: speed,
       originStarId: 'hip-sol',
       destStarId,
     });
@@ -96,41 +97,25 @@ export function SetupPanel() {
 
       <div className="glass-card space-y-8 rounded-2xl p-8">
         <div>
-          <label id="focus-minutes-label" className="mb-3 block text-sm text-deep-300">
-            专注时长
-          </label>
-          <div className="grid grid-cols-4 gap-1.5">
-            {PRESETS.map((p) => (
-              <button
-                key={p}
-                type="button"
-                aria-pressed={minutes === p}
-                aria-label={`${p} 分钟`}
-                onClick={() => handlePreset(p)}
-                className={twMerge(
-                  'h-12 cursor-pointer rounded-xl border font-display text-base transition-colors duration-200',
-                  minutes === p
-                    ? 'border-star-gold/50 text-star-gold'
-                    : 'border-transparent text-deep-400 hover:text-foreground',
-                )}
-              >
-                {p}
-              </button>
-            ))}
+          <div className="mb-4 flex items-center justify-between">
+            <label htmlFor="duration-scrubber" className="text-sm text-deep-300">
+              专注时长
+            </label>
+            <div className="flex items-baseline gap-1.5">
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={600}
+                value={minutes}
+                aria-label="自定义专注时长（分钟）"
+                onChange={(e) => handleCustomChange(e.target.value)}
+                className="w-16 appearance-none bg-transparent text-right font-mono text-2xl tabular-nums text-foreground focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              />
+              <span className="text-xs text-deep-400">分钟</span>
+            </div>
           </div>
-          <div className="mt-4 flex items-center gap-3">
-            <input
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={600}
-              value={minutes}
-              aria-label="自定义专注时长（分钟）"
-              onChange={(e) => handleCustomChange(e.target.value)}
-              className="h-12 w-28 rounded-xl border border-[var(--color-glass-border)] bg-[var(--color-glass)] px-3 font-mono text-base text-foreground focus:border-star-blue focus:outline-none"
-            />
-            <span className="text-sm text-deep-400">{formatMinuteLabel(minutes)}</span>
-          </div>
+          <DurationScrubber value={minutes} onChange={handleScrub} />
         </div>
 
         <div>
@@ -150,37 +135,40 @@ export function SetupPanel() {
               </option>
             ))}
           </select>
-          {destStar != null && destStar.distanceLy > 0 && (
-            <p className="mt-1 text-xs text-deep-500">
-              预计专注 {formatFocusEstimate(requiredFocusMinutes(destStar.distanceLy, vOverC))}
-            </p>
-          )}
         </div>
 
         <div>
-          <label
-            htmlFor="v-slider"
-            className="mb-3 flex items-center justify-between text-sm text-deep-300"
-          >
-            <span>航行速度</span>
-            <span className="font-mono text-deep-200">
-              {formatVOverC(vOverC)} · γ {formatGamma(gamma)}
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-sm text-deep-300">
+              {plan != null ? '航行速度（推算）' : '航行速度'}
             </span>
-          </label>
-          <input
-            id="v-slider"
-            type="range"
-            min={0.5}
-            max={0.999}
-            step={0.001}
-            value={vOverC}
-            aria-label="航行速度 v/c"
-            onChange={(e) => setVOverC(Number(e.target.value))}
-            className="h-12 w-full cursor-pointer accent-[var(--color-star-gold)]"
-          />
-          <p className="mt-1 text-xs text-deep-500">
-            速度越接近光速，时间膨胀越明显，航行距离越远。
-          </p>
+            <span className="font-mono text-sm text-deep-200 tabular-nums">
+              {formatVOverC(speed)} · γ {formatGamma(gamma)}
+            </span>
+          </div>
+          {plan != null && destStar != null ? (
+            <p className="text-xs leading-relaxed text-deep-500">
+              飞抵 {destStar.name} 时，船上 {formatMinuteLabel(minutes)} ≈ 地球上{' '}
+              {plan.earthYears.toFixed(1)} 年。
+            </p>
+          ) : (
+            <>
+              <input
+                id="v-slider"
+                type="range"
+                min={0.5}
+                max={0.999}
+                step={0.001}
+                value={vOverC}
+                aria-label="航行速度 v/c"
+                onChange={(e) => setVOverC(Number(e.target.value))}
+                className="h-12 w-full cursor-pointer accent-[var(--color-star-gold)]"
+              />
+              <p className="mt-1 text-xs text-deep-500">
+                速度越接近光速，时间膨胀越明显，航行距离越远。
+              </p>
+            </>
+          )}
         </div>
       </div>
 
