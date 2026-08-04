@@ -2,6 +2,7 @@ import type { VoyageSnapshot } from '@/engine/contract/voyage-types';
 import { NovaDatabase } from '@/storage/NovaDatabase';
 import { SettingsRepository } from '@/storage/SettingsRepository';
 import { VoyageRepository } from '@/storage/VoyageRepository';
+import { StarCatalogRepository } from '@/storage/StarCatalogRepository';
 import { resetStoreDepsForTest, setStoreDepsForTest, useHistoryStore } from '@/store/index';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -56,6 +57,7 @@ describe('useHistoryStore (Zustand · VoyageRepository list/stats)', () => {
       const voyageRepo = new VoyageRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         voyageRepo,
         settingsRepo: new SettingsRepository(db),
       });
@@ -82,6 +84,7 @@ describe('useHistoryStore (Zustand · VoyageRepository list/stats)', () => {
       const voyageRepo = new VoyageRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         voyageRepo,
         settingsRepo: new SettingsRepository(db),
       });
@@ -102,6 +105,7 @@ describe('useHistoryStore (Zustand · VoyageRepository list/stats)', () => {
       const voyageRepo = new VoyageRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         voyageRepo,
         settingsRepo: new SettingsRepository(db),
       });
@@ -120,6 +124,7 @@ describe('useHistoryStore (Zustand · VoyageRepository list/stats)', () => {
       const voyageRepo = new VoyageRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         voyageRepo,
         settingsRepo: new SettingsRepository(db),
       });
@@ -142,6 +147,7 @@ describe('useHistoryStore (Zustand · VoyageRepository list/stats)', () => {
       const voyageRepo = new VoyageRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         voyageRepo,
         settingsRepo: new SettingsRepository(db),
       });
@@ -162,6 +168,7 @@ describe('useHistoryStore (Zustand · VoyageRepository list/stats)', () => {
       const voyageRepo = new VoyageRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         voyageRepo,
         settingsRepo: new SettingsRepository(db),
       });

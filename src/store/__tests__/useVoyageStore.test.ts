@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NovaDatabase } from '@/storage/NovaDatabase';
 import { SettingsRepository } from '@/storage/SettingsRepository';
 import { VoyageRepository } from '@/storage/VoyageRepository';
+import { StarCatalogRepository } from '@/storage/StarCatalogRepository';
 import {
   resetStoreDepsForTest,
   resetVoyageControllerForTest,
@@ -101,6 +102,7 @@ describe('useVoyageStore (Zustand · VoyageController 桥接 + Dexie 自动保�
       const voyageRepo = new VoyageRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         voyageRepo,
         settingsRepo: new SettingsRepository(db),
       });
@@ -138,6 +140,7 @@ describe('useVoyageStore (Zustand · VoyageController 桥接 + Dexie 自动保�
       const voyageRepo = new VoyageRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         voyageRepo,
         settingsRepo: new SettingsRepository(db),
       });

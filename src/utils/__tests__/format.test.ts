@@ -3,9 +3,13 @@ import { describe, expect, it } from 'vitest';
 import {
   formatDateTime,
   formatDurationMs,
+  formatFocusEstimate,
   formatGamma,
+  formatKelvin,
   formatLy,
+  formatMagnitude,
   formatMinuteLabel,
+  formatSpectral,
   formatVOverC,
 } from '@/utils/format';
 
@@ -88,5 +92,74 @@ describe('formatMinuteLabel', () => {
 
   it('120 → 2小时', () => {
     expect(formatMinuteLabel(120)).toBe('2小时');
+  });
+});
+
+describe('formatFocusEstimate', () => {
+  it('0.5 分钟 → 不足 1 分钟', () => {
+    expect(formatFocusEstimate(0.5)).toBe('不足 1 分钟');
+  });
+
+  it('25 → 25 分钟', () => {
+    expect(formatFocusEstimate(25)).toBe('25 分钟');
+  });
+
+  it('90 → 1 小时 30 分', () => {
+    expect(formatFocusEstimate(90)).toBe('1 小时 30 分');
+  });
+
+  it('120 → 2 小时', () => {
+    expect(formatFocusEstimate(120)).toBe('2 小时');
+  });
+
+  it('1440 → 1 天', () => {
+    expect(formatFocusEstimate(1440)).toBe('1 天');
+  });
+
+  it('318_000 → 221 天（比邻星 @0.99c）', () => {
+    expect(formatFocusEstimate(318_000)).toBe('221 天');
+  });
+
+  it('525_600 → 约 1.0 年', () => {
+    expect(formatFocusEstimate(525_600)).toBe('约 1.0 年');
+  });
+
+  it('1_877_000 → 约 3.6 年（织女星 @0.99c）', () => {
+    expect(formatFocusEstimate(1_877_000)).toBe('约 3.6 年');
+  });
+
+  it('非法值 → —', () => {
+    expect(formatFocusEstimate(Number.NaN)).toBe('—');
+    expect(formatFocusEstimate(-5)).toBe('—');
+  });
+});
+
+describe('formatSpectral', () => {
+  it('G2V → G2V', () => {
+    expect(formatSpectral({ type: 'G', subclass: 2, luminosityClass: 'V' })).toBe('G2V');
+  });
+
+  it('M5.5 无光度级 → M5.5', () => {
+    expect(formatSpectral({ type: 'M', subclass: 5.5 })).toBe('M5.5');
+  });
+
+  it('无子型无光度级 → O', () => {
+    expect(formatSpectral({ type: 'O' })).toBe('O');
+  });
+});
+
+describe('formatMagnitude', () => {
+  it('-0.01 → -0.01', () => {
+    expect(formatMagnitude(-0.01)).toBe('-0.01');
+  });
+
+  it('11.13 → 11.13', () => {
+    expect(formatMagnitude(11.13)).toBe('11.13');
+  });
+});
+
+describe('formatKelvin', () => {
+  it('5778 → 5,778 K', () => {
+    expect(formatKelvin(5778)).toBe('5,778 K');
   });
 });

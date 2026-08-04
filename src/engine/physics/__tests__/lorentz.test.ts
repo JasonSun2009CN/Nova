@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { LIGHT_SPEED, lorentzFactor, travelDistance } from '@/engine/physics/lorentz';
+import {
+  LIGHT_SPEED,
+  lorentzFactor,
+  requiredFocusMinutes,
+  travelDistance,
+} from '@/engine/physics/lorentz';
 
 describe('engine/physics/lorentz', () => {
   describe('LIGHT_SPEED constant', () => {
@@ -81,6 +86,37 @@ describe('engine/physics/lorentz', () => {
     it('throws if neither focusMinutes nor focusHours provided', () => {
       // @ts-expect-error - intentionally missing required field
       expect(() => travelDistance({ vOverC: 0.99 })).toThrow(TypeError);
+    });
+  });
+
+  describe('requiredFocusMinutes()', () => {
+    it('是 travelDistance 的逆运算：25 分钟 × 0.99c 往返一致', () => {
+      const dist = travelDistance({ focusMinutes: 25, vOverC: 0.99 });
+      expect(requiredFocusMinutes(dist, 0.99)).toBeCloseTo(25, 5);
+    });
+
+    it('1 小时 × 0.9c 往返一致', () => {
+      const dist = travelDistance({ focusHours: 1, vOverC: 0.9 });
+      expect(requiredFocusMinutes(dist, 0.9)).toBeCloseTo(60, 5);
+    });
+
+    it('比邻星 4.246ly @0.99c ≈ 31.8 万分钟', () => {
+      const minutes = requiredFocusMinutes(4.246, 0.99);
+      expect(minutes).toBeGreaterThan(300_000);
+      expect(minutes).toBeLessThan(340_000);
+    });
+
+    it('织女星 25.04ly @0.99c ≈ 187 万分钟（约 3.6 年）', () => {
+      const minutes = requiredFocusMinutes(25.04, 0.99);
+      expect(minutes).toBeGreaterThan(1_800_000);
+      expect(minutes).toBeLessThan(1_950_000);
+    });
+
+    it('distanceLy 非正或 vOverC 越界抛 RangeError', () => {
+      expect(() => requiredFocusMinutes(0, 0.99)).toThrow(RangeError);
+      expect(() => requiredFocusMinutes(-1, 0.99)).toThrow(RangeError);
+      expect(() => requiredFocusMinutes(10, 0)).toThrow(RangeError);
+      expect(() => requiredFocusMinutes(10, 1)).toThrow(RangeError);
     });
   });
 });

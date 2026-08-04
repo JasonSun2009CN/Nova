@@ -1,6 +1,6 @@
 # ADR-0007: 样式方案 - Tailwind CSS + CSS Variables
 
-- 状态: Accepted
+- 状态: Accepted（多主题部分被 ADR-0009 取代）
 - 日期: 2026-07-29
 - 决策者: 项目初始团队
 
@@ -9,7 +9,7 @@
 Nova 的 UI 样式有以下需求：
 
 1. **快速迭代**：MVP 阶段需要频繁调整 UI，样式方案不能成为瓶颈
-2. **多主题支持**：至少需要 4 套主题（深空蓝紫 / 赛博朋克 / 复古胶片 / 极简白）
+2. **主题支持**：通过 CSS Variables 支持主题化；当前收敛为单一暗色中性主题（见 ADR-0009，原 4 套主题已删除）
 3. **动效精细**：星空、仪表盘、过渡动画需要精确控制 CSS 变量
 4. **视觉一致性**：组件之间需要统一的间距、圆角、阴影、色彩 Token
 5. **团队协作**：多人开发需要统一的命名和组织方式
@@ -37,8 +37,8 @@ Nova 的 UI 样式有以下需求：
 **主题系统实现：**
 
 - 所有颜色/阴影/圆角 Token 用 CSS Variables 定义
-- 切换主题 = 切换 `document.documentElement.dataset.theme`
-- 主题定义抽离为独立 JSON 文件，支持未来新增主题包
+- 主题通过 `document.documentElement.dataset.theme` 应用；当前为单一 `neutral`（见 ADR-0009）
+- 主题定义集中在 `src/styles/index.css` 的 `:root`，未来如需回归多主题可扩展 `[data-theme=...]` 块
 
 **优点:**
 

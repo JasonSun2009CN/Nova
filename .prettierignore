@@ -3,5 +3,6 @@ node_modules
 coverage
 playwright-report
 pnpm-lock.yaml
+public/data/stars
 *.min.js
 *.min.css

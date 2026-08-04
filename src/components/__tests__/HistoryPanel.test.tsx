@@ -6,6 +6,7 @@ import type { VoyageSnapshot } from '@/engine/contract/voyage-types';
 import { NovaDatabase } from '@/storage/NovaDatabase';
 import { SettingsRepository } from '@/storage/SettingsRepository';
 import { VoyageRepository } from '@/storage/VoyageRepository';
+import { StarCatalogRepository } from '@/storage/StarCatalogRepository';
 import { resetStoreDepsForTest, setStoreDepsForTest, useHistoryStore } from '@/store/index';
 
 function sampleSnapshot(status: 'completed' | 'aborted'): VoyageSnapshot {
@@ -46,7 +47,12 @@ describe('HistoryPanel', () => {
   it('渲染历史记录与统计', async () => {
     await NovaDatabase.temp('nova-hist-ui-1', async (db) => {
       const voyageRepo = new VoyageRepository(db);
-      setStoreDepsForTest({ db, voyageRepo, settingsRepo: new SettingsRepository(db) });
+      setStoreDepsForTest({
+        db,
+        voyageRepo,
+        settingsRepo: new SettingsRepository(db),
+        starCatalogRepo: new StarCatalogRepository(db),
+      });
       await voyageRepo.save({
         snapshot: sampleSnapshot('completed'),
         originStar: { id: 'hip-sol' },
@@ -63,7 +69,12 @@ describe('HistoryPanel', () => {
   it('删除记录后显示空态', async () => {
     await NovaDatabase.temp('nova-hist-ui-2', async (db) => {
       const voyageRepo = new VoyageRepository(db);
-      setStoreDepsForTest({ db, voyageRepo, settingsRepo: new SettingsRepository(db) });
+      setStoreDepsForTest({
+        db,
+        voyageRepo,
+        settingsRepo: new SettingsRepository(db),
+        starCatalogRepo: new StarCatalogRepository(db),
+      });
       await voyageRepo.save({
         snapshot: sampleSnapshot('completed'),
         originStar: { id: 'hip-sol' },

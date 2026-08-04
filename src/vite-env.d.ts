@@ -5,6 +5,10 @@ declare global {
   interface Window {
     __TEST_ONLY__?: {
       fastForward: (ms: number) => void;
+      getStarScreenPosition: (starId: string) => { clientX: number; clientY: number } | null;
+      setAutoRotate: (enabled: boolean) => void;
+      getViewMode: () => 'from-departure' | 'overview' | null;
+      getCameraPosition: () => { x: number; y: number; z: number } | null;
     };
   }
 }

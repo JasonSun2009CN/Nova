@@ -10,3 +10,19 @@ if (typeof globalThis !== 'undefined') {
 HTMLCanvasElement.prototype.getContext = function getContextStub(this: HTMLCanvasElement) {
   return null;
 } as unknown as typeof HTMLCanvasElement.prototype.getContext;
+
+if (typeof window !== 'undefined' && window.matchMedia == null) {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }),
+  });
+}

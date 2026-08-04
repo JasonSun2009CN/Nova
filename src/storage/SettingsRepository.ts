@@ -2,7 +2,7 @@ import type { SettingsEntry, SettingsKey, SettingsValueMap } from '@/contract/st
 import type { NovaDatabase } from '@/storage/NovaDatabase';
 
 export const DEFAULT_SETTINGS: Readonly<SettingsValueMap> = {
-  theme: 'deep-space',
+  theme: 'neutral',
   defaultFocusMinutes: 25,
   defaultVOverC: 0.99,
   soundVolume: 0.6,
@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: Readonly<SettingsValueMap> = {
   enableReducedMotion: false,
   lastViewedStarId: null,
   acceptedTermsVersion: null,
+  currentStarId: 'hip-sol',
 };
 
 export class SettingsRepository {

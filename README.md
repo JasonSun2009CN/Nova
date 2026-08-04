@@ -49,18 +49,18 @@
 
 ## 🛠️ 技术栈
 
-| 层级           | 技术选择                                | 说明                               |
-| -------------- | --------------------------------------- | ---------------------------------- |
-| **前端框架**   | React 18 + TypeScript                   | 类型安全，组件化开发               |
-| **图形渲染**   | WebGL 2.0 (Three.js) + Inline SVG       | 高性能 3D 星空 + 精准 UI 图形      |
-| **状态管理**   | Zustand                                 | 轻量、简洁，无需 Redux boilerplate |
-| **样式方案**   | Tailwind CSS + CSS Variables            | 快速迭代 + 主题系统                |
-| **构建工具**   | Vite                                    | 极速 HMR，原生 ESM                 |
-| **数据持久化** | IndexedDB (Dexie)                       | 离线可用，存储星图缓存和航行记录   |
-| **单元测试**   | Vitest + React Testing Library          | Vite 原生集成                      |
-| **E2E 测试**   | Playwright                              | 跨浏览器端到端验证                 |
-| **包管理**     | pnpm                                    | 严格依赖，节省磁盘空间             |
-| **代码质量**   | ESLint + Prettier + Husky + lint-staged | 提交前自动检查和格式化             |
+| 层级           | 技术选择                                | 说明                                    |
+| -------------- | --------------------------------------- | --------------------------------------- |
+| **前端框架**   | React 18 + TypeScript                   | 类型安全，组件化开发                    |
+| **图形渲染**   | WebGL 2.0 (Three.js) + Inline SVG       | 高性能 3D 星空 + 精准 UI 图形           |
+| **状态管理**   | Zustand                                 | 轻量、简洁，无需 Redux boilerplate      |
+| **样式方案**   | Tailwind CSS + CSS Variables            | 快速迭代 + 单一暗色中性主题（金色强调） |
+| **构建工具**   | Vite                                    | 极速 HMR，原生 ESM                      |
+| **数据持久化** | IndexedDB (Dexie)                       | 离线可用，存储星图缓存和航行记录        |
+| **单元测试**   | Vitest + React Testing Library          | Vite 原生集成                           |
+| **E2E 测试**   | Playwright                              | 跨浏览器端到端验证                      |
+| **包管理**     | pnpm                                    | 严格依赖，节省磁盘空间                  |
+| **代码质量**   | ESLint + Prettier + Husky + lint-staged | 提交前自动检查和格式化                  |
 
 ---
 
@@ -139,7 +139,7 @@ Nova/
 │   │
 │   ├── hooks/                   # 自定义 React Hooks
 │   ├── store/                   # Zustand 状态管理
-│   ├── styles/                  # 全局样式、主题变量
+│   ├── styles/                  # 全局样式、中性主题 Token
 │   ├── types/                   # TypeScript 类型定义
 │   ├── utils/                   # 工具函数
 │   ├── pages/                   # 路由页面

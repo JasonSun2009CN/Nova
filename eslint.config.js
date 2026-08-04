@@ -22,6 +22,7 @@ export default tseslint.config(
       '**/playwright-report/**',
       '**/test-results/**',
       '**/.husky/**',
+      'scripts/**',
       '*.config.{js,ts,cjs,mjs}',
     ],
   },
@@ -138,6 +139,29 @@ export default tseslint.config(
               message:
                 '引擎层通用逻辑禁止直接依赖 three。图形相关类放入 src/engine/renderer，通过 src/engine/contract 类型与其他模块解耦。',
             },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/engine/renderer/**/*.{ts,tsx}'],
+    rules: {
+      'react/no-unknown-property': [
+        'error',
+        {
+          ignore: [
+            'attach',
+            'args',
+            'vertexShader',
+            'fragmentShader',
+            'uniforms',
+            'transparent',
+            'depthWrite',
+            'position',
+            'color',
+            'opacity',
+            'side',
           ],
         },
       ],

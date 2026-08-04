@@ -128,10 +128,10 @@ describe('SettingsRepository (KV 偏好设置 · fake-indexeddb)', () => {
       const repo = new SettingsRepository(db);
       expect(await repo.getOrDefault('theme')).toBe(DEFAULT_SETTINGS.theme);
       expect(await repo.get('theme')).toBeUndefined();
-      const row = await repo.set('theme', 'cyberpunk');
+      const row = await repo.set('theme', 'neutral');
       expect(row.key).toBe('theme');
-      expect(row.value).toBe('cyberpunk');
-      expect(await repo.get('theme')).toBe('cyberpunk');
+      expect(row.value).toBe('neutral');
+      expect(await repo.get('theme')).toBe('neutral');
       await repo.bulkApply({ defaultFocusMinutes: 45, defaultVOverC: 0.999 });
       const all = await repo.getAll();
       expect(all).toHaveLength(3);
@@ -149,7 +149,7 @@ describe('SettingsRepository (KV 偏好设置 · fake-indexeddb)', () => {
   it('remove 存在/不存在分支 + resetToDefaults 后 8 键齐全', async () => {
     await NovaDatabase.temp('nova-set-test2', async (db) => {
       const repo = new SettingsRepository(db);
-      await repo.set('theme', 'retro');
+      await repo.set('theme', 'neutral');
       await repo.set('soundVolume', 0.9);
       expect(await repo.remove('theme')).toBe(true);
       expect(await repo.remove('theme')).toBe(false);

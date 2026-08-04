@@ -1,7 +1,7 @@
 import type { VoyageSnapshot, VoyageStatus } from '@/engine/contract/voyage-types';
 import type { Cartesian3, CatalogTier, Star } from '@/engine/contract/catalog-types';
 
-export type ThemeKey = 'deep-space' | 'cyberpunk' | 'retro' | 'minimal-light';
+export type ThemeKey = 'neutral';
 
 export type VoyageRecord = Readonly<{
   id: string;
@@ -31,7 +31,8 @@ export type SettingsKey =
   | 'musicVolume'
   | 'enableReducedMotion'
   | 'lastViewedStarId'
-  | 'acceptedTermsVersion';
+  | 'acceptedTermsVersion'
+  | 'currentStarId';
 
 export type SettingsValueMap = {
   theme: ThemeKey;
@@ -42,6 +43,7 @@ export type SettingsValueMap = {
   enableReducedMotion: boolean;
   lastViewedStarId: string | null;
   acceptedTermsVersion: string | null;
+  currentStarId: string | null;
 };
 
 export type SettingsEntry<K extends SettingsKey = SettingsKey> = Readonly<{
@@ -53,4 +55,19 @@ export type SettingsEntry<K extends SettingsKey = SettingsKey> = Readonly<{
 export type EnginePreferencesSerialized = Readonly<{
   defaultTier: CatalogTier | null;
   highlightSpectral: readonly Star['spectral']['type'][];
+}>;
+
+export type StarChunkRecord = Readonly<{
+  id: string;
+  sourceVersion: string;
+  stars: readonly Star[];
+  loadedAt: number;
+}>;
+
+export type StarCatalogMetaRecord = Readonly<{
+  id: 'main';
+  sourceVersion: string;
+  chunks: readonly string[];
+  totalStars: number;
+  fetchedAt: number;
 }>;

@@ -1,11 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-import { DESTINATION_STARS } from '@/data/destination-stars';
-import { LIGHT_SPEED, lorentzFactor } from '@/engine';
+import {
+  DESTINATION_STARS,
+  destinationOptionsFromStars,
+  findDestinationOption,
+} from '@/data/destination-stars';
+import { LIGHT_SPEED, lorentzFactor, requiredFocusMinutes } from '@/engine';
+import { useCatalogStore } from '@/store/useCatalogStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
-import { formatGamma, formatLy, formatMinuteLabel, formatVOverC } from '@/utils/format';
+import {
+  formatFocusEstimate,
+  formatGamma,
+  formatLy,
+  formatMinuteLabel,
+  formatVOverC,
+} from '@/utils/format';
 
 const PRESETS = [5, 15, 25, 45] as const;
 
@@ -16,7 +27,9 @@ export function SetupPanel() {
 
   const [minutes, setMinutes] = useState<number>(defaultMinutes);
   const [vOverC, setVOverC] = useState<number>(defaultVOverC);
-  const [destStarId, setDestStarId] = useState<string | null>(null);
+  const destStarId = useVoyageStore((s) => s.destStarId);
+  const catalogStars = useCatalogStore((s) => s.stars);
+  const catalogStatus = useCatalogStore((s) => s.status);
   const touchedRef = useRef(false);
 
   useEffect(() => {
@@ -27,6 +40,17 @@ export function SetupPanel() {
 
   const valid = Number.isFinite(minutes) && minutes > 0;
   const gamma = lorentzFactor(vOverC * LIGHT_SPEED);
+  const destinationOptions = useMemo(
+    () =>
+      catalogStatus === 'ready' && catalogStars.length > 0
+        ? destinationOptionsFromStars(catalogStars)
+        : [...DESTINATION_STARS],
+    [catalogStars, catalogStatus],
+  );
+  const destStar = useMemo(
+    () => findDestinationOption(destStarId, catalogStars),
+    [destStarId, catalogStars],
+  );
 
   const handleCustomChange = (raw: string) => {
     touchedRef.current = true;
@@ -42,9 +66,7 @@ export function SetupPanel() {
   };
 
   const handleDestChange = (value: string) => {
-    const next = value === '' ? null : value;
-    setDestStarId(next);
-    useVoyageStore.getState().selectDestination(next);
+    useVoyageStore.getState().selectDestination(value === '' ? null : value);
   };
 
   const handleStart = () => {
@@ -61,19 +83,23 @@ export function SetupPanel() {
   return (
     <section
       data-testid="setup-panel"
-      className="mx-auto flex w-full max-w-md flex-1 flex-col gap-7 px-5 pb-10 pt-4"
+      className="mx-auto flex w-full max-w-md animate-fade-up flex-1 flex-col gap-6 px-6 pb-12 pt-10"
     >
-      <div className="space-y-3">
-        <h2 className="flex items-center gap-2 text-lg font-medium">
-          <span className="text-star-gold">✦</span>
-          <span>规划一次星际航行</span>
-        </h2>
+      <div>
+        <h2 className="font-display text-xl font-medium tracking-wide">规划一次星际航行</h2>
+        <p className="mt-1.5 text-sm text-deep-400">
+          {destStar != null
+            ? `太阳系 → ${destStar.name} · ${formatLy(destStar.distanceLy)}`
+            : '设定专注时长，飞船将从太阳系出发'}
+        </p>
+      </div>
 
+      <div className="glass-card space-y-8 rounded-2xl p-8">
         <div>
-          <label id="focus-minutes-label" className="mb-2 block text-sm text-deep-300">
+          <label id="focus-minutes-label" className="mb-3 block text-sm text-deep-300">
             专注时长
           </label>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-1.5">
             {PRESETS.map((p) => (
               <button
                 key={p}
@@ -82,17 +108,17 @@ export function SetupPanel() {
                 aria-label={`${p} 分钟`}
                 onClick={() => handlePreset(p)}
                 className={twMerge(
-                  'flex h-12 cursor-pointer items-center justify-center rounded-md border text-base font-medium transition-colors duration-200',
+                  'h-12 cursor-pointer rounded-xl border font-display text-base transition-colors duration-200',
                   minutes === p
-                    ? 'border-star-gold bg-star-gold/10 text-star-gold shadow-glow-sm'
-                    : 'border-border text-deep-200 hover:border-border-strong hover:bg-surface-muted',
+                    ? 'border-star-gold/50 text-star-gold'
+                    : 'border-transparent text-deep-400 hover:text-foreground',
                 )}
               >
                 {p}
               </button>
             ))}
           </div>
-          <div className="mt-3 flex items-center gap-3">
+          <div className="mt-4 flex items-center gap-3">
             <input
               type="number"
               inputMode="numeric"
@@ -101,35 +127,40 @@ export function SetupPanel() {
               value={minutes}
               aria-label="自定义专注时长（分钟）"
               onChange={(e) => handleCustomChange(e.target.value)}
-              className="h-12 w-28 rounded-md border border-border bg-surface-elevated px-3 font-mono text-base text-foreground focus:border-star-blue focus:outline-none"
+              className="h-12 w-28 rounded-xl border border-[var(--color-glass-border)] bg-[var(--color-glass)] px-3 font-mono text-base text-foreground focus:border-star-blue focus:outline-none"
             />
             <span className="text-sm text-deep-400">{formatMinuteLabel(minutes)}</span>
           </div>
         </div>
 
         <div>
-          <label htmlFor="dest-star" className="mb-2 block text-sm text-deep-300">
+          <label htmlFor="dest-star" className="mb-3 block text-sm text-deep-300">
             目的地
           </label>
           <select
             id="dest-star"
             value={destStarId ?? ''}
             onChange={(e) => handleDestChange(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-md border border-border bg-surface-elevated px-3 text-base text-foreground focus:border-star-blue focus:outline-none"
+            className="h-12 w-full cursor-pointer rounded-xl border border-[var(--color-glass-border)] bg-[var(--color-glass)] px-3 text-base text-foreground focus:border-star-blue focus:outline-none"
           >
             <option value="">（无目的地 · 自由漂流）</option>
-            {DESTINATION_STARS.map((s) => (
+            {destinationOptions.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name} · {formatLy(s.distanceLy)}
               </option>
             ))}
           </select>
+          {destStar != null && destStar.distanceLy > 0 && (
+            <p className="mt-1 text-xs text-deep-500">
+              预计专注 {formatFocusEstimate(requiredFocusMinutes(destStar.distanceLy, vOverC))}
+            </p>
+          )}
         </div>
 
         <div>
           <label
             htmlFor="v-slider"
-            className="mb-2 flex items-center justify-between text-sm text-deep-300"
+            className="mb-3 flex items-center justify-between text-sm text-deep-300"
           >
             <span>航行速度</span>
             <span className="font-mono text-deep-200">
@@ -145,9 +176,11 @@ export function SetupPanel() {
             value={vOverC}
             aria-label="航行速度 v/c"
             onChange={(e) => setVOverC(Number(e.target.value))}
-            className="h-12 w-full cursor-pointer accent-star-gold"
+            className="h-12 w-full cursor-pointer accent-[var(--color-star-gold)]"
           />
-          <p className="text-xs text-deep-500">速度越接近光速，时间膨胀越明显，航行距离越远。</p>
+          <p className="mt-1 text-xs text-deep-500">
+            速度越接近光速，时间膨胀越明显，航行距离越远。
+          </p>
         </div>
       </div>
 
@@ -156,10 +189,10 @@ export function SetupPanel() {
         onClick={handleStart}
         disabled={!valid}
         className={twMerge(
-          'flex h-14 w-full cursor-pointer items-center justify-center rounded-lg border text-lg font-semibold tracking-widest transition-colors duration-200',
+          'h-14 w-full rounded-xl font-display text-base font-medium tracking-wider transition-colors duration-200',
           valid
-            ? 'border-star-gold bg-star-gold/15 text-star-gold shadow-glow hover:bg-star-gold/25'
-            : 'cursor-not-allowed border-border text-deep-500',
+            ? 'bg-star-gold text-[#0a1032] hover:opacity-85'
+            : 'cursor-not-allowed border border-[var(--color-glass-border)] text-deep-500',
         )}
       >
         启动航行
