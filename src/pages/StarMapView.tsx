@@ -199,6 +199,7 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
             enableZoom
             enableDamping
             enablePan={false}
+            rotateSpeed={-1}
             autoRotate={false}
             autoRotateSpeed={0.4}
             minDistance={0.3}
