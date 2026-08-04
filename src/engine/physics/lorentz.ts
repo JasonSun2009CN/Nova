@@ -52,6 +52,19 @@ export function travelDistance(input: TravelDistanceInput): number {
   return meters / METERS_PER_LIGHT_YEAR;
 }
 
+export function requiredFocusMinutes(distanceLy: number, vOverC: number): number {
+  if (!(distanceLy > 0)) {
+    throw new RangeError('requiredFocusMinutes: distanceLy 必须为正数。');
+  }
+  if (!(vOverC > 0 && vOverC < 1)) {
+    throw new RangeError('requiredFocusMinutes: vOverC 必须在 (0, 1) 区间内。');
+  }
+  const v = LIGHT_SPEED * vOverC;
+  const gamma = lorentzFactor(v);
+  const meters = distanceLy * METERS_PER_LIGHT_YEAR;
+  return meters / (v * gamma * 60);
+}
+
 export const __internal = {
   SECONDS_PER_YEAR,
   METERS_PER_LIGHT_YEAR,

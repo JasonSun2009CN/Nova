@@ -1,5 +1,10 @@
 export type * from './physics/lorentz';
-export { LIGHT_SPEED, lorentzFactor, travelDistance } from './physics/lorentz';
+export {
+  LIGHT_SPEED,
+  lorentzFactor,
+  requiredFocusMinutes,
+  travelDistance,
+} from './physics/lorentz';
 
 export type * from './contract/voyage-types';
 export { VoyageController, IllegalStateError } from './navigation/VoyageController';

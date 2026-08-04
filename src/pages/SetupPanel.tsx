@@ -1,11 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-import { DESTINATION_STARS } from '@/data/destination-stars';
-import { LIGHT_SPEED, lorentzFactor } from '@/engine';
+import {
+  DESTINATION_STARS,
+  destinationOptionsFromStars,
+  findDestinationOption,
+} from '@/data/destination-stars';
+import { LIGHT_SPEED, lorentzFactor, requiredFocusMinutes } from '@/engine';
+import { useCatalogStore } from '@/store/useCatalogStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
-import { formatGamma, formatLy, formatMinuteLabel, formatVOverC } from '@/utils/format';
+import {
+  formatFocusEstimate,
+  formatGamma,
+  formatLy,
+  formatMinuteLabel,
+  formatVOverC,
+} from '@/utils/format';
 
 const PRESETS = [5, 15, 25, 45] as const;
 
@@ -17,6 +28,8 @@ export function SetupPanel() {
   const [minutes, setMinutes] = useState<number>(defaultMinutes);
   const [vOverC, setVOverC] = useState<number>(defaultVOverC);
   const destStarId = useVoyageStore((s) => s.destStarId);
+  const catalogStars = useCatalogStore((s) => s.stars);
+  const catalogStatus = useCatalogStore((s) => s.status);
   const touchedRef = useRef(false);
 
   useEffect(() => {
@@ -27,7 +40,17 @@ export function SetupPanel() {
 
   const valid = Number.isFinite(minutes) && minutes > 0;
   const gamma = lorentzFactor(vOverC * LIGHT_SPEED);
-  const destStar = DESTINATION_STARS.find((s) => s.id === destStarId) ?? null;
+  const destinationOptions = useMemo(
+    () =>
+      catalogStatus === 'ready' && catalogStars.length > 0
+        ? destinationOptionsFromStars(catalogStars)
+        : [...DESTINATION_STARS],
+    [catalogStars, catalogStatus],
+  );
+  const destStar = useMemo(
+    () => findDestinationOption(destStarId, catalogStars),
+    [destStarId, catalogStars],
+  );
 
   const handleCustomChange = (raw: string) => {
     touchedRef.current = true;
@@ -121,12 +144,17 @@ export function SetupPanel() {
             className="h-12 w-full cursor-pointer rounded-xl border border-[var(--color-glass-border)] bg-[var(--color-glass)] px-3 text-base text-foreground focus:border-star-blue focus:outline-none"
           >
             <option value="">（无目的地 · 自由漂流）</option>
-            {DESTINATION_STARS.map((s) => (
+            {destinationOptions.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name} · {formatLy(s.distanceLy)}
               </option>
             ))}
           </select>
+          {destStar != null && destStar.distanceLy > 0 && (
+            <p className="mt-1 text-xs text-deep-500">
+              预计专注 {formatFocusEstimate(requiredFocusMinutes(destStar.distanceLy, vOverC))}
+            </p>
+          )}
         </div>
 
         <div>

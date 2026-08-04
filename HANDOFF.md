@@ -6,14 +6,15 @@
 
 ---
 
-## ⚠️ 当前进度（2026-08-03 交接）
+## ⚠️ 当前进度（2026-08-04 交接）
 
 - **Phase 1 MVP（S11~S15）已全部完成**：Zustand 状态层 / React UI / Web Worker 计时 + 崩溃恢复 / CI + e2e / PWA 离线。
 - **Phase 2 已交付（S16+S17）**：R3F 3D 星空渲染器 + **星图弹窗交互**（点星 → 确认设目的地 + 当前位置标记）。
 - **星图双视角增量**：出发地第一人称视角（默认，站在当前位置星环视星空，圆环标记目的地）/ 上帝全览视角（太阳居中 + 以太阳为中心的半径圈 10/25/50 光年）；左缘按钮切换。当前位置（出发地）持久化于 settings `currentStarId`，航行完成后出发地 = 上次目的地。
 - **用户驱动变更**：UI 极简克制化重设计、星际航行术语弹窗、**单一暗色 Neutral 主题（删除原 4 套主题，见 ADR-0009）**。
+- **S18 导航增量**（分支 `feature/S18-navigation-duration`，**未 commit 等用户确认**）：设置页目的地改用**真实星表唯一数据源**——目录就绪时下拉列出全部 ~60 颗命名星（按距离排序）、未加载回退 17 颗 `DESTINATION_STARS`，修复「星图选中非 `DESTINATION_STARS` 的星后，设置页显示无目的地」的 bug；新增 `requiredFocusMinutes`（`travelDistance` 逆运算，引擎层）与 `formatFocusEstimate`（分钟→小时→天→年），点星确认卡与设置页显示预计专注时长。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
-- **当前分支**：`feature/S16-starmap-renderer`；S16+S17 + 星图双视角改动已本地验证（`pnpm check` 4/4、e2e 全绿、166 单测），**未 commit（等用户确认）**。
+- **当前分支**：S16+S17 + 双视角已 commit 在 `feature/S16-starmap-renderer`（HEAD bbd849e）；S18 增量位于 worktree 分支 `feature/S18-navigation-duration`（`pnpm check` 4/4、194 单测、e2e 18 过 + starmap 6 跳过）。
 
 ---
 
@@ -54,7 +55,7 @@ src/
 │   └── worker-types.ts        ✅ VoyageTimerWorkerRequest/Response（S13）
 ├── engine/                    ✅ 引擎层（纯 TS，0 React / 0 Three / 0 Dexie，renderer 例外）
 │   ├── contract/              ✅ voyage-types.ts + catalog-types.ts（Star/SpectralType/CatalogTier）
-│   ├── physics/lorentz.ts     ✅ S7 γ = 1/√(1-β²) 泰勒分段，11 tests
+│   ├── physics/lorentz.ts     ✅ S7 γ = 1/√(1-β²) 泰勒分段；S18 requiredFocusMinutes 逆运算，16 tests
 │   ├── navigation/VoyageController.ts ✅ S8 状态机 + snapshot↔恢复 + S13 tick(wallTime?)/setExternalTicker，22 tests
 │   ├── data/                  ✅ S9
 │   │   ├── KdTree3.ts         ✅ 手写 3D KD-Tree，5 tests
@@ -80,7 +81,7 @@ src/
 │   ├── store-deps.ts          ✅ getStoreDeps/setStoreDepsForTest
 │   └── __tests__/             ✅ 含 useVoyageStoreTimer（worker 模式集成）
 ├── workers/                   ✅ S13 voyage-timer.worker.ts（后台每 250ms 广播 tick）
-├── data/                      ✅ destination-stars.ts（星图目的地下拉的真星数据）
+├── data/                      ✅ destination-stars.ts（星图目的地下拉的真星数据；S18 新增目录驱动解析 destinationOptionsFromStars / findDestinationOption / starDistanceLy）
 ├── components/                ✅ React 组件
 │   ├── SetupPanel 相关的…      （见 pages）
 │   ├── VoyageStarFlow.tsx     ✅ Canvas 2D 星流（航行视图背景）
@@ -90,7 +91,7 @@ src/
 │   └── StarMap/
 │       └── StarInfoCard.tsx   ✅ 点星确认卡（详情 + 设为目的地/取消/完成）
 ├── pages/
-│   ├── SetupPanel.tsx         ✅ 设置面板（时长/目的地/速度 + 启动）
+│   ├── SetupPanel.tsx         ✅ 设置面板（时长/目的地/速度 + 启动；S18 目的地来源真实星表 + 预计专注显示）
 │   ├── VoyageView.tsx         ✅ 航行视图（倒计时/指标/进度/暂停结束）
 │   ├── ResultView.tsx         ✅ 结果视图
 │   ├── StarMapDialog.tsx      ✅ S17 星图弹窗外壳（顶栏 + 当前位置图例 + Esc 关闭）
@@ -98,7 +99,7 @@ src/
 ├── test/                      ✅ setup.ts（fake-indexeddb + canvas stub + matchMedia stub）+ dev-hooks.ts（__TEST_ONLY__.fastForward / getStarScreenPosition / setAutoRotate）+ star-map-hooks.ts
 ├── styles/index.css           ✅ 单一 Neutral 主题 tokens（暗色灰阶 + 金色强调）+ Space Grotesk @font-face
 ├── main.tsx / App.tsx         ✅ App：idle 主视图（设置/日志）+ 星图弹窗 + 术语弹窗 + data-theme=neutral
-├── utils/format.ts            ✅ formatDurationMs/formatLy/formatGamma/... + 17 tests
+├── utils/format.ts            ✅ formatDurationMs/formatLy/formatGamma/formatFocusEstimate/... + 32 tests
 └── vite-env.d.ts              ✅ Window.__TEST_ONLY__ 增强（declare global interface Window）
 ```
 
@@ -106,7 +107,7 @@ src/
 
 ---
 
-## 二、怎么继续开发（当前阶段：Phase 2 星图导航，S16+S17 已完成）
+## 二、怎么继续开发（当前阶段：Phase 2 星图导航，S16~S18 已完成）
 
 ### 2.1 标准开发循环
 
@@ -137,8 +138,9 @@ pnpm test:e2e
 | S17    | 星图弹窗 + 点星确认设目的地 + 当前位置标记（+ 拾取/分层） | ✅                       |
 | 增量   | UI 极简克制化重设计 + 术语弹窗 + 单一暗色 Neutral 主题    | ✅                       |
 | 增量2  | 星图双视角（出发地/全览）+ 半径圈 + 出发地随航行更新      | ✅                       |
+| S18    | 目的地数据源统一（真实星表）+ 反推预计专注时长            | ✅ 未 commit             |
 
-**验证基线**：`pnpm check` 4/4（**166 单测**，23 test files）；e2e 3 浏览器全过（starmap 仅 chromium）；`pnpm build` 主包 ~64KB（three 967KB 懒加载进星图弹窗 chunk）。
+**验证基线**：`pnpm check` 4/4（**194 单测**，25 test files）；e2e 3 浏览器 **18 过 + 6 跳过**（starmap WebGL 仅 chromium）；`pnpm build` 主包 ~64KB（three 967KB 懒加载进星图弹窗 chunk）。
 
 ### 2.3 下一步（Phase 2 星图导航，按 ROADMAP）
 
@@ -149,7 +151,7 @@ Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注�
 | 1    | ~~星图交互：点星信息卡 + 设为目的地 + 当前位置标记~~（**已交付 S17**）            | 弹窗内拾取 + 确认卡；`__TEST_ONLY__.getStarScreenPosition` 驱动 e2e                   |
 | 2    | ~~星表数据集成：内嵌 50ly 内完整星表替代 500 fixture~~（**已交付，见 ADR-0010**） | 数据分块 JSON + IndexedDB 缓存；真实 HIP，`DESTINATION_STARS` 已改真星表              |
 | 3    | ~~星图双视角 + 半径圈 + 出发地随航行更新~~（**已交付增量2**）                     | `StarMapCameraRig` / `RadiusGuides`；settings `currentStarId`；`getViewMode` 驱动 e2e |
-| 4    | **导航系统**：选目的地 → 反推所需专注时长 / 推荐目的地                            | 复用 `travelDistance` + γ；确认卡里可显示预计专注时长                                 |
+| 4    | ~~选目的地 → 反推所需专注时长~~（**已交付 S18**）+ **推荐目的地**                 | `requiredFocusMinutes` 逆运算 + 确认卡/设置页预计专注显示；「推荐目的地」待做         |
 | 5    | 搜索、定位当前、多级跃迁                                                          | 远期                                                                                  |
 
 **远期**：S20 γ 视觉（Doppler 红移蓝移 uniform）；S29 Gaia 百万星（tier3 单独 KDTree + GPU BufferGeometry）。

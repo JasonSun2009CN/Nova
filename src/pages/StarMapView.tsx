@@ -3,7 +3,7 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState, type ElementRef, type RefObject } from 'react';
 
 import { StarInfoCard } from '@/components/StarMap/StarInfoCard';
-import { starDisplayName } from '@/data/destination-stars';
+import { starDisplayName, starDistanceLy } from '@/data/destination-stars';
 import { StarCatalog, type Star } from '@/engine';
 import { FollowStarBridge } from '@/engine/renderer/FollowStarBridge';
 import { CurrentPositionMarker, DestinationMarker } from '@/engine/renderer/MapMarkers';
@@ -24,11 +24,6 @@ const NAV_SCALE = 45 / NAV_MAX_DISTANCE_LY;
 const SUN_RENDER_MAGNITUDE = 1.5;
 const SUN_SIZE_SCALE = 2.4;
 const RADIUS_GUIDES_LY = [10, 25, 50];
-
-function starDistanceLy(star: Star): number {
-  const c = star.coords.cartesian;
-  return Math.hypot(c.xLy, c.yLy, c.zLy);
-}
 
 function StarMapHookBridge({
   stars,

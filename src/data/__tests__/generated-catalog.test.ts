@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import type { Star } from '@/engine';
-import { DESTINATION_STARS } from '@/data/destination-stars';
+import { destinationOptionsFromStars, DESTINATION_STARS } from '@/data/destination-stars';
 
 const STARS_DIR = resolve(process.cwd(), 'public/data/stars');
 
@@ -104,6 +104,13 @@ describe('生成星表数据完整性 (public/data/stars)', () => {
     const ids = new Set(loadAllStars().map((s) => s.id));
     for (const d of DESTINATION_STARS) {
       expect(ids.has(d.id), `目的地 ${d.id} 不在目录中`).toBe(true);
+    }
+  });
+
+  it('destinationOptionsFromStars 收录全部 DESTINATION_STARS（目录即目的地唯一数据源）', () => {
+    const optionIds = new Set(destinationOptionsFromStars(loadAllStars()).map((o) => o.id));
+    for (const d of DESTINATION_STARS) {
+      expect(optionIds.has(d.id), `目的地 ${d.id} 应被目录收录`).toBe(true);
     }
   });
 });

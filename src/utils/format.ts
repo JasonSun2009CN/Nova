@@ -48,6 +48,24 @@ export function formatMinuteLabel(totalMinutes: number): string {
   return `${minutes}分钟`;
 }
 
+const MINUTES_PER_DAY = 60 * 24;
+const MINUTES_PER_YEAR = 60 * 24 * 365;
+
+export function formatFocusEstimate(totalMinutes: number): string {
+  if (!Number.isFinite(totalMinutes) || totalMinutes <= 0) return '—';
+  if (totalMinutes < 1) return '不足 1 分钟';
+  if (totalMinutes < 60) return `${Math.round(totalMinutes)} 分钟`;
+  if (totalMinutes < MINUTES_PER_DAY) {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.round(totalMinutes % 60);
+    return minutes > 0 ? `${hours} 小时 ${minutes} 分` : `${hours} 小时`;
+  }
+  if (totalMinutes < MINUTES_PER_YEAR) {
+    return `${Math.round(totalMinutes / MINUTES_PER_DAY)} 天`;
+  }
+  return `约 ${(totalMinutes / MINUTES_PER_YEAR).toFixed(1)} 年`;
+}
+
 export function formatSpectral(spectral: SpectralClass): string {
   const subclass = spectral.subclass != null ? String(spectral.subclass) : '';
   const luminosity = spectral.luminosityClass ?? '';

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatDateTime,
   formatDurationMs,
+  formatFocusEstimate,
   formatGamma,
   formatKelvin,
   formatLy,
@@ -91,6 +92,45 @@ describe('formatMinuteLabel', () => {
 
   it('120 → 2小时', () => {
     expect(formatMinuteLabel(120)).toBe('2小时');
+  });
+});
+
+describe('formatFocusEstimate', () => {
+  it('0.5 分钟 → 不足 1 分钟', () => {
+    expect(formatFocusEstimate(0.5)).toBe('不足 1 分钟');
+  });
+
+  it('25 → 25 分钟', () => {
+    expect(formatFocusEstimate(25)).toBe('25 分钟');
+  });
+
+  it('90 → 1 小时 30 分', () => {
+    expect(formatFocusEstimate(90)).toBe('1 小时 30 分');
+  });
+
+  it('120 → 2 小时', () => {
+    expect(formatFocusEstimate(120)).toBe('2 小时');
+  });
+
+  it('1440 → 1 天', () => {
+    expect(formatFocusEstimate(1440)).toBe('1 天');
+  });
+
+  it('318_000 → 221 天（比邻星 @0.99c）', () => {
+    expect(formatFocusEstimate(318_000)).toBe('221 天');
+  });
+
+  it('525_600 → 约 1.0 年', () => {
+    expect(formatFocusEstimate(525_600)).toBe('约 1.0 年');
+  });
+
+  it('1_877_000 → 约 3.6 年（织女星 @0.99c）', () => {
+    expect(formatFocusEstimate(1_877_000)).toBe('约 3.6 年');
+  });
+
+  it('非法值 → —', () => {
+    expect(formatFocusEstimate(Number.NaN)).toBe('—');
+    expect(formatFocusEstimate(-5)).toBe('—');
   });
 });
 

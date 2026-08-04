@@ -37,6 +37,32 @@ export function getDestinationName(id: string | null): string | null {
   return id;
 }
 
+export function starDistanceLy(star: Star): number {
+  const c = star.coords.cartesian;
+  return Math.hypot(c.xLy, c.yLy, c.zLy);
+}
+
+export function destinationOptionsFromStars(stars: readonly Star[]): DestinationStar[] {
+  return stars
+    .filter((s) => s.properName != null)
+    .map((s) => ({ id: s.id, name: starDisplayName(s), distanceLy: starDistanceLy(s) }))
+    .sort((a, b) => a.distanceLy - b.distanceLy);
+}
+
+export function findDestinationOption(
+  starId: string | null,
+  catalogStars: readonly Star[],
+): DestinationStar | null {
+  if (starId == null) return null;
+  if (catalogStars.length > 0) {
+    const hit = catalogStars.find((s) => s.id === starId);
+    if (hit != null) {
+      return { id: hit.id, name: starDisplayName(hit), distanceLy: starDistanceLy(hit) };
+    }
+  }
+  return DESTINATION_STARS.find((s) => s.id === starId) ?? null;
+}
+
 export function starDisplayName(star: Star): string {
   if (star.properName != null) return star.properName;
   if (star.hipId != null) return `HIP ${star.hipId}`;
