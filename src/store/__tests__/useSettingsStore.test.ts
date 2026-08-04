@@ -2,6 +2,7 @@ import type { SettingsValueMap } from '@/contract/storage-types';
 import { NovaDatabase } from '@/storage/NovaDatabase';
 import { SettingsRepository, DEFAULT_SETTINGS } from '@/storage/SettingsRepository';
 import { VoyageRepository } from '@/storage/VoyageRepository';
+import { StarCatalogRepository } from '@/storage/StarCatalogRepository';
 import { resetStoreDepsForTest, setStoreDepsForTest, useSettingsStore } from '@/store/index';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -25,13 +26,14 @@ describe('useSettingsStore (Zustand · SettingsRepository 批量 hydration)', ()
     resetStoreDepsForTest();
   });
 
-  it('load 从 Dexie getOrDefault 批量加载 8 键，hydrated=true', async () => {
+  it('load 从 Dexie getOrDefault 批量加载 9 键，hydrated=true', async () => {
     await NovaDatabase.temp('nova-set-store-1', async (db) => {
       const settingsRepo = new SettingsRepository(db);
       await settingsRepo.set('theme', 'neutral');
       await settingsRepo.set('defaultFocusMinutes', 45);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         settingsRepo,
         voyageRepo: new VoyageRepository(db),
       });
@@ -52,6 +54,7 @@ describe('useSettingsStore (Zustand · SettingsRepository 批量 hydration)', ()
       const settingsRepo = new SettingsRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         settingsRepo,
         voyageRepo: new VoyageRepository(db),
       });
@@ -73,6 +76,7 @@ describe('useSettingsStore (Zustand · SettingsRepository 批量 hydration)', ()
       const settingsRepo = new SettingsRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         settingsRepo,
         voyageRepo: new VoyageRepository(db),
       });
@@ -88,11 +92,30 @@ describe('useSettingsStore (Zustand · SettingsRepository 批量 hydration)', ()
     });
   });
 
-  it('resetToDefaults 恢复 8 键默认值', async () => {
+  it('setCurrentStar 更新出发地（当前位置）并持久化', async () => {
+    await NovaDatabase.temp('nova-set-store-4b', async (db) => {
+      const settingsRepo = new SettingsRepository(db);
+      setStoreDepsForTest({
+        db,
+        starCatalogRepo: new StarCatalogRepository(db),
+        settingsRepo,
+        voyageRepo: new VoyageRepository(db),
+      });
+
+      expect(useSettingsStore.getState().settings.currentStarId).toBe('hip-sol');
+      await useSettingsStore.getState().setCurrentStar('hip-91262');
+
+      expect(useSettingsStore.getState().settings.currentStarId).toBe('hip-91262');
+      expect(await settingsRepo.get('currentStarId')).toBe('hip-91262');
+    });
+  });
+
+  it('resetToDefaults 恢复 9 键默认值', async () => {
     await NovaDatabase.temp('nova-set-store-4', async (db) => {
       const settingsRepo = new SettingsRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         settingsRepo,
         voyageRepo: new VoyageRepository(db),
       });
@@ -111,6 +134,7 @@ describe('useSettingsStore (Zustand · SettingsRepository 批量 hydration)', ()
       const settingsRepo = new SettingsRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         settingsRepo,
         voyageRepo: new VoyageRepository(db),
       });
@@ -130,6 +154,7 @@ describe('useSettingsStore (Zustand · SettingsRepository 批量 hydration)', ()
       const settingsRepo = new SettingsRepository(db);
       setStoreDepsForTest({
         db,
+        starCatalogRepo: new StarCatalogRepository(db),
         settingsRepo,
         voyageRepo: new VoyageRepository(db),
       });

@@ -22,6 +22,7 @@ export default tseslint.config(
       '**/playwright-report/**',
       '**/test-results/**',
       '**/.husky/**',
+      'scripts/**',
       '*.config.{js,ts,cjs,mjs}',
     ],
   },

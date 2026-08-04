@@ -1,13 +1,21 @@
 import Dexie, { type Table } from 'dexie';
 
-import type { SettingsEntry, VoyageRecord } from '@/contract/storage-types';
+import type {
+  SettingsEntry,
+  StarCatalogMetaRecord,
+  StarChunkRecord,
+  VoyageRecord,
+} from '@/contract/storage-types';
 
 const DB_NAME = 'nova-db';
 const DB_VERSION_V1 = 1;
+const DB_VERSION_V2 = 2;
 
 export class NovaDatabase extends Dexie {
   voyages!: Table<VoyageRecord, string>;
   settings!: Table<SettingsEntry, SettingsEntry['key']>;
+  starChunks!: Table<StarChunkRecord, string>;
+  starCatalogMeta!: Table<StarCatalogMetaRecord, string>;
 
   constructor(name: string = DB_NAME) {
     super(name, { autoOpen: true, cache: 'immutable' });
@@ -16,8 +24,17 @@ export class NovaDatabase extends Dexie {
         'id, status, startWallTime, endWallTime, createdAt, updatedAt, traveledLy, vOverC, originStarId, destStarId',
       settings: 'key, updatedAt',
     });
+    this.version(DB_VERSION_V2).stores({
+      voyages:
+        'id, status, startWallTime, endWallTime, createdAt, updatedAt, traveledLy, vOverC, originStarId, destStarId',
+      settings: 'key, updatedAt',
+      starChunks: 'id, sourceVersion',
+      starCatalogMeta: 'id',
+    });
     this.voyages = this.table('voyages');
     this.settings = this.table('settings');
+    this.starChunks = this.table('starChunks');
+    this.starCatalogMeta = this.table('starCatalogMeta');
   }
 
   async ensureOpen(): Promise<void> {

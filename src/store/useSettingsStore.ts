@@ -17,6 +17,7 @@ type SettingsStoreActions = {
   setTheme: (theme: SettingsValueMap['theme']) => Promise<void>;
   setDefaultFocusMinutes: (minutes: SettingsValueMap['defaultFocusMinutes']) => Promise<void>;
   setDefaultVOverC: (vOverC: number) => Promise<void>;
+  setCurrentStar: (starId: string) => Promise<void>;
   resetToDefaults: () => Promise<void>;
   removeSetting: (key: SettingsKey) => Promise<void>;
 };
@@ -68,6 +69,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   setDefaultVOverC: async (defaultVOverC) => {
     await get().updateSettings({ defaultVOverC });
+  },
+
+  setCurrentStar: async (starId) => {
+    await get().updateSettings({ currentStarId: starId });
   },
 
   resetToDefaults: async () => {

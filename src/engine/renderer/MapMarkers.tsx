@@ -4,9 +4,11 @@ import type { Star } from '@/engine';
 
 const MARKER_GOLD = '#ffd700';
 
-export function CurrentPositionMarker() {
+type Position3 = [number, number, number];
+
+export function CurrentPositionMarker({ position = [0, 0, 0] }: { position?: Position3 }) {
   return (
-    <group>
+    <group position={position}>
       <mesh position={[0, 0.2, 0]}>
         <cylinderGeometry args={[0.2, 0.02, 0.4, 16]} />
         <meshBasicMaterial color={MARKER_GOLD} />

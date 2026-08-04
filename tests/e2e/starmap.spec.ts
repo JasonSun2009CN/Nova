@@ -15,7 +15,7 @@ test.describe('星图视图 (S16 R3F)', () => {
 
     await page.getByRole('button', { name: '星图' }).click();
     await expect(page.getByTestId('starmap-view')).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText('500 颗恒星')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('star-count')).toContainText(/颗恒星/, { timeout: 20_000 });
 
     await page.waitForTimeout(1200);
     const canvasOk = await page.evaluate(() => {
@@ -40,8 +40,16 @@ test.describe('星图视图 (S16 R3F)', () => {
     await expect(page.getByTestId('starmap-dialog')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('starmap-view')).toBeVisible();
 
+    // 默认是出发地视角，切到全览视角再点星（织女星需在画面内）
+    await page.getByTestId('view-toggle-overview').click();
     await page.waitForFunction(
-      () => window.__TEST_ONLY__?.getStarScreenPosition('hip-102098') != null,
+      () => window.__TEST_ONLY__?.getViewMode() === 'overview',
+      undefined,
+      { timeout: 20_000 },
+    );
+
+    await page.waitForFunction(
+      () => window.__TEST_ONLY__?.getStarScreenPosition('hip-91262') != null,
       undefined,
       { timeout: 20_000 },
     );
@@ -49,9 +57,7 @@ test.describe('星图视图 (S16 R3F)', () => {
     await page.evaluate(() => window.__TEST_ONLY__!.setAutoRotate(false));
     await page.waitForTimeout(100);
 
-    const pos = await page.evaluate(() =>
-      window.__TEST_ONLY__!.getStarScreenPosition('hip-102098'),
-    );
+    const pos = await page.evaluate(() => window.__TEST_ONLY__!.getStarScreenPosition('hip-91262'));
     expect(pos).not.toBeNull();
 
     await page.mouse.click(pos!.clientX, pos!.clientY);
@@ -70,6 +76,66 @@ test.describe('星图视图 (S16 R3F)', () => {
     await page.getByRole('button', { name: '完成' }).click();
     await expect(page.getByTestId('starmap-dialog')).not.toBeVisible();
     await expect(page.getByTestId('setup-panel')).toBeVisible();
-    await expect(page.getByLabel('目的地')).toHaveValue('hip-102098');
+    await expect(page.getByLabel('目的地')).toHaveValue('hip-91262');
+  });
+
+  test('双视角切换：出发地视角 ↔ 全览视角（相机定位 + 半径圈 + 无报错）', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (m) => {
+      if (m.type() === 'error') errors.push(m.text());
+    });
+    page.on('pageerror', (error: Error) => errors.push(error.message));
+
+    await page.goto('/');
+    await page.getByRole('button', { name: '星图' }).click();
+    await expect(page.getByTestId('starmap-view')).toBeVisible({ timeout: 20_000 });
+    await page.waitForFunction(() => window.__TEST_ONLY__?.getViewMode() != null, undefined, {
+      timeout: 20_000,
+    });
+
+    // 默认出发地视角：相机站在太阳近旁，无半径圈，显示「所在星：太阳」
+    expect(await page.evaluate(() => window.__TEST_ONLY__!.getViewMode())).toBe('from-departure');
+    await page.waitForFunction(() => {
+      const p = window.__TEST_ONLY__?.getCameraPosition();
+      return p != null && Math.hypot(p.x, p.y - 0.5, p.z - 1.1) < 0.5;
+    });
+    await expect(page.getByTestId('view-toggle-from-departure')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect(page.getByText(/所在星：太阳/)).toBeVisible();
+    await expect(page.getByText(/半径圈/)).not.toBeVisible();
+
+    // 切到全览视角：相机拉远到太阳系上方，太阳居中，显示半径圈
+    await page.getByTestId('view-toggle-overview').click();
+    await page.waitForFunction(
+      () => window.__TEST_ONLY__?.getViewMode() === 'overview',
+      undefined,
+      { timeout: 20_000 },
+    );
+    await page.evaluate(() => window.__TEST_ONLY__!.setAutoRotate(false));
+    await page.waitForFunction(() => {
+      const p = window.__TEST_ONLY__?.getCameraPosition();
+      return p != null && Math.hypot(p.x, p.y - 20, p.z - 80) < 1.5;
+    });
+    await expect(page.getByTestId('view-toggle-overview')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByText(/当前位置：太阳/)).toBeVisible();
+    await expect(page.getByText(/半径圈 10 \/ 25 \/ 50 光年/)).toBeVisible();
+
+    // 切回出发地视角
+    await page.getByTestId('view-toggle-from-departure').click();
+    await page.waitForFunction(
+      () => window.__TEST_ONLY__?.getViewMode() === 'from-departure',
+      undefined,
+      { timeout: 20_000 },
+    );
+    await page.waitForFunction(() => {
+      const p = window.__TEST_ONLY__?.getCameraPosition();
+      return p != null && Math.hypot(p.x, p.y - 0.5, p.z - 1.1) < 0.5;
+    });
+    await expect(page.getByText(/所在星：太阳/)).toBeVisible();
+    await expect(page.getByText(/半径圈/)).not.toBeVisible();
+
+    expect(errors).toHaveLength(0);
   });
 });

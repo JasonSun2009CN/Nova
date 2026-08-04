@@ -53,6 +53,7 @@ ADR (Architecture Decision Record) 是一种轻量级文档，用于记录重要
 | [ADR-0007](0007-styling-solution.md)                   | 样式方案：Tailwind CSS + CSS Variables | Accepted | 2026-07-29 |
 | [ADR-0008](0008-build-tool.md)                         | 构建工具：Vite + pnpm                  | Accepted | 2026-07-29 |
 | [ADR-0009](0009-single-neutral-theme-starmap-modal.md) | 单一 Neutral 主题 + 星图弹窗           | Accepted | 2026-08-03 |
+| [ADR-0010](0010-real-star-catalog.md)                  | 真实星表数据集成（HYG + 分块缓存）     | Accepted | 2026-08-04 |
 
 ---
 

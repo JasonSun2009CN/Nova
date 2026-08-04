@@ -12,6 +12,7 @@ import { VoyageController } from '@/engine/navigation/VoyageController';
 import { clearLiveVoyage, loadLiveVoyage, saveLiveVoyage } from '@/storage/live-voyage-storage';
 import { getStoreDeps } from '@/store/store-deps';
 import { useHistoryStore } from '@/store/useHistoryStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 type VoyageStoreState = {
   progress: VoyageProgress | null;
@@ -106,6 +107,10 @@ function attachControllerListeners(
   controller.on('complete', (progress) => {
     stopWorker();
     clearLiveVoyage();
+    const { destStarId } = useVoyageStore.getState();
+    if (destStarId != null) {
+      void useSettingsStore.getState().setCurrentStar(destStarId);
+    }
     set({
       progress,
       snapshot: controller.snapshot(),

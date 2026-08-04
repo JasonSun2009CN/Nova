@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: Readonly<SettingsValueMap> = {
   enableReducedMotion: false,
   lastViewedStarId: null,
   acceptedTermsVersion: null,
+  currentStarId: 'hip-sol',
 };
 
 export class SettingsRepository {

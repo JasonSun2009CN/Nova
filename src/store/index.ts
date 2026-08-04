@@ -6,3 +6,5 @@ export { resetVoyageControllerForTest, useVoyageStore } from '@/store/useVoyageS
 export type { VoyageStore } from '@/store/useVoyageStore';
 export { useSettingsStore } from '@/store/useSettingsStore';
 export type { SettingsStore } from '@/store/useSettingsStore';
+export { useCatalogStore } from '@/store/useCatalogStore';
+export type { CatalogStore, CatalogStatus } from '@/store/useCatalogStore';

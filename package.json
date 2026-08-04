@@ -26,6 +26,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:trace": "playwright test --trace on",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm format:check",
+    "build:stars": "node --experimental-strip-types scripts/build-star-catalog.ts",
     "prepare": "husky",
     "tauri": "tauri"
   },

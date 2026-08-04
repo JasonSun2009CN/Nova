@@ -2,6 +2,7 @@ import type { Camera } from 'three';
 
 import type { Star } from '@/engine';
 import { projectToScreen } from '@/engine/renderer/pick-star';
+import type { StarMapViewMode, WorldPosition } from '@/engine/renderer/StarMapCameraRig';
 
 export type StarMapHookState = {
   camera: Camera;
@@ -10,6 +11,8 @@ export type StarMapHookState = {
   height: number;
   stars: readonly Star[];
   scale: number;
+  mode: StarMapViewMode;
+  getCameraPosition: () => WorldPosition;
   setAutoRotate: (enabled: boolean) => void;
 };
 
@@ -43,4 +46,14 @@ export function getStarScreenPosition(starId: string): { clientX: number; client
 export function setStarMapAutoRotate(enabled: boolean): void {
   if (getState == null) return;
   getState().setAutoRotate(enabled);
+}
+
+export function getStarMapViewMode(): StarMapViewMode | null {
+  if (getState == null) return null;
+  return getState().mode;
+}
+
+export function getStarMapCameraPosition(): WorldPosition | null {
+  if (getState == null) return null;
+  return getState().getCameraPosition();
 }
