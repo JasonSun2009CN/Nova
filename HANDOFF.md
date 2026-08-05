@@ -16,7 +16,7 @@
 - **S19 时长滑杆 + 反推航线（已 commit `945ec2e`，分支 `feature/S19-duration-scrubber`，未合并）**：`DurationScrubber`（1~240 分钟刻度滑杆）+ 自定义分钟输入；引擎层 `cruisePlan({focusMinutes, distanceLy})` 反推所需速度 γ 与地球年（`rapidity = d/(t·c)` 双曲线式），设了目的地时设置页改显「推算速度」隐藏手动 v 滑杆；`formatVOverC` 高精度、`formatGamma` 千分位。
 - **S20 星图搜索 + 推荐目的地（未 commit，等用户确认）**：`src/data/star-search.ts` `searchStars`（常用名 / bayer / flamsteed / HIP 编号 / 星座，评分排序）→ 星图弹窗顶部搜索框 `StarSearch`（下拉即选 → 弹信息卡）；`recommendDestination(options, focusMinutes)`（`cruisePlan` 反推 γ ≤ `RECOMMEND_MAX_GAMMA=50000` 的最远可达星，无可达时回退最近星）→ 设置页「推荐目的地」提示 + 选用按钮。星表加载中搜索显示「星表加载中…」而非误报无结果。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
-- **当前分支**：`feature/S19-duration-scrubber`（HEAD 945ec2e，S20 未 commit）。（基线：`pnpm check` 4/4、**222 单测**、27 test files，见下方 2.2。）
+- **当前分支**：`feature/S19-duration-scrubber`（HEAD 945ec2e，S20 未 commit）。（基线：`pnpm check` 4/4、**223 单测**、27 test files，见下方 2.2。）
 - **文档已同步**：ROADMAP Phase 2 状态 + 2.1 搜索勾选、ADR 索引（10 份）、本文件均已刷新至 S20。
 - **注意**：用户在某时刻编辑了 ROADMAP，移除了 2.2 的「推荐目的地 / 多级跃迁」两个 checkbox（已按建议实施推荐目的地但保留 checkbox 移除，勿擅自加回）。
 
@@ -152,7 +152,7 @@ pnpm test:e2e
 | S19    | 时长滑杆 `DurationScrubber` + `cruisePlan` 反推航线                     | ✅ commit 945ec2e 未合并 |
 | S20    | 星图搜索 `searchStars`/`StarSearch` + 推荐目的地 `recommendDestination` | ✅ 未 commit             |
 
-**验证基线**：`pnpm check` 4/4（**222 单测**，27 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap WebGL 仅 chromium）；`pnpm build` 主包 ~64KB（three 967KB 懒加载进星图弹窗 chunk）。
+**验证基线**：`pnpm check` 4/4（**223 单测**，27 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap WebGL 仅 chromium）；`pnpm build` 主包 ~64KB（three 967KB 懒加载进星图弹窗 chunk）。
 
 ### 2.3 下一步（Phase 2 星图导航，按 ROADMAP）
 
