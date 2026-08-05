@@ -155,4 +155,40 @@ test.describe('星图视图 (S16 R3F)', () => {
 
     expect(errors).toHaveLength(0);
   });
+
+  test('Phase 2 验收走查：搜索半人马座α → 信息卡 → 设目的地 → 启动航行 → 航行视图', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: '星图' }).click();
+    await expect(page.getByTestId('starmap-view')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('star-search')).toBeVisible();
+
+    // 按名称搜索半人马座 α（真实星表中文名命中）
+    await page.getByLabel('搜索恒星').fill('半人马');
+    await expect(page.getByTestId('star-search-results')).toBeVisible();
+    const firstResult = page.getByTestId('star-search-result').first();
+    await expect(firstResult).toContainText(/半人马/);
+    await firstResult.click();
+
+    // 信息卡 → 设为目的地
+    await expect(page.getByTestId('star-info-card')).toBeVisible();
+    await page.getByRole('button', { name: '设为目的地' }).click();
+    await expect(page.getByText('已设为目的地')).toBeVisible();
+    await page.getByRole('button', { name: '完成' }).click();
+    await expect(page.getByTestId('starmap-dialog')).not.toBeVisible();
+
+    // 设置页预选目的地
+    await expect(page.getByTestId('setup-panel')).toBeVisible();
+    const destValue = await page.getByLabel('目的地').inputValue();
+    expect(destValue.length).toBeGreaterThan(0);
+
+    // 填 1 分钟 → 启动航行
+    await page.getByLabel('自定义专注时长（分钟）').fill('1');
+    await page.getByRole('button', { name: '启动航行' }).click();
+    await expect(page.getByTestId('voyage-view')).toBeVisible({ timeout: 20_000 });
+
+    // 航行视图显示真实目的地名
+    await expect(page.getByTestId('voyage-view').getByText(/半人马/)).toBeVisible();
+  });
 });

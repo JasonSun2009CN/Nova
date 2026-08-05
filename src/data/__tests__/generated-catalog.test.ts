@@ -113,4 +113,37 @@ describe('生成星表数据完整性 (public/data/stars)', () => {
       expect(optionIds.has(d.id), `目的地 ${d.id} 应被目录收录`).toBe(true);
     }
   });
+
+  it('抽样校验：13 颗已知恒星距离与参考值偏差在容差内（数据准确性抽查）', () => {
+    const stars = loadAllStars();
+    const byId = new Map(stars.map((s) => [s.id, s] as const));
+    const dist = (id: string): number => {
+      const s = byId.get(id);
+      expect(s, `${id} 缺失`).toBeDefined();
+      const c = s!.coords.cartesian;
+      return Math.hypot(c.xLy, c.yLy, c.zLy);
+    };
+    const sample = [
+      { id: 'hip-70890', name: '比邻星', ly: 4.246, tol: 0.06 },
+      { id: 'hip-71683', name: '半人马座 α A', ly: 4.36, tol: 0.06 },
+      { id: 'hip-71681', name: '半人马座 α B', ly: 4.36, tol: 0.06 },
+      { id: 'hip-87937', name: '巴纳德星', ly: 5.963, tol: 0.08 },
+      { id: 'gl-406', name: '沃尔夫 359', ly: 7.9, tol: 0.15 },
+      { id: 'hip-54035', name: '拉兰德 21185', ly: 8.307, tol: 0.1 },
+      { id: 'hip-32349', name: '天狼星', ly: 8.6, tol: 0.1 },
+      { id: 'hip-37279', name: '南河三', ly: 11.46, tol: 0.15 },
+      { id: 'hip-8102', name: '天仓五', ly: 11.91, tol: 0.15 },
+      { id: 'hip-97649', name: '牛郎星', ly: 16.73, tol: 0.2 },
+      { id: 'hip-91262', name: '织女星', ly: 25.04, tol: 0.3 },
+      { id: 'hip-113368', name: '北落师门', ly: 25.13, tol: 0.3 },
+      { id: 'hip-69673', name: '大角星', ly: 36.7, tol: 0.4 },
+    ] as const;
+    for (const s of sample) {
+      const actual = dist(s.id);
+      expect(
+        Math.abs(actual - s.ly),
+        `${s.name}(${s.id}) 实测 ${actual.toFixed(2)}ly vs 参考 ${s.ly}ly`,
+      ).toBeLessThan(s.tol);
+    }
+  });
 });
