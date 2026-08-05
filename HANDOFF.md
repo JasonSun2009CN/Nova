@@ -6,15 +6,19 @@
 
 ---
 
-## ⚠️ 当前进度（2026-08-04 交接）
+## ⚠️ 当前进度（2026-08-05 交接）
 
 - **Phase 1 MVP（S11~S15）已全部完成**：Zustand 状态层 / React UI / Web Worker 计时 + 崩溃恢复 / CI + e2e / PWA 离线。
 - **Phase 2 已交付（S16+S17）**：R3F 3D 星空渲染器 + **星图弹窗交互**（点星 → 确认设目的地 + 当前位置标记）。
 - **星图双视角增量**：出发地第一人称视角（默认，站在当前位置星环视星空，圆环标记目的地）/ 上帝全览视角（太阳居中 + 以太阳为中心的半径圈 10/25/50 光年）；左缘按钮切换。当前位置（出发地）持久化于 settings `currentStarId`，航行完成后出发地 = 上次目的地。
 - **用户驱动变更**：UI 极简克制化重设计、星际航行术语弹窗、**单一暗色 Neutral 主题（删除原 4 套主题，见 ADR-0009）**。
-- **S18 导航增量**（分支 `feature/S18-navigation-duration`，**未 commit 等用户确认**）：设置页目的地改用**真实星表唯一数据源**——目录就绪时下拉列出全部 ~60 颗命名星（按距离排序）、未加载回退 17 颗 `DESTINATION_STARS`，修复「星图选中非 `DESTINATION_STARS` 的星后，设置页显示无目的地」的 bug；新增 `requiredFocusMinutes`（`travelDistance` 逆运算，引擎层）与 `formatFocusEstimate`（分钟→小时→天→年），点星确认卡与设置页显示预计专注时长。
+- **S18 导航增量**（已合并，PR #3 → main）：设置页目的地改用**真实星表唯一数据源**——目录就绪时下拉列出全部 ~60 颗命名星（按距离排序）、未加载回退 17 颗 `DESTINATION_STARS`，修复「星图选中非 `DESTINATION_STARS` 的星后，设置页显示无目的地」的 bug；新增 `requiredFocusMinutes`（`travelDistance` 逆运算，引擎层）与 `formatFocusEstimate`（分钟→小时→天→年），点星确认卡与设置页显示预计专注时长。
+- **S19 时长滑杆 + 反推航线（已 commit `945ec2e`，分支 `feature/S19-duration-scrubber`，未合并）**：`DurationScrubber`（1~240 分钟刻度滑杆）+ 自定义分钟输入；引擎层 `cruisePlan({focusMinutes, distanceLy})` 反推所需速度 γ 与地球年（`rapidity = d/(t·c)` 双曲线式），设了目的地时设置页改显「推算速度」隐藏手动 v 滑杆；`formatVOverC` 高精度、`formatGamma` 千分位。
+- **S20 星图搜索 + 推荐目的地（未 commit，等用户确认）**：`src/data/star-search.ts` `searchStars`（常用名 / bayer / flamsteed / HIP 编号 / 星座，评分排序）→ 星图弹窗顶部搜索框 `StarSearch`（下拉即选 → 弹信息卡）；`recommendDestination(options, focusMinutes)`（`cruisePlan` 反推 γ ≤ `RECOMMEND_MAX_GAMMA=50000` 的最远可达星，无可达时回退最近星）→ 设置页「推荐目的地」提示 + 选用按钮。星表加载中搜索显示「星表加载中…」而非误报无结果。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
-- **当前分支**：S16+S17 + 双视角已 commit 在 `feature/S16-starmap-renderer`（HEAD bbd849e）；S18 增量位于 worktree 分支 `feature/S18-navigation-duration`（`pnpm check` 4/4、194 单测、e2e 18 过 + starmap 6 跳过）。
+- **当前分支**：`feature/S19-duration-scrubber`（HEAD 945ec2e，S20 未 commit）。（基线：`pnpm check` 4/4、**222 单测**、27 test files，见下方 2.2。）
+- **文档已同步**：ROADMAP Phase 2 状态 + 2.1 搜索勾选、ADR 索引（10 份）、本文件均已刷新至 S20。
+- **注意**：用户在某时刻编辑了 ROADMAP，移除了 2.2 的「推荐目的地 / 多级跃迁」两个 checkbox（已按建议实施推荐目的地但保留 checkbox 移除，勿擅自加回）。
 
 ---
 
@@ -33,7 +37,7 @@
 
 1. [README.md](file:///Users/fiona/Documents/trae_projects/Nova/README.md) — 项目定义、技术选型原因、用户故事、**用户使用指引**。
 2. [docs/ROADMAP.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/ROADMAP.md) — **唯一的阶段验收依据**。Phase 1 MVP 验收已全部勾选。当前在 **Phase 2 星图导航系统（v0.2）**：WebGL 星空渲染、星表集成、交互（拖拽/缩放/点星/搜索）、导航（设目的地/当前位置）。每次接事先看对应 Phase 的 Acceptance Criteria，别自己加 scope。
-3. [docs/adr/README.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/adr/README.md) + 8 份 ADR — **所有「为什么这么做」全在这**。尤其是 **ADR-003 分层架构**（引擎 vs 渲染 vs UI vs 数据 vs 基础设施严格隔离，不允许跨层 import）。
+3. [docs/adr/README.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/adr/README.md) + 10 份 ADR — **所有「为什么这么做」全在这**。尤其是 **ADR-003 分层架构**（引擎 vs 渲染 vs UI vs 数据 vs 基础设施严格隔离，不允许跨层 import）。最新 ADR-0010（真实星表数据集成）。
 
 ### 1.2 开发规范 & 工程化（写代码前必读，避免 CI 红）
 
@@ -55,51 +59,57 @@ src/
 │   └── worker-types.ts        ✅ VoyageTimerWorkerRequest/Response（S13）
 ├── engine/                    ✅ 引擎层（纯 TS，0 React / 0 Three / 0 Dexie，renderer 例外）
 │   ├── contract/              ✅ voyage-types.ts + catalog-types.ts（Star/SpectralType/CatalogTier）
-│   ├── physics/lorentz.ts     ✅ S7 γ = 1/√(1-β²) 泰勒分段；S18 requiredFocusMinutes 逆运算，16 tests
+│   ├── physics/lorentz.ts     ✅ S7 γ = 1/√(1-β²) 泰勒分段；S18 requiredFocusMinutes 逆运算；S19 cruisePlan 反推航线（rapidity 双曲式）
 │   ├── navigation/VoyageController.ts ✅ S8 状态机 + snapshot↔恢复 + S13 tick(wallTime?)/setExternalTicker，22 tests
 │   ├── data/                  ✅ S9
 │   │   ├── KdTree3.ts         ✅ 手写 3D KD-Tree，5 tests
 │   │   ├── StarCatalog.ts     ✅ 4 tiered tree + 6 索引 + 8 StarFilter + LOD，10 tests
+│   │   ├── star-mapper.ts     ✅ S16 赤经赤纬 → 银道坐标（J2000 常数 + X 符号修正）
 │   │   ├── __fixtures__/stars-500.ts ✅ STARS_500_FIXTURE（前 31 真星 + 469 假星）
 │   │   └── __tests__/*.test.ts
 │   ├── renderer/              ✅ S16 R3F 星空（唯一允许 import three/R3F 的子目录）
 │   │   ├── star-colors.ts     ✅ 光谱 OBAFGKM → 颜色（黑体近似），纯函数
 │   │   ├── build-star-points.ts ✅ 星 → position/color/size Float32Array，纯函数
+│   │   ├── pick-star.ts       ✅ 拾取（屏幕坐标 → 最近星）
 │   │   ├── StarField.tsx      ✅ `<points>` + 自定义 ShaderMaterial（圆点、越近越大=视差）
+│   │   ├── StarMapCameraRig.tsx / MapMarkers.tsx / RadiusGuides.tsx / PickController.tsx / FollowStarBridge.tsx ✅ 双视角相机 + 标记 + 半径圈 + 拾取
 │   │   └── __tests__/         ✅ 9 tests（star-colors 5 + build-star-points 4）
 │   └── index.ts               ✅ 引擎统一出口（纯 TS，**不含 renderer**）
 ├── storage/                   ✅ 基础设施层（Dexie + localStorage）
 │   ├── NovaDatabase.ts        ✅ Dexie 子类 + v1 schema + temp<T>
 │   ├── VoyageRepository.ts    ✅ save/getById/list/delete/clearAll/stats
 │   ├── SettingsRepository.ts  ✅ get/getOrDefault/set/remove/bulkApply/resetToDefaults
+│   ├── StarCatalogRepository.ts ✅ S18 真实星表分块 JSON + IndexedDB 缓存（sourceVersion 当缓存键）
 │   ├── live-voyage-storage.ts ✅ S13 localStorage 崩溃恢复快照（仅 running/paused 可恢复）
 │   └── __tests__/             ✅ repositories + live-voyage-storage
-├── store/                     ✅ S11 Zustand 3 stores
+├── store/                     ✅ Zustand 4 stores
 │   ├── useSettingsStore.ts    ✅ load/updateSettings/setTheme/...（hydrate 自 Dexie）
 │   ├── useVoyageStore.ts      ✅ S11+S13：worker 桥接 + 崩溃恢复 + fastForwardVoyageForTest
 │   ├── useHistoryStore.ts     ✅ load/refresh/delete/clearAll/loadPage
+│   ├── useCatalogStore.ts     ✅ S18 星表加载状态（idle/loading/ready/error + cache/network）
 │   ├── store-deps.ts          ✅ getStoreDeps/setStoreDepsForTest
 │   └── __tests__/             ✅ 含 useVoyageStoreTimer（worker 模式集成）
 ├── workers/                   ✅ S13 voyage-timer.worker.ts（后台每 250ms 广播 tick）
-├── data/                      ✅ destination-stars.ts（星图目的地下拉的真星数据；S18 新增目录驱动解析 destinationOptionsFromStars / findDestinationOption / starDistanceLy）
+├── data/                      ✅ destination-stars.ts（星图目的地下拉的真星数据；S18 目录驱动解析 destinationOptionsFromStars / findDestinationOption / starDistanceLy / starDisplayName；S20 recommendDestination 推荐最远可达星）+ star-search.ts（S20 searchStars 评分搜索，常用名/bayer/flamsteed/HIP/星座）
 ├── components/                ✅ React 组件
-│   ├── SetupPanel 相关的…      （见 pages）
+│   ├── DurationScrubber.tsx   ✅ S19 专注时长滑杆（1~240 刻度 + 金线填充）
 │   ├── VoyageStarFlow.tsx     ✅ Canvas 2D 星流（航行视图背景）
 │   ├── SpaceBackdrop.tsx      ✅ 纯渐变背景层（用户要求极简，**不要加装饰**）
 │   ├── HistoryPanel.tsx       ✅ 航行日志列表
 │   ├── GlossaryDialog.tsx     ✅ 星际航行术语弹窗（γ/光年/时间膨胀等 8 词条）
 │   └── StarMap/
-│       └── StarInfoCard.tsx   ✅ 点星确认卡（详情 + 设为目的地/取消/完成）
+│       ├── StarInfoCard.tsx   ✅ 点星确认卡（详情 + 设为目的地/取消/完成）
+│       └── StarSearch.tsx     ✅ S20 星图搜索框（下拉即选；星表加载中显示加载态）
 ├── pages/
-│   ├── SetupPanel.tsx         ✅ 设置面板（时长/目的地/速度 + 启动；S18 目的地来源真实星表 + 预计专注显示）
+│   ├── SetupPanel.tsx         ✅ 设置面板（S18 目的地来源真实星表 + 预计专注显示；S19 时长滑杆 + 设目的地后推算速度；S20 推荐目的地提示 + 选用）
 │   ├── VoyageView.tsx         ✅ 航行视图（倒计时/指标/进度/暂停结束）
 │   ├── ResultView.tsx         ✅ 结果视图
 │   ├── StarMapDialog.tsx      ✅ S17 星图弹窗外壳（顶栏 + 当前位置图例 + Esc 关闭）
 │   └── StarMapView.tsx        ✅ S16+S17 3D 星图（Canvas + 分层渲染 + 拾取 + 标记，弹窗内）
 ├── test/                      ✅ setup.ts（fake-indexeddb + canvas stub + matchMedia stub）+ dev-hooks.ts（__TEST_ONLY__.fastForward / getStarScreenPosition / setAutoRotate）+ star-map-hooks.ts
-├── styles/index.css           ✅ 单一 Neutral 主题 tokens（暗色灰阶 + 金色强调）+ Space Grotesk @font-face
+├── styles/index.css           ✅ 单一 Neutral 主题 tokens（暗色灰阶 + 金色强调）+ Space Grotesk @font-face + duration-scrubber 样式
 ├── main.tsx / App.tsx         ✅ App：idle 主视图（设置/日志）+ 星图弹窗 + 术语弹窗 + data-theme=neutral
-├── utils/format.ts            ✅ formatDurationMs/formatLy/formatGamma/formatFocusEstimate/... + 32 tests
+├── utils/format.ts            ✅ formatDurationMs/formatLy/formatGamma/formatVOverC/formatFocusEstimate/formatMinuteLabel/... + 34 tests
 └── vite-env.d.ts              ✅ Window.__TEST_ONLY__ 增强（declare global interface Window）
 ```
 
@@ -107,13 +117,13 @@ src/
 
 ---
 
-## 二、怎么继续开发（当前阶段：Phase 2 星图导航，S16~S18 已完成）
+## 二、怎么继续开发（当前阶段：Phase 2 星图导航，S16~S19 已完成）
 
 ### 2.1 标准开发循环
 
 ```bash
 # 0. 开新分支（严格遵守 CONTRIBUTING.md）
-git checkout -b feature/S17-xxx
+git checkout -b feature/S20-xxx
 
 # 1. 写完代码 → 立刻跑全量校验（唯一入口，别只跑 test）
 pnpm check
@@ -125,36 +135,39 @@ pnpm vitest src/engine/renderer --reporter=verbose
 pnpm test:e2e
 ```
 
-### 2.2 当前已完成（S11~S17 + 用户驱动增量）
+### 2.2 当前已完成（S11~S20 + 用户驱动增量）
 
-| Sprint | 内容                                                      | 状态                     |
-| ------ | --------------------------------------------------------- | ------------------------ |
-| S11    | Zustand 3 stores                                          | ✅ 7/10/6 actions + 测试 |
-| S12    | React UI（Setup/Voyage/Result/History + App 路由）        | ✅                       |
-| S13    | Web Worker 计时 + localStorage 崩溃恢复                   | ✅                       |
-| S14    | GitHub Actions CI + mvp.e2e（3 浏览器）                   | ✅                       |
-| S15    | PWA 离线 + manifest + README 指引                         | ✅                       |
-| S16    | R3F 3D 星空渲染器 + 星图视图（懒加载）                    | ✅                       |
-| S17    | 星图弹窗 + 点星确认设目的地 + 当前位置标记（+ 拾取/分层） | ✅                       |
-| 增量   | UI 极简克制化重设计 + 术语弹窗 + 单一暗色 Neutral 主题    | ✅                       |
-| 增量2  | 星图双视角（出发地/全览）+ 半径圈 + 出发地随航行更新      | ✅                       |
-| S18    | 目的地数据源统一（真实星表）+ 反推预计专注时长            | ✅ 未 commit             |
+| Sprint | 内容                                                                    | 状态                     |
+| ------ | ----------------------------------------------------------------------- | ------------------------ |
+| S11    | Zustand 3 stores                                                        | ✅ 7/10/6 actions + 测试 |
+| S12    | React UI（Setup/Voyage/Result/History + App 路由）                      | ✅                       |
+| S13    | Web Worker 计时 + localStorage 崩溃恢复                                 | ✅                       |
+| S14    | GitHub Actions CI + mvp.e2e（3 浏览器）                                 | ✅                       |
+| S15    | PWA 离线 + manifest + README 指引                                       | ✅                       |
+| S16    | R3F 3D 星空渲染器 + 星图视图（懒加载）                                  | ✅                       |
+| S17    | 星图弹窗 + 点星确认设目的地 + 当前位置标记（+ 拾取/分层）               | ✅                       |
+| 增量   | UI 极简克制化重设计 + 术语弹窗 + 单一暗色 Neutral 主题                  | ✅                       |
+| 增量2  | 星图双视角（出发地/全览）+ 半径圈 + 出发地随航行更新                    | ✅                       |
+| S18    | 目的地数据源统一（真实星表）+ 反推预计专注时长                          | ✅ 已合并（PR #3）       |
+| S19    | 时长滑杆 `DurationScrubber` + `cruisePlan` 反推航线                     | ✅ commit 945ec2e 未合并 |
+| S20    | 星图搜索 `searchStars`/`StarSearch` + 推荐目的地 `recommendDestination` | ✅ 未 commit             |
 
-**验证基线**：`pnpm check` 4/4（**194 单测**，25 test files）；e2e 3 浏览器 **18 过 + 6 跳过**（starmap WebGL 仅 chromium）；`pnpm build` 主包 ~64KB（three 967KB 懒加载进星图弹窗 chunk）。
+**验证基线**：`pnpm check` 4/4（**222 单测**，27 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap WebGL 仅 chromium）；`pnpm build` 主包 ~64KB（three 967KB 懒加载进星图弹窗 chunk）。
 
 ### 2.3 下一步（Phase 2 星图导航，按 ROADMAP）
 
-Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16 渲染 + S17 弹窗交互已完成；星图双视角（出发地 / 全览）与当前位置更新也已完成。接下来按 ROADMAP 2.1/2.2 推进，建议顺序：
+Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S20 已交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地），2.1 与 2.2 的功能项基本闭合。剩下 2.3 质量保障与验收标准人工走查，建议顺序：
 
-| 顺序 | 内容                                                                              | 说明                                                                                  |
-| ---- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| 1    | ~~星图交互：点星信息卡 + 设为目的地 + 当前位置标记~~（**已交付 S17**）            | 弹窗内拾取 + 确认卡；`__TEST_ONLY__.getStarScreenPosition` 驱动 e2e                   |
-| 2    | ~~星表数据集成：内嵌 50ly 内完整星表替代 500 fixture~~（**已交付，见 ADR-0010**） | 数据分块 JSON + IndexedDB 缓存；真实 HIP，`DESTINATION_STARS` 已改真星表              |
-| 3    | ~~星图双视角 + 半径圈 + 出发地随航行更新~~（**已交付增量2**）                     | `StarMapCameraRig` / `RadiusGuides`；settings `currentStarId`；`getViewMode` 驱动 e2e |
-| 4    | ~~选目的地 → 反推所需专注时长~~（**已交付 S18**）+ **推荐目的地**                 | `requiredFocusMinutes` 逆运算 + 确认卡/设置页预计专注显示；「推荐目的地」待做         |
-| 5    | 搜索、定位当前、多级跃迁                                                          | 远期                                                                                  |
+| 顺序 | 内容                                                                                | 说明                                                                                                                 |
+| ---- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 1    | ~~星图交互：点星信息卡 + 设为目的地 + 当前位置标记~~（**已交付 S17**）              | 弹窗内拾取 + 确认卡；`__TEST_ONLY__.getStarScreenPosition` 驱动 e2e                                                  |
+| 2    | ~~星表数据集成：内嵌 50ly 内完整星表替代 500 fixture~~（**已交付，见 ADR-0010**）   | 数据分块 JSON + IndexedDB 缓存；真实 HIP，`DESTINATION_STARS` 已改真星表                                             |
+| 3    | ~~星图双视角 + 半径圈 + 出发地随航行更新~~（**已交付增量2**）                       | `StarMapCameraRig` / `RadiusGuides`；settings `currentStarId`；`getViewMode` 驱动 e2e                                |
+| 4    | ~~选目的地 → 反推所需专注时长~~（**已交付 S18**）+ **推荐目的地**（**已交付 S20**） | `requiredFocusMinutes` 逆运算 + 确认卡/设置页预计专注显示；`recommendDestination` 推荐最远可达星（无可达回退最近星） |
+| 5    | ~~星图搜索（常用名 + HIP 编号）~~（**已交付 S20**）+ 定位当前 + 多级跃迁            | `searchStars` + `StarSearch` 弹窗顶部搜索下拉即选；定位当前/多级跃迁远期                                             |
+| 6    | Phase 2 收尾：2.3 质量保障（60fps / 缩放平移流畅度 / 数据抽样校验）+ 验收标准走查   | 性能与抽样属测试任务，可用 Playwright + 抽查脚本补齐                                                                 |
 
-**远期**：S20 γ 视觉（Doppler 红移蓝移 uniform）；S29 Gaia 百万星（tier3 单独 KDTree + GPU BufferGeometry）。
+**远期**：S21 γ 视觉（Doppler 红移蓝移 uniform）；S29 Gaia 百万星（tier3 单独 KDTree + GPU BufferGeometry）。
 
 ---
 

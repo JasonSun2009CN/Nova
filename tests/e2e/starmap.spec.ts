@@ -79,6 +79,23 @@ test.describe('星图视图 (S16 R3F)', () => {
     await expect(page.getByLabel('目的地')).toHaveValue('hip-91262');
   });
 
+  test('星图搜索：输入中文名 → 下拉 → 点结果弹出信息卡', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: '星图' }).click();
+    await expect(page.getByTestId('starmap-view')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('star-search')).toBeVisible();
+    await expect(page.getByTestId('star-count')).toContainText(/颗恒星/, { timeout: 20_000 });
+
+    await page.getByLabel('搜索恒星').fill('织女');
+    await expect(page.getByTestId('star-search-results')).toBeVisible();
+    const firstResult = page.getByTestId('star-search-result').first();
+    await expect(firstResult).toContainText(/织女/);
+
+    await firstResult.click();
+    await expect(page.getByTestId('star-info-card')).toBeVisible();
+    await expect(page.getByTestId('star-info-card').getByText(/织女/)).toBeVisible();
+  });
+
   test('双视角切换：出发地视角 ↔ 全览视角（相机定位 + 半径圈 + 无报错）', async ({ page }) => {
     const errors: string[] = [];
     page.on('console', (m) => {

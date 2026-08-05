@@ -98,6 +98,22 @@ describe('SetupPanel', () => {
     expect(screen.getByText(/太阳系 → Ross 154/)).toBeInTheDocument();
   });
 
+  it('未选目的地时显示推荐目的地（默认 25 分钟 → 比邻星）且点选用即选中', () => {
+    render(<SetupPanel />);
+    const recommend = screen.getByTestId('recommend-destination');
+    expect(recommend).toBeInTheDocument();
+    expect(recommend).toHaveTextContent('推荐目的地');
+    expect(recommend).toHaveTextContent('比邻星');
+    fireEvent.click(screen.getByRole('button', { name: '选用' }));
+    expect(useVoyageStore.getState().destStarId).toBe('hip-70890');
+  });
+
+  it('选中目的地后不再显示推荐', () => {
+    render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-70890' } });
+    expect(screen.queryByText(/推荐目的地/)).not.toBeInTheDocument();
+  });
+
   it('选中目的地后由专注时长推算航行速度（巡航速度+γ+地球历时）', () => {
     render(<SetupPanel />);
     fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-70890' } });

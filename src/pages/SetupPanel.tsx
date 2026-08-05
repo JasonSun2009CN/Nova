@@ -6,6 +6,7 @@ import {
   DESTINATION_STARS,
   destinationOptionsFromStars,
   findDestinationOption,
+  recommendDestination,
 } from '@/data/destination-stars';
 import { LIGHT_SPEED, cruisePlan, lorentzFactor } from '@/engine';
 import { useCatalogStore } from '@/store/useCatalogStore';
@@ -52,6 +53,10 @@ export function SetupPanel() {
   );
   const gamma = plan?.gamma ?? lorentzFactor(vOverC * LIGHT_SPEED);
   const speed = plan?.vOverC ?? vOverC;
+  const recommendation = useMemo(
+    () => (destStar == null ? recommendDestination(destinationOptions, minutes) : null),
+    [destStar, destinationOptions, minutes],
+  );
 
   const handleCustomChange = (raw: string) => {
     touchedRef.current = true;
@@ -135,6 +140,25 @@ export function SetupPanel() {
               </option>
             ))}
           </select>
+          {recommendation != null && (
+            <div
+              data-testid="recommend-destination"
+              className="mt-3 flex items-center justify-between gap-2"
+            >
+              <p className="text-xs text-deep-400">
+                推荐目的地：
+                <span className="text-deep-200">{recommendation.name}</span> ·{' '}
+                {formatLy(recommendation.distanceLy)}
+              </p>
+              <button
+                type="button"
+                onClick={() => useVoyageStore.getState().selectDestination(recommendation.id)}
+                className="h-8 shrink-0 cursor-pointer rounded-lg border border-[var(--color-glass-border)] px-3 text-xs text-deep-200 transition-colors duration-200 hover:border-star-gold hover:text-star-gold"
+              >
+                选用
+              </button>
+            </div>
+          )}
         </div>
 
         <div>

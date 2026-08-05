@@ -3,6 +3,7 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState, type ElementRef, type RefObject } from 'react';
 
 import { StarInfoCard } from '@/components/StarMap/StarInfoCard';
+import { StarSearch } from '@/components/StarMap/StarSearch';
 import { starDisplayName, starDistanceLy } from '@/data/destination-stars';
 import { StarCatalog, type Star } from '@/engine';
 import { FollowStarBridge } from '@/engine/renderer/FollowStarBridge';
@@ -207,6 +208,10 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
         </Canvas>
       </div>
 
+      <div className="absolute left-1/2 top-6 z-20 -translate-x-1/2">
+        <StarSearch stars={pickableStars} status={catalogStatus} onSelect={handlePick} />
+      </div>
+
       <div data-testid="view-toggle" className="absolute left-4 top-1/2 z-10 -translate-y-1/2">
         <div className="glass-card flex flex-col gap-1 rounded-2xl p-1.5">
           <button
@@ -275,7 +280,7 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
         ))}
 
       {mode === 'overview' && (
-        <div className="pointer-events-none absolute left-1/2 top-6 z-10 -translate-x-1/2">
+        <div className="pointer-events-none absolute left-1/2 top-16 z-10 -translate-x-1/2">
           <p className="glass-card rounded-full px-4 py-1.5 text-xs text-deep-400">
             以太阳为中心 · 半径圈 {RADIUS_GUIDES_LY.join(' / ')} 光年
           </p>

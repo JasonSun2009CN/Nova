@@ -1,4 +1,4 @@
-import type { Star } from '@/engine';
+import { cruisePlan, type Star } from '@/engine';
 
 export type DestinationStar = {
   id: string;
@@ -71,4 +71,21 @@ export function starDisplayName(star: Star): string {
 
 export function isSettableDestination(star: Star): boolean {
   return star.properName != null;
+}
+
+export const RECOMMEND_MAX_GAMMA = 50_000;
+
+export function recommendDestination(
+  options: readonly DestinationStar[],
+  focusMinutes: number,
+): DestinationStar | null {
+  const withGamma = options
+    .filter((s) => s.distanceLy > 0)
+    .map((s) => ({ star: s, gamma: cruisePlan({ focusMinutes, distanceLy: s.distanceLy }).gamma }));
+  const reachable = withGamma.filter((r) => r.gamma <= RECOMMEND_MAX_GAMMA);
+  if (reachable.length > 0) {
+    return reachable.sort((a, b) => b.star.distanceLy - a.star.distanceLy)[0]!.star;
+  }
+  const nearest = [...withGamma].sort((a, b) => a.star.distanceLy - b.star.distanceLy)[0];
+  return nearest?.star ?? null;
 }
