@@ -54,6 +54,8 @@ ADR (Architecture Decision Record) 是一种轻量级文档，用于记录重要
 | [ADR-0008](0008-build-tool.md)                         | 构建工具：Vite + pnpm                  | Accepted | 2026-07-29 |
 | [ADR-0009](0009-single-neutral-theme-starmap-modal.md) | 单一 Neutral 主题 + 星图弹窗           | Accepted | 2026-08-03 |
 | [ADR-0010](0010-real-star-catalog.md)                  | 真实星表数据集成（HYG + 分块缓存）     | Accepted | 2026-08-04 |
+| [ADR-0011](0011-voyage-view-real-stars.md)             | 航行视图真实星表渲染（R3F 复用）       | Accepted | 2026-08-05 |
+| [ADR-0012](0012-unified-flight-model-engine-tiers.md)  | 统一飞行模型 + 引擎 γ 分级             | Accepted | 2026-08-05 |
 
 ---
 
