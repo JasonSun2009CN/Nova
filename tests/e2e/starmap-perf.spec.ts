@@ -81,6 +81,56 @@ test.describe('星图性能 (S21 Phase 2 QA)', () => {
     expect(stats.maxFrameMs).toBeLessThan(MAX_FRAME_MS);
   });
 
+  test('出发地视角：星空实际渲染（画布亮像素占比达标，防星空空白回归）', async ({ page }) => {
+    const countBright = async (): Promise<number> => {
+      const box = await page.getByTestId('starmap-view').boundingBox();
+      expect(box).not.toBeNull();
+      const shot = await page.screenshot({
+        clip: { x: box!.x, y: box!.y, width: box!.width, height: box!.height },
+      });
+      const ratio = await page.evaluate(async (b64: string) => {
+        const img = new Image();
+        await new Promise((resolve) => {
+          img.onload = resolve;
+          img.src = 'data:image/png;base64,' + b64;
+        });
+        const c = document.createElement('canvas');
+        c.width = img.width;
+        c.height = img.height;
+        const ctx = c.getContext('2d');
+        if (ctx == null) return null;
+        ctx.drawImage(img, 0, 0);
+        const d = ctx.getImageData(0, 0, c.width, c.height).data;
+        let bright = 0;
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i]! + d[i + 1]! + d[i + 2]! > 150) bright++;
+        }
+        return bright / (c.width * c.height);
+      }, shot.toString('base64'));
+      expect(ratio).not.toBeNull();
+      return ratio!;
+    };
+
+    // 开图 → 校验 → 关闭，重复两次抓概率性空白
+    for (let i = 0; i < 2; i++) {
+      if (i > 0) {
+        await page.getByRole('button', { name: '星图' }).click();
+        await expect(page.getByTestId('starmap-view')).toBeVisible({ timeout: 20_000 });
+        await expect(page.getByTestId('star-count')).toContainText(/颗恒星/, {
+          timeout: 20_000,
+        });
+      } else {
+        await openStarmap(page);
+      }
+      await page.waitForTimeout(1500);
+      const ratio = await countBright();
+      // 健康星空约 0.0058；纯背景（无星星）约 0.00045；阈值 0.001 拦"星空空白"
+      expect(ratio).toBeGreaterThan(0.001);
+      await page.keyboard.press('Escape');
+      await expect(page.getByTestId('starmap-dialog')).not.toBeVisible();
+    }
+  });
+
   test('缩放/环绕/平移流畅度：相机正确响应 + 交互期间无长卡顿 + 无报错', async ({ page }) => {
     const errors: string[] = [];
     page.on('console', (m) => {
