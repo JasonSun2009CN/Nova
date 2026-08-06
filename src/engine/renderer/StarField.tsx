@@ -44,8 +44,12 @@ export function StarField({ stars, scale = 1, sizeScale = 1 }: StarFieldProps) {
   );
   const uniforms = useMemo(() => ({ uPixelRatio: { value: pixelRatio } }), [pixelRatio]);
 
+  if (stars.length === 0) return null;
+
+  // key=星数：目录异步加载后 空→满 时强制重挂载 geometry，
+  // 避免旧的空缓冲区在真实 GPU 上残留导致星空不渲染（偶发，拖动后短暂恢复）。
   return (
-    <points>
+    <points key={stars.length}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[points.positions, 3]} />
         <bufferAttribute attach="attributes-aColor" args={[points.colors, 3]} />

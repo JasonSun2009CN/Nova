@@ -1,6 +1,6 @@
 import type { OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
-import { useEffect, type ElementRef, type RefObject } from 'react';
+import { useLayoutEffect, type ElementRef, type RefObject } from 'react';
 
 export type StarMapViewMode = 'from-departure' | 'overview';
 
@@ -27,7 +27,9 @@ type StarMapCameraRigProps = {
 export function StarMapCameraRig({ mode, focusPosition, controlsRef }: StarMapCameraRigProps) {
   const camera = useThree((s) => s.camera);
 
-  useEffect(() => {
+  // useLayoutEffect：在首帧绘制前摆好相机，避免首帧用默认朝向闪一下；
+  // 出发地视角显式关闭 autoRotate / pan，防止从全览视角切回时残留绕转状态。
+  useLayoutEffect(() => {
     const controls = controlsRef.current;
     if (controls == null) return;
 
