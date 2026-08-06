@@ -6,7 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Nova · 星际专注** — a "focus timer as interplanetary travel" app. You set a focus duration, your ship "flies" toward a real destination star, and relativistic time dilation (Lorentz factor γ) maps your focused minutes to cosmological distance. Tech: Vite 5 + React 18 + TypeScript (strict, `noUncheckedIndexedAccess`) + Three.js/R3F + Zustand + Dexie (IndexedDB) + Web Worker timer + Vitest + Playwright + Tailwind. A Tauri 2 macOS shell exists in `src-tauri/` (Rust not installed yet; do not attempt `pnpm tauri build`).
 
-**Start here for context, in order:** `HANDOFF.md` (handoff doc — current status, architecture map, every gotcha), `docs/ROADMAP.md` (the only acceptance-criteria authority for each phase), `docs/adr/README.md` + the 9 ADRs (all "why" decisions), `docs/UI-UX-DESIGN.md`. Project docs are written in Chinese.
+## 新会话必读（Onboarding）— 每个新 session 开始时必须按顺序读完，不得跳过
+
+1. **`HANDOFF.md`** — 当前状态 / 架构地图 / 所有 gotcha（最重要的文件）
+2. **`docs/ROADMAP.md`** — 各阶段验收标准的唯一权威来源
+3. **`docs/adr/README.md`** + **`docs/adr/00NN-*.md` 全部 13 个 ADR**（0010–0012 是真实星表/飞行模型，也必读）— 所有 "why" 决策
+4. **`docs/UI-UX-DESIGN.md`** — 视觉与交互设计规范
+
+以上文件在动手写任何代码之前读取。项目文档均为中文。
 
 ## Commands
 
