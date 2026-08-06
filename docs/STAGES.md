@@ -11,7 +11,7 @@
 - **S 编号自 S11（Phase 1 MVP）起正式用于分支命名**；更早的引擎基础（S7~S9）按交接/代码标注逻辑编号，无独立分支。
 - **S1~S6、S10 从未定义**，保持留空，不要自行占用。
 - **S21~S38 已按第五节规划占用**（Phase 2 收尾 → Phase 5），开工前先读第五节「规划顺序与关键决策」，不要自行改号。
-- 交付新阶段时 **同步刷新三处**：本文档 + `HANDOFF.md` + `docs/ROADMAP.md`（现状已交付至 S20，规划至 S38）。
+- 交付新阶段时 **同步刷新三处**：本文档 + `HANDOFF.md` + `docs/ROADMAP.md`（现状已交付至 S20 + 增量 3 变动出发地，规划至 S38）。
 
 ## 二、状态图例
 
@@ -24,43 +24,44 @@
 
 ## 三、阶段总表
 
-| Stage  | 所属 Phase | 版本 | 内容                                                                                                                                                                                                 | 状态      | 关联 commit / PR                  |
-| ------ | ---------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------------------------------- |
-| S1–S6  | —          | —    | 未使用（阶段编号自 S7 起）                                                                                                                                                                           | —         | —                                 |
-| S7     | Phase 1    | v0.1 | 相对论物理 `lorentz.ts`：γ = 1/√(1-β²) 泰勒分段、`travelDistance`、`LIGHT_SPEED`                                                                                                                     | ✅        | 无独立分支                        |
-| S8     | Phase 1    | v0.1 | 航行状态机 `VoyageController`（idle/running/paused/completed/aborted + snapshot↔恢复 + tick）                                                                                                       | ✅        | 无独立分支                        |
-| S9     | Phase 1    | v0.1 | 星表数据结构：`KdTree3`（手写 3D KD-Tree）+ `StarCatalog`（4 层树 + 索引 + LOD）                                                                                                                     | ✅        | 无独立分支                        |
-| S10    | —          | —    | 未使用                                                                                                                                                                                               | —         | —                                 |
-| S11    | Phase 1    | v0.1 | Zustand 3 stores（settings/voyage/history）                                                                                                                                                          | ✅        | `3a14b17`                         |
-| S12    | Phase 1    | v0.1 | React UI（Setup/Voyage/Result/History + App 路由）                                                                                                                                                   | ✅        | `4ebf2fc`                         |
-| S13    | Phase 1    | v0.1 | Web Worker 计时 + localStorage 崩溃恢复                                                                                                                                                              | ✅        | `7cdf0c4`                         |
-| S14    | Phase 1    | v0.1 | GitHub Actions CI + mvp.e2e（3 浏览器）                                                                                                                                                              | ✅        | `e37f499`                         |
-| S15    | Phase 1    | v0.1 | PWA 离线 + manifest + README 指引                                                                                                                                                                    | ✅        | `0b94761`（PR #1）                |
-| S16    | Phase 2    | v0.2 | R3F 3D 星空渲染器 + 星图视图（懒加载）                                                                                                                                                               | ✅        | `fe808af` / `5313028` / `bbd849e` |
-| S17    | Phase 2    | v0.2 | 星图弹窗 + 点星确认设目的地 + 当前位置标记（拾取/分层）                                                                                                                                              | ✅        | 同 S16                            |
-| S18    | Phase 2    | v0.2 | 目的地数据源统一（真实星表）+ 反推预计专注时长 `requiredFocusMinutes`                                                                                                                                | ✅ 已合并 | `0b5dcfb`（PR #3）                |
-| S19    | Phase 2    | v0.2 | 时长滑杆 `DurationScrubber` + `cruisePlan` 反推航线                                                                                                                                                  | ✅ 已提交 | `945ec2e`                         |
-| S20    | Phase 2    | v0.2 | 星图搜索 `searchStars`/`StarSearch` + 推荐目的地 `recommendDestination`                                                                                                                              | ✅ 已提交 | `c3817bf`                         |
-| 增量   | Phase 1/2  | —    | UI 极简克制化重设计 + 术语弹窗 + 单一暗色 Neutral 主题（ADR-0009）                                                                                                                                   | ✅        | `8b9b466` 等                      |
-| 增量 2 | Phase 2    | —    | 星图双视角（出发地第一人称 / 上帝全览）+ 半径圈 + 出发地随航行更新                                                                                                                                   | ✅        | 无独立 commit                     |
-| S21    | Phase 2    | v0.2 | Phase 2 收尾：2.3 质量保障（60fps / 缩放平移流畅度 / 星表数据抽样校验）+ 验收标准走查，关闭 v0.2                                                                                                     | ⏳        | —                                 |
-| S22    | Phase 3    | v0.3 | 统一飞行模型 + 引擎 γ 配置：合并 `travelDistance`/`cruisePlan` 为单一模型（d=β·γ·τ）+ `ENGINE_TIERS`（γ_max × 解锁）+ 可达性 API（所需 γ/最短专注/可达半径），退役 `RECOMMEND_MAX_GAMMA`（ADR-0012） | ⏳        | —                                 |
-| S23    | Phase 3    | v0.3 | 航行视图真实星表化：R3F `StarField` 进 VoyageView（相机立当前位置星、朝目的地）+ 深度分层星流（复用 LOD）+ 星光拖尾随 γ + 光行差畸变（ADR-0011）                                                     | ⏳        | —                                 |
-| S24    | Phase 3    | v0.3 | γ 视觉 Doppler（前向蓝移）：前方星空随 γ 偏蓝（shader uniform 驱动），**只蓝不红**（后方不可见，红移已砍）                                                                                           | ⏳        | —                                 |
-| S25    | Phase 3    | v0.3 | 实时仪表盘：主/客观双时间轴、当前速度 v/c、γ、已航行/剩余距离、ETA、引擎功率指示                                                                                                                     | ⏳        | —                                 |
-| S26    | Phase 3    | v0.3 | 跃迁过渡动画：启动点火→星光加速→进入跃迁（3s）/ 到达减速→目标星真实变大→入轨（3s）/ 中断紧急刹车停中途                                                                                               | ⏳        | —                                 |
-| S27    | Phase 3    | v0.3 | 引擎等级解锁（γ 分级，按累计专注解锁）+ 任务模式（定时/跃迁/自由漂流）+ **不可达阻止与升级路径提示**                                                                                                 | ⏳        | —                                 |
-| S28    | Phase 3    | v0.3 | 白噪音系统：引擎嗡鸣（可调/可关）+ 可选 CMB 白噪音 / 脉冲星节奏 + 关键事件音效（启动/到达/中断/成就）                                                                                                | ⏳        | —                                 |
-| S29    | Phase 3    | v0.3 | Phase 3 质量保障：航行视图 60fps（帧率自动降级）+ 相对论数值精度对拍 + 8h 连续运行稳定性 + 验收走查                                                                                                  | ⏳        | —                                 |
-| S30    | Phase 4    | v0.5 | 船长日志统计面板：总时长/总距离/已探索恒星数/最长单次/streak 总览 + 热力图 + 时间线 + 周/月柱状图                                                                                                    | ⏳        | —                                 |
-| S31    | Phase 4    | v0.5 | 航线地图：星图高亮已探索路径；导出 CSV/JSON + 航线图图片分享                                                                                                                                         | ⏳        | —                                 |
-| S32    | Phase 4    | v0.5 | 成就系统：里程/探索/专注/特殊挑战/里程碑分类 + 成就墙 + 解锁动画 + 成就点                                                                                                                            | ⏳        | —                                 |
-| S33    | Phase 4    | v0.5 | 个性化设置：引擎外观（飞船视觉）+ 通知偏好（声音/振动/浏览器通知）+ 默认专注时长预设                                                                                                                 | ⏳        | —                                 |
-| S34    | Phase 4    | v0.5 | 好友雏形：本地/云端账户 + 个人分享链接 + 好友当前状态（仅展示）                                                                                                                                      | ⏳        | —                                 |
-| S35    | Phase 5    | v1.0 | 星图数据扩展：500ly 亮星（Hipparcos L2，~10k）+ 星云/星团 + 银河结构叠加（按 ADR-0006）                                                                                                              | ⏳        | —                                 |
-| S36    | Phase 5    | v1.0 | Gaia 百万星：tier3 单独 KDTree + GPU BufferGeometry（原预留 S29 迁至 S36）                                                                                                                           | ⏳        | —                                 |
-| S37    | Phase 5    | v1.0 | 体验打磨：首次引导教程 + 无障碍（对比度/reduced-motion/字体缩放）+ i18n 中英 + 首屏 <2s                                                                                                              | ⏳        | —                                 |
-| S38    | Phase 5    | v1.0 | 稳定性与发布准备：Bug Bash + 跨浏览器/设备测试 + 数据迁移脚本 + 落地页/FAQ/安装包                                                                                                                    | ⏳        | —                                 |
+| Stage  | 所属 Phase | 版本 | 内容                                                                                                                                                                                                 | 状态      | 关联 commit / PR                       |
+| ------ | ---------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------------------------------------- |
+| S1–S6  | —          | —    | 未使用（阶段编号自 S7 起）                                                                                                                                                                           | —         | —                                      |
+| S7     | Phase 1    | v0.1 | 相对论物理 `lorentz.ts`：γ = 1/√(1-β²) 泰勒分段、`travelDistance`、`LIGHT_SPEED`                                                                                                                     | ✅        | 无独立分支                             |
+| S8     | Phase 1    | v0.1 | 航行状态机 `VoyageController`（idle/running/paused/completed/aborted + snapshot↔恢复 + tick）                                                                                                       | ✅        | 无独立分支                             |
+| S9     | Phase 1    | v0.1 | 星表数据结构：`KdTree3`（手写 3D KD-Tree）+ `StarCatalog`（4 层树 + 索引 + LOD）                                                                                                                     | ✅        | 无独立分支                             |
+| S10    | —          | —    | 未使用                                                                                                                                                                                               | —         | —                                      |
+| S11    | Phase 1    | v0.1 | Zustand 3 stores（settings/voyage/history）                                                                                                                                                          | ✅        | `3a14b17`                              |
+| S12    | Phase 1    | v0.1 | React UI（Setup/Voyage/Result/History + App 路由）                                                                                                                                                   | ✅        | `4ebf2fc`                              |
+| S13    | Phase 1    | v0.1 | Web Worker 计时 + localStorage 崩溃恢复                                                                                                                                                              | ✅        | `7cdf0c4`                              |
+| S14    | Phase 1    | v0.1 | GitHub Actions CI + mvp.e2e（3 浏览器）                                                                                                                                                              | ✅        | `e37f499`                              |
+| S15    | Phase 1    | v0.1 | PWA 离线 + manifest + README 指引                                                                                                                                                                    | ✅        | `0b94761`（PR #1）                     |
+| S16    | Phase 2    | v0.2 | R3F 3D 星空渲染器 + 星图视图（懒加载）                                                                                                                                                               | ✅        | `fe808af` / `5313028` / `bbd849e`      |
+| S17    | Phase 2    | v0.2 | 星图弹窗 + 点星确认设目的地 + 当前位置标记（拾取/分层）                                                                                                                                              | ✅        | 同 S16                                 |
+| S18    | Phase 2    | v0.2 | 目的地数据源统一（真实星表）+ 反推预计专注时长 `requiredFocusMinutes`                                                                                                                                | ✅ 已合并 | `0b5dcfb`（PR #3）                     |
+| S19    | Phase 2    | v0.2 | 时长滑杆 `DurationScrubber` + `cruisePlan` 反推航线                                                                                                                                                  | ✅ 已提交 | `945ec2e`                              |
+| S20    | Phase 2    | v0.2 | 星图搜索 `searchStars`/`StarSearch` + 推荐目的地 `recommendDestination`                                                                                                                              | ✅ 已提交 | `c3817bf`                              |
+| 增量   | Phase 1/2  | —    | UI 极简克制化重设计 + 术语弹窗 + 单一暗色 Neutral 主题（ADR-0009）                                                                                                                                   | ✅        | `8b9b466` 等                           |
+| 增量 2 | Phase 2    | —    | 星图双视角（出发地第一人称 / 上帝全览）+ 半径圈 + 出发地随航行更新                                                                                                                                   | ✅        | 无独立 commit                          |
+| 增量 3 | Phase 2    | —    | 变动出发地（ADR-0013）：出发地 = 上次目的地（settings `currentStarId` 驱动）+ 两星实际距离规划 `distanceBetweenStars`（leg 距离）                                                                    | 🚧        | 随 S21 分支（`feature/S21-phase2-qa`） |
+| S21    | Phase 2    | v0.2 | Phase 2 收尾：2.3 质量保障（60fps / 缩放平移流畅度 / 星表数据抽样校验）+ 验收标准走查，关闭 v0.2                                                                                                     | ⏳        | —                                      |
+| S22    | Phase 3    | v0.3 | 统一飞行模型 + 引擎 γ 配置：合并 `travelDistance`/`cruisePlan` 为单一模型（d=β·γ·τ）+ `ENGINE_TIERS`（γ_max × 解锁）+ 可达性 API（所需 γ/最短专注/可达半径），退役 `RECOMMEND_MAX_GAMMA`（ADR-0012） | ⏳        | —                                      |
+| S23    | Phase 3    | v0.3 | 航行视图真实星表化：R3F `StarField` 进 VoyageView（相机立当前位置星、朝目的地）+ 深度分层星流（复用 LOD）+ 星光拖尾随 γ + 光行差畸变（ADR-0011）                                                     | ⏳        | —                                      |
+| S24    | Phase 3    | v0.3 | γ 视觉 Doppler（前向蓝移）：前方星空随 γ 偏蓝（shader uniform 驱动），**只蓝不红**（后方不可见，红移已砍）                                                                                           | ⏳        | —                                      |
+| S25    | Phase 3    | v0.3 | 实时仪表盘：主/客观双时间轴、当前速度 v/c、γ、已航行/剩余距离、ETA、引擎功率指示                                                                                                                     | ⏳        | —                                      |
+| S26    | Phase 3    | v0.3 | 跃迁过渡动画：启动点火→星光加速→进入跃迁（3s）/ 到达减速→目标星真实变大→入轨（3s）/ 中断紧急刹车停中途                                                                                               | ⏳        | —                                      |
+| S27    | Phase 3    | v0.3 | 引擎等级解锁（γ 分级，按累计专注解锁）+ 任务模式（定时/跃迁/自由漂流）+ **不可达阻止与升级路径提示**                                                                                                 | ⏳        | —                                      |
+| S28    | Phase 3    | v0.3 | 白噪音系统：引擎嗡鸣（可调/可关）+ 可选 CMB 白噪音 / 脉冲星节奏 + 关键事件音效（启动/到达/中断/成就）                                                                                                | ⏳        | —                                      |
+| S29    | Phase 3    | v0.3 | Phase 3 质量保障：航行视图 60fps（帧率自动降级）+ 相对论数值精度对拍 + 8h 连续运行稳定性 + 验收走查                                                                                                  | ⏳        | —                                      |
+| S30    | Phase 4    | v0.5 | 船长日志统计面板：总时长/总距离/已探索恒星数/最长单次/streak 总览 + 热力图 + 时间线 + 周/月柱状图                                                                                                    | ⏳        | —                                      |
+| S31    | Phase 4    | v0.5 | 航线地图：星图高亮已探索路径；导出 CSV/JSON + 航线图图片分享                                                                                                                                         | ⏳        | —                                      |
+| S32    | Phase 4    | v0.5 | 成就系统：里程/探索/专注/特殊挑战/里程碑分类 + 成就墙 + 解锁动画 + 成就点                                                                                                                            | ⏳        | —                                      |
+| S33    | Phase 4    | v0.5 | 个性化设置：引擎外观（飞船视觉）+ 通知偏好（声音/振动/浏览器通知）+ 默认专注时长预设                                                                                                                 | ⏳        | —                                      |
+| S34    | Phase 4    | v0.5 | 好友雏形：本地/云端账户 + 个人分享链接 + 好友当前状态（仅展示）                                                                                                                                      | ⏳        | —                                      |
+| S35    | Phase 5    | v1.0 | 星图数据扩展：500ly 亮星（Hipparcos L2，~10k）+ 星云/星团 + 银河结构叠加（按 ADR-0006）                                                                                                              | ⏳        | —                                      |
+| S36    | Phase 5    | v1.0 | Gaia 百万星：tier3 单独 KDTree + GPU BufferGeometry（原预留 S29 迁至 S36）                                                                                                                           | ⏳        | —                                      |
+| S37    | Phase 5    | v1.0 | 体验打磨：首次引导教程 + 无障碍（对比度/reduced-motion/字体缩放）+ i18n 中英 + 首屏 <2s                                                                                                              | ⏳        | —                                      |
+| S38    | Phase 5    | v1.0 | 稳定性与发布准备：Bug Bash + 跨浏览器/设备测试 + 数据迁移脚本 + 落地页/FAQ/安装包                                                                                                                    | ⏳        | —                                      |
 
 ## 四、Phase ↔ 版本 ↔ Stage 对照（跨阶段视图）
 
@@ -68,7 +69,7 @@
 | ------- | ------ | ------------------------------ | ---------------------------------------------------------- | ------------------------------------------ |
 | Phase 0 | v0.0.1 | 项目奠基（脚手架/文档/规范）   | 无独立编号（早期 commit：`24a2b46`、`3fbcc0b`、`d0bcf50`） | 部分完成（脚手架、CI 等未竟）              |
 | Phase 1 | v0.1.0 | MVP 基础专注闭环               | S7~S15                                                     | ✅ 已完成                                  |
-| Phase 2 | v0.2.0 | 星图导航系统                   | S16~S20 + 增量 / 增量 2 + **S21（收尾）**                  | 🚧 功能闭合；S21 质量保障 + 验收走查后关闭 |
+| Phase 2 | v0.2.0 | 星图导航系统                   | S16~S20 + 增量 / 增量 2 / 增量 3 + **S21（收尾）**         | 🚧 功能闭合；S21 质量保障 + 验收走查后关闭 |
 | Phase 3 | v0.3.0 | 完整航行系统 + 相对论视觉      | S22~S29                                                    | ⏳ 已规划（顺序见第五节）                  |
 | Phase 4 | v0.5.0 | 成就系统 + 航行日志            | S30~S34                                                    | ⏳ 已规划                                  |
 | Phase 5 | v1.0.0 | 正式版发布                     | S35~S38                                                    | ⏳ 已规划                                  |
@@ -102,6 +103,7 @@
 ### 5.3 与既有实现的衔接（避免重复踩坑）
 
 - **S27 引擎等级** 与 S19/S20 联动：`cruisePlan` / `recommendDestination` 的 γ 上限改为当前引擎 `ENGINE_TIERS` 的 γ_max（退役 `RECOMMEND_MAX_GAMMA=50000`），随引擎解锁放宽。
+- **增量 3 变动出发地**（ADR-0013）：出发地 = `settings.currentStarId`；规划/推荐距离统一为出发地→目的地的 leg 距离（`distanceBetweenStars`），正是 S22 统一飞行模型 `d = β·γ·τ` 中 `d` 的真实取值，S22 直接复用，不用再改距离口径。
 - **S24 Doppler** 遵循现有 StarField ShaderMaterial 结构新增 uniform；测试走纯函数单测 + Playwright 冒烟（WebGL 仅 chromium，20s 超时）。
 - **S30/S31 统计** 从 `HistoryRepository` / `VoyageRecord` 聚合；聚合纯函数放引擎层，UI 图表样式遵循 `docs/UI-UX-DESIGN.md`（单一 Neutral 主题 + 金色强调）。
 - **S28 音效** 遵循 PWA 离线：音频资源放 `public/` 参与预缓存；沿用「用户手势后初始化 AudioContext」规避 autoplay 限制。

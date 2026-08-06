@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest';
 import {
   DESTINATION_STARS,
   destinationOptionsFromStars,
+  distanceBetweenStars,
   findDestinationOption,
   recommendDestination,
+  starDistanceLy,
 } from '@/data/destination-stars';
 import { protoToStar, type ProtoStar } from '@/engine/data/star-mapper';
 
@@ -50,6 +52,57 @@ describe('destination-stars 目录驱动的目的地解析', () => {
   it('findDestinationOption 未知 id 或空选择返回 null', () => {
     expect(findDestinationOption('hip-999999', [])).toBeNull();
     expect(findDestinationOption(null, [star()])).toBeNull();
+  });
+});
+
+describe('distanceBetweenStars 两星 leg 距离（变动出发地）', () => {
+  it('太阳出发时退化为目的星的太阳距（太阳在原点）', () => {
+    const sol = protoToStar({
+      ...ROSS_154,
+      id: 'hip-sol',
+      properName: '太阳',
+      distanceLy: 0,
+      raDeg: 0,
+      decDeg: 0,
+    });
+    expect(distanceBetweenStars(sol, star())).toBeCloseTo(9.7, 1);
+  });
+
+  it('两星距离 = cartesian 坐标差的欧氏距离（对称性）', () => {
+    const a = protoToStar({ ...ROSS_154, id: 'hip-a', distanceLy: 6, raDeg: 0, decDeg: 0 });
+    const b = protoToStar({ ...ROSS_154, id: 'hip-b', distanceLy: 6, raDeg: 0, decDeg: 90 });
+    const ab = distanceBetweenStars(a, b);
+    expect(ab).toBeCloseTo(Math.sqrt(72), 1);
+    expect(distanceBetweenStars(b, a)).toBeCloseTo(ab, 5);
+  });
+
+  it('非太阳出发地：leg 距离不等于目的星太阳距，且小于两星到太阳距离之和', () => {
+    const proxima = protoToStar({
+      id: 'hip-70890',
+      properName: '比邻星',
+      raDeg: 217.4,
+      decDeg: -62.68,
+      distanceLy: 4.246,
+      vMag: 11.05,
+      absMag: 15.6,
+      spectral: 'M5.5V',
+      tier: 'tier1-nearby-100ly',
+    });
+    const vega = protoToStar({
+      id: 'hip-91262',
+      properName: '织女星',
+      raDeg: 279.23,
+      decDeg: 38.78,
+      distanceLy: 25.04,
+      vMag: 0.03,
+      absMag: 0.58,
+      spectral: 'A0V',
+      tier: 'tier1-nearby-100ly',
+    });
+    const leg = distanceBetweenStars(proxima, vega);
+    expect(leg).toBeGreaterThan(0);
+    expect(leg).toBeLessThan(starDistanceLy(proxima) + starDistanceLy(vega));
+    expect(leg).not.toBeCloseTo(starDistanceLy(vega), 1);
   });
 });
 

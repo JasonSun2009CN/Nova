@@ -5,8 +5,10 @@ import { DurationScrubber } from '@/components/DurationScrubber';
 import {
   DESTINATION_STARS,
   destinationOptionsFromStars,
+  distanceBetweenStars,
   findDestinationOption,
   recommendDestination,
+  starDisplayName,
 } from '@/data/destination-stars';
 import { LIGHT_SPEED, cruisePlan, lorentzFactor } from '@/engine';
 import { useCatalogStore } from '@/store/useCatalogStore';
@@ -22,6 +24,7 @@ export function SetupPanel() {
   const [minutes, setMinutes] = useState<number>(defaultMinutes);
   const [vOverC, setVOverC] = useState<number>(defaultVOverC);
   const destStarId = useVoyageStore((s) => s.destStarId);
+  const currentStarId = useSettingsStore((s) => s.settings.currentStarId) ?? 'hip-sol';
   const catalogStars = useCatalogStore((s) => s.stars);
   const catalogStatus = useCatalogStore((s) => s.status);
   const touchedRef = useRef(false);
@@ -44,18 +47,45 @@ export function SetupPanel() {
     () => findDestinationOption(destStarId, catalogStars),
     [destStarId, catalogStars],
   );
+  const originStarId = currentStarId ?? 'hip-sol';
+  const originStar = useMemo(
+    () => catalogStars.find((s) => s.id === originStarId) ?? null,
+    [catalogStars, originStarId],
+  );
+  const originName = useMemo(() => {
+    if (originStarId === 'hip-sol') return '太阳系';
+    if (originStar != null) return starDisplayName(originStar);
+    return findDestinationOption(originStarId, catalogStars)?.name ?? '太阳系';
+  }, [originStarId, originStar, catalogStars]);
+  const destStarObj = useMemo(
+    () => catalogStars.find((s) => s.id === destStarId) ?? null,
+    [catalogStars, destStarId],
+  );
+  const legLy = useMemo(() => {
+    if (originStar != null && destStarObj != null) {
+      return distanceBetweenStars(originStar, destStarObj);
+    }
+    return destStar?.distanceLy ?? 0;
+  }, [originStar, destStarObj, destStar]);
   const plan = useMemo(
     () =>
-      destStar != null && destStar.distanceLy > 0
-        ? cruisePlan({ focusMinutes: minutes, distanceLy: destStar.distanceLy })
+      destStar != null && legLy > 0
+        ? cruisePlan({ focusMinutes: minutes, distanceLy: legLy })
         : null,
-    [destStar, minutes],
+    [destStar, legLy, minutes],
   );
   const gamma = plan?.gamma ?? lorentzFactor(vOverC * LIGHT_SPEED);
   const speed = plan?.vOverC ?? vOverC;
+  const originOptions = useMemo(() => {
+    if (originStar == null) return destinationOptions;
+    return destinationOptions.map((d) => {
+      const ds = catalogStars.find((s) => s.id === d.id);
+      return ds == null ? d : { ...d, distanceLy: distanceBetweenStars(originStar, ds) };
+    });
+  }, [originStar, destinationOptions, catalogStars]);
   const recommendation = useMemo(
-    () => (destStar == null ? recommendDestination(destinationOptions, minutes) : null),
-    [destStar, destinationOptions, minutes],
+    () => (destStar == null ? recommendDestination(originOptions, minutes) : null),
+    [destStar, originOptions, minutes],
   );
 
   const handleCustomChange = (raw: string) => {
@@ -80,7 +110,7 @@ export function SetupPanel() {
     useVoyageStore.getState().prepare({
       focusMinutes: minutes,
       vOverC: speed,
-      originStarId: 'hip-sol',
+      originStarId,
       destStarId,
     });
     useVoyageStore.getState().start();
@@ -95,8 +125,8 @@ export function SetupPanel() {
         <h2 className="font-display text-xl font-medium tracking-wide">规划一次星际航行</h2>
         <p className="mt-1.5 text-sm text-deep-400">
           {destStar != null
-            ? `太阳系 → ${destStar.name} · ${formatLy(destStar.distanceLy)}`
-            : '设定专注时长，飞船将从太阳系出发'}
+            ? `${originName} → ${destStar.name} · ${formatLy(legLy)}`
+            : `设定专注时长，飞船将从 ${originName} 出发`}
         </p>
       </div>
 

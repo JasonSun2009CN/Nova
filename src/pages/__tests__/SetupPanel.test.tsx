@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { distanceBetweenStars } from '@/data/destination-stars';
 import { cruisePlan } from '@/engine';
 import { protoToStar, type ProtoStar } from '@/engine/data/star-mapper';
 import { SetupPanel } from '@/pages/SetupPanel';
@@ -125,5 +126,69 @@ describe('SetupPanel', () => {
     const gamma = useVoyageStore.getState().progress?.gamma;
     expect(gamma).toBeDefined();
     expect((gamma ?? 0) / plan.gamma).toBeCloseTo(1, 3);
+  });
+
+  it('出发地 = settings.currentStarId（上次目的地）：从比邻星出发并显示', () => {
+    useSettingsStore.setState({
+      settings: { ...DEFAULT_SETTINGS, currentStarId: 'hip-70890' },
+      hydrated: true,
+      loading: false,
+      error: null,
+    });
+    render(<SetupPanel />);
+    expect(screen.getByText(/飞船将从 比邻星/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '启动航行' }));
+    expect(useVoyageStore.getState().originStarId).toBe('hip-70890');
+  });
+
+  it('从非太阳系出发：预计专注按两星 leg 距离反推而非目的星太阳距', () => {
+    const PROXIMA: ProtoStar = {
+      id: 'hip-70890',
+      properName: '比邻星',
+      raDeg: 217.4,
+      decDeg: -62.68,
+      distanceLy: 4.246,
+      vMag: 11.05,
+      absMag: 15.6,
+      spectral: 'M5.5V',
+      tier: 'tier1-nearby-100ly',
+    };
+    const VEGA: ProtoStar = {
+      id: 'hip-91262',
+      properName: '织女星',
+      raDeg: 279.23,
+      decDeg: 38.78,
+      distanceLy: 25.04,
+      vMag: 0.03,
+      absMag: 0.58,
+      spectral: 'A0V',
+      tier: 'tier1-nearby-100ly',
+    };
+    useSettingsStore.setState({
+      settings: { ...DEFAULT_SETTINGS, currentStarId: 'hip-70890' },
+      hydrated: true,
+      loading: false,
+      error: null,
+    });
+    useCatalogStore.setState({
+      stars: [protoToStar(PROXIMA), protoToStar(VEGA)],
+      status: 'ready',
+      source: 'cache',
+      error: null,
+    });
+    render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
+    expect(screen.getByText(/比邻星 → 织女星/)).toBeInTheDocument();
+    const legLy = distanceBetweenStars(protoToStar(PROXIMA), protoToStar(VEGA));
+    const sunLy = 25.04;
+    expect(legLy).not.toBeCloseTo(sunLy, 1);
+    const plan = cruisePlan({ focusMinutes: 25, distanceLy: legLy });
+    const sunPlan = cruisePlan({ focusMinutes: 25, distanceLy: sunLy });
+    expect(screen.getByText('航行速度（推算）')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '启动航行' }));
+    const started = useVoyageStore.getState().progress;
+    const startedGamma = started?.gamma ?? 0;
+    expect(startedGamma / plan.gamma).toBeCloseTo(1, 3);
+    expect(startedGamma).not.toBeCloseTo(sunPlan.gamma, 1);
   });
 });

@@ -42,6 +42,12 @@ export function starDistanceLy(star: Star): number {
   return Math.hypot(c.xLy, c.yLy, c.zLy);
 }
 
+export function distanceBetweenStars(a: Star, b: Star): number {
+  const A = a.coords.cartesian;
+  const B = b.coords.cartesian;
+  return Math.hypot(A.xLy - B.xLy, A.yLy - B.yLy, A.zLy - B.zLy);
+}
+
 export function destinationOptionsFromStars(stars: readonly Star[]): DestinationStar[] {
   return stars
     .filter((s) => s.properName != null)

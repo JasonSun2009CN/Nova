@@ -25,14 +25,18 @@ export function ResultView() {
 
   const completed = progress.status === 'completed';
   const destName = getDestinationName(destStarId);
-  const originName = getDestinationName(originStarId) ?? '太阳系';
+  const originName =
+    originStarId === 'hip-sol' ? '太阳系' : (getDestinationName(originStarId) ?? '太阳系');
   const coordinateHours = (progress.elapsedFocusMs * progress.gamma) / (60 * 60 * 1000);
 
   const handleRestart = () => {
+    const restartOrigin = completed
+      ? (destStarId ?? originStarId ?? 'hip-sol')
+      : (originStarId ?? 'hip-sol');
     prepare({
       focusMinutes: progress.focusTotalMs != null ? progress.focusTotalMs / 60_000 : 25,
       vOverC: progress.vOverC,
-      originStarId: 'hip-sol',
+      originStarId: restartOrigin,
       destStarId,
     });
     start();
