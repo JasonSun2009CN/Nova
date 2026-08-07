@@ -3,6 +3,7 @@ import { useMemo, useRef } from 'react';
 import type { Mesh } from 'three';
 
 import type { Star } from '@/engine/contract/catalog-types';
+import { blueShiftColor, dopplerFactor } from '@/engine/renderer/doppler';
 import { StarField } from '@/engine/renderer/StarField';
 import { spectralColor } from '@/engine/renderer/star-colors';
 import { VoyageCameraRig, type Position3 } from '@/engine/renderer/VoyageCameraRig';
@@ -41,6 +42,8 @@ type VoyageStarFieldProps = {
   stars: readonly Star[];
   originStar: Star | null;
   destStar: Star | null;
+  gamma: number;
+  vOverC: number;
   traveledLy: number;
   legLy: number | null;
 };
@@ -95,6 +98,8 @@ export function VoyageStarField({
   stars,
   originStar,
   destStar,
+  gamma,
+  vOverC,
   traveledLy,
   legLy,
 }: VoyageStarFieldProps) {
@@ -103,11 +108,16 @@ export function VoyageStarField({
     [originStar],
   );
   const destWorld = useMemo(() => (destStar != null ? worldOf(destStar) : null), [destStar]);
+  const destDoppler = useMemo(
+    () => (destStar != null ? dopplerFactor(vOverC, 1) : 1),
+    [destStar, vOverC],
+  );
   const destColor = useMemo(() => {
     if (destStar == null) return null;
     const rgb = spectralColor(destStar.spectral.type, destStar.temperatureKelvin);
-    return [rgb[0], rgb[1], rgb[2]] as [number, number, number];
-  }, [destStar]);
+    const shifted = blueShiftColor(rgb, destDoppler);
+    return [shifted[0], shifted[1], shifted[2]] as [number, number, number];
+  }, [destStar, destDoppler]);
   const safeLeg = useMemo(
     () => (originStar != null && destStar != null && legLy != null && legLy > 0 ? legLy : null),
     [originStar, destStar, legLy],
@@ -123,6 +133,7 @@ export function VoyageStarField({
           scale={VOYAGE_SCALE}
           opacity={BG_OPACITY}
           sizeScale={BG_SIZE_SCALE}
+          doppler={{ gamma, beta: vOverC }}
         />
         {destStar != null && destWorld != null && destColor != null && (
           <DestinationStar position={destWorld} color={destColor} fraction={fraction} />

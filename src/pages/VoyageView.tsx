@@ -147,6 +147,8 @@ export function VoyageView() {
             stars={fieldStars}
             originStar={originStar}
             destStar={destStar}
+            gamma={progress.gamma}
+            vOverC={progress.vOverC}
             traveledLy={progress.traveledLy}
             legLy={legLy}
           />
