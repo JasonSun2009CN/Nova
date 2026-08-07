@@ -34,9 +34,10 @@ type StarFieldProps = {
   stars: readonly Star[];
   scale?: number;
   sizeScale?: number;
+  opacity?: number;
 };
 
-export function StarField({ stars, scale = 1, sizeScale = 1 }: StarFieldProps) {
+export function StarField({ stars, scale = 1, sizeScale = 1, opacity = 1 }: StarFieldProps) {
   const pixelRatio = useThree((s) => s.gl.getPixelRatio());
   const points = useMemo(
     () => buildStarPoints(stars, { scale, sizeScale }),
@@ -60,6 +61,7 @@ export function StarField({ stars, scale = 1, sizeScale = 1 }: StarFieldProps) {
         fragmentShader={FRAGMENT_SHADER}
         transparent
         depthWrite={false}
+        opacity={opacity}
         uniforms={uniforms}
       />
     </points>

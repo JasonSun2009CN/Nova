@@ -9,6 +9,10 @@ import {
   useVoyageStore,
 } from '@/store/index';
 
+vi.mock('@/engine/renderer/VoyageStarField', () => ({
+  VoyageStarField: () => null,
+}));
+
 function startVoyage() {
   useVoyageStore.getState().prepare({
     focusMinutes: 25,
@@ -52,17 +56,21 @@ describe('VoyageView', () => {
     vi.useRealTimers();
   });
 
-  it('渲染倒计时与目的地', () => {
+  it('渲染倒计时与目的地', async () => {
     startVoyage();
-    render(<VoyageView />);
+    await act(async () => {
+      render(<VoyageView />);
+    });
     expect(screen.getByTestId('voyage-view')).toBeInTheDocument();
     expect(screen.getByText('25:00')).toBeInTheDocument();
     expect(screen.getByText(/比邻星/)).toBeInTheDocument();
   });
 
-  it('暂停 → paused 显示已暂停，继续 → running', () => {
+  it('暂停 → paused 显示已暂停，继续 → running', async () => {
     startVoyage();
-    render(<VoyageView />);
+    await act(async () => {
+      render(<VoyageView />);
+    });
 
     fireEvent.click(screen.getByRole('button', { name: '暂停' }));
     expect(useVoyageStore.getState().progress?.status).toBe('paused');
@@ -72,11 +80,26 @@ describe('VoyageView', () => {
     expect(useVoyageStore.getState().progress?.status).toBe('running');
   });
 
-  it('点击结束 → progress.status=aborted', () => {
+  it('点击结束 → progress.status=aborted', async () => {
     startVoyage();
-    render(<VoyageView />);
+    await act(async () => {
+      render(<VoyageView />);
+    });
 
     fireEvent.click(screen.getByRole('button', { name: '结束' }));
     expect(useVoyageStore.getState().progress?.status).toBe('aborted');
+  });
+
+  it('S25 仪表盘：航行进度显示出发地→目的地星名 + 引擎功率/双时间轴', async () => {
+    startVoyage();
+    await act(async () => {
+      render(<VoyageView />);
+    });
+    const gauge = screen.getByTestId('voyage-progress-gauge');
+    expect(gauge).toHaveTextContent('太阳系');
+    expect(gauge).toHaveTextContent(/比邻星/);
+    expect(screen.getByText('引擎功率')).toBeInTheDocument();
+    expect(screen.getByText('航行速度')).toBeInTheDocument();
+    expect(screen.getByText(/船上已过/)).toBeInTheDocument();
   });
 });

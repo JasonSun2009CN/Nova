@@ -188,7 +188,8 @@ test.describe('星图视图 (S16 R3F)', () => {
     await page.getByRole('button', { name: '启动航行' }).click();
     await expect(page.getByTestId('voyage-view')).toBeVisible({ timeout: 20_000 });
 
-    // 航行视图显示真实目的地名
+    // 航行视图显示真实目的地名 + R3F 星场（S23 真实星表化）
     await expect(page.getByTestId('voyage-view').getByText(/半人马/)).toBeVisible();
+    await expect(page.getByTestId('voyage-star-field')).toBeVisible({ timeout: 20_000 });
   });
 });

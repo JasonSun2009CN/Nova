@@ -1,9 +1,21 @@
+import { lazy, Suspense, useEffect, useMemo } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-import { VoyageStarFlow } from '@/components/VoyageStarFlow';
-import { getDestinationName } from '@/data/destination-stars';
+import { getDestinationName, starDisplayName } from '@/data/destination-stars';
+import { DEFAULT_ENGINE_TIER } from '@/engine';
+import { useCatalogStore } from '@/store/useCatalogStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
-import { formatDurationMs, formatGamma, formatLy, formatVOverC } from '@/utils/format';
+import {
+  formatDurationMs,
+  formatFocusEstimate,
+  formatGamma,
+  formatLy,
+  formatVOverC,
+} from '@/utils/format';
+
+const VoyageStarField = lazy(() =>
+  import('@/engine/renderer/VoyageStarField').then((m) => ({ default: m.VoyageStarField })),
+);
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
@@ -14,23 +26,105 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
+function VoyageProgressGauge({
+  originName,
+  destName,
+  fraction,
+  traveledLy,
+}: {
+  originName: string;
+  destName: string | null;
+  fraction: number | null;
+  traveledLy: number;
+}) {
+  if (destName == null) {
+    return (
+      <div className="flex w-full items-center justify-between text-sm text-deep-200">
+        <span>自由漂流</span>
+        <span className="font-mono text-xs text-deep-400 tabular-nums">
+          已航行 {formatLy(traveledLy)}
+        </span>
+      </div>
+    );
+  }
+  const pct = fraction != null ? Math.min(100, Math.max(0, fraction * 100)) : 0;
+  return (
+    <div data-testid="voyage-progress-gauge" className="w-full">
+      <div className="flex items-center justify-between gap-3 text-sm">
+        <span className="max-w-[38%] truncate text-deep-200">{originName}</span>
+        <span className="font-mono text-xs text-deep-400 tabular-nums">{pct.toFixed(0)}%</span>
+        <span className="max-w-[38%] truncate text-right text-deep-200">{destName}</span>
+      </div>
+      <div className="mt-2 flex items-center gap-2">
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-star-gold" aria-hidden="true" />
+        <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-surface-elevated">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-star-gold transition-[width] duration-500 ease-out"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-star-gold" aria-hidden="true" />
+      </div>
+    </div>
+  );
+}
+
 export function VoyageView() {
   const progress = useVoyageStore((s) => s.progress);
   const destStarId = useVoyageStore((s) => s.destStarId);
+  const originStarId = useVoyageStore((s) => s.originStarId);
   const resumedFromSnapshot = useVoyageStore((s) => s.resumedFromSnapshot);
   const pause = useVoyageStore((s) => s.pause);
   const resume = useVoyageStore((s) => s.resume);
   const abort = useVoyageStore((s) => s.abort);
+  const catalogStars = useCatalogStore((s) => s.stars);
+
+  useEffect(() => {
+    void useCatalogStore.getState().load();
+  }, []);
+
+  const originStar = useMemo(
+    () => catalogStars.find((s) => s.id === originStarId) ?? null,
+    [catalogStars, originStarId],
+  );
+  const destStar = useMemo(
+    () => catalogStars.find((s) => s.id === destStarId) ?? null,
+    [catalogStars, destStarId],
+  );
+  const fieldStars = useMemo(
+    () => catalogStars.filter((s) => s.id !== originStarId),
+    [catalogStars, originStarId],
+  );
+  const legLy = useMemo(() => {
+    if (originStar == null || destStar == null) return null;
+    const A = originStar.coords.cartesian;
+    const B = destStar.coords.cartesian;
+    return Math.hypot(A.xLy - B.xLy, A.yLy - B.yLy, A.zLy - B.zLy);
+  }, [originStar, destStar]);
+  const originName = useMemo(() => {
+    if (originStarId === 'hip-sol') return '太阳系';
+    if (originStar != null) return starDisplayName(originStar);
+    return getDestinationName(originStarId) ?? '太阳系';
+  }, [originStarId, originStar]);
+  const destName = useMemo(() => {
+    if (destStar != null) return starDisplayName(destStar);
+    return getDestinationName(destStarId);
+  }, [destStar, destStarId]);
 
   if (progress == null) return null;
 
   const status = progress.status;
   const active = status === 'running';
   const remaining = progress.remainingFocusMs ?? progress.elapsedFocusMs;
-  const total = progress.focusTotalMs;
-  const pct =
-    total != null && total > 0 ? Math.min(100, (progress.elapsedFocusMs / total) * 100) : 0;
-  const destName = getDestinationName(destStarId);
+  const elapsedFocusMs = progress.elapsedFocusMs;
+  const gamma = progress.gamma;
+  const vOverC = progress.vOverC;
+  const traveledLy = progress.traveledLy;
+  const remainingLy = destStar != null && legLy != null ? Math.max(0, legLy - traveledLy) : null;
+  const fraction = destStar != null && legLy != null && legLy > 0 ? traveledLy / legLy : null;
+  const earthElapsed = (elapsedFocusMs / 60000) * gamma;
+  const earthRemaining = (remaining / 60000) * gamma;
+  const powerPct = Math.min(100, (gamma / DEFAULT_ENGINE_TIER.gammaMax) * 100);
 
   return (
     <section
@@ -38,25 +132,34 @@ export function VoyageView() {
       className="relative flex h-full w-full flex-1 animate-fade-up flex-col overflow-hidden"
     >
       <div className="absolute inset-0">
-        <VoyageStarFlow speed={progress.vOverC} active={active} />
+        <Suspense
+          fallback={
+            <div
+              className="h-full w-full"
+              style={{
+                background:
+                  'radial-gradient(120% 120% at 50% 0%, var(--color-deep-900) 0%, var(--color-deep-950) 58%)',
+              }}
+            />
+          }
+        >
+          <VoyageStarField
+            stars={fieldStars}
+            originStar={originStar}
+            destStar={destStar}
+            traveledLy={progress.traveledLy}
+            legLy={legLy}
+          />
+        </Suspense>
       </div>
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-between px-6 pb-8 pt-5">
-        <div className="flex w-full items-center justify-between">
-          <div className="max-w-[70%] truncate text-sm text-deep-200">
-            {destName != null ? (
-              <>
-                <span className="text-star-gold">前往 </span>
-                {destName}
-              </>
-            ) : (
-              '自由漂流'
-            )}
-          </div>
-          <div className="font-mono text-xs text-deep-400 tabular-nums">
-            已用 {formatDurationMs(progress.elapsedFocusMs)}
-          </div>
-        </div>
+        <VoyageProgressGauge
+          originName={originName}
+          destName={destName}
+          fraction={fraction}
+          traveledLy={traveledLy}
+        />
 
         <div className="text-center">
           {resumedFromSnapshot && (
@@ -86,26 +189,23 @@ export function VoyageView() {
               已暂停
             </div>
           )}
+          <div className="mt-3 text-xs text-deep-400">
+            船上已过 {formatDurationMs(elapsedFocusMs)} · 地球已过{' '}
+            {formatFocusEstimate(earthElapsed)}
+          </div>
         </div>
 
         <div className="w-full space-y-5">
           <div className="grid grid-cols-3 gap-2">
-            <Metric label="时间膨胀 γ" value={formatGamma(progress.gamma)} />
-            <Metric label="航行速度" value={formatVOverC(progress.vOverC)} />
-            <Metric label="已航行距离" value={formatLy(progress.traveledLy)} />
-          </div>
-
-          <div
-            className="h-1 w-full overflow-hidden rounded-full bg-surface-elevated"
-            role="progressbar"
-            aria-valuenow={pct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          >
-            <div
-              className="h-full rounded-full bg-star-gold transition-[width] duration-500 ease-out"
-              style={{ width: `${pct}%` }}
+            <Metric label="航行速度" value={formatVOverC(vOverC)} />
+            <Metric label="时间膨胀 γ" value={formatGamma(gamma)} />
+            <Metric label="已航行距离" value={formatLy(traveledLy)} />
+            <Metric label="剩余距离" value={remainingLy != null ? formatLy(remainingLy) : '—'} />
+            <Metric
+              label="预计到达"
+              value={destStar != null ? formatFocusEstimate(earthRemaining) : '—'}
             />
+            <Metric label="引擎功率" value={`${powerPct.toFixed(0)}%`} />
           </div>
 
           <div className="flex items-stretch gap-3">
