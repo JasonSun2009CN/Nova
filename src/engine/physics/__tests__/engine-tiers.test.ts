@@ -4,7 +4,9 @@ import {
   DEFAULT_ENGINE_TIER,
   ENGINE_TIERS,
   getEngineTierById,
+  getNextUnlock,
   getTierForGamma,
+  getUnlockedTier,
 } from '@/engine/physics/engine-tiers';
 import { reachableRadiusLy } from '@/engine/physics/lorentz';
 
@@ -64,5 +66,49 @@ describe('engine/physics/engine-tiers 引擎 γ 分级（ADR-0012）', () => {
     expect(getTierForGamma(20_000_001)).toBeNull();
     expect(getTierForGamma(1)).toBeNull();
     expect(getTierForGamma(Number.NaN)).toBeNull();
+  });
+
+  describe('getUnlockedTier() 按累计专注自动解锁', () => {
+    it('0 小时 → 常规引擎（默认）', () => {
+      expect(getUnlockedTier(0).id).toBe('standard');
+    });
+
+    it('10 小时整 → 曲速一级；差 1 秒仍常规', () => {
+      expect(getUnlockedTier(10).id).toBe('warp-1');
+      expect(getUnlockedTier(9.99).id).toBe('standard');
+    });
+
+    it('50 / 200 小时 → 曲速二 / 三级', () => {
+      expect(getUnlockedTier(50).id).toBe('warp-2');
+      expect(getUnlockedTier(200).id).toBe('warp-3');
+    });
+
+    it('跃迁引擎为里程碑（unlockFocusHours=null），永不因小时解锁', () => {
+      expect(getUnlockedTier(10_000).id).toBe('warp-3');
+    });
+
+    it('focusHours 非法抛 RangeError', () => {
+      expect(() => getUnlockedTier(-1)).toThrow(RangeError);
+      expect(() => getUnlockedTier(Number.NaN)).toThrow(RangeError);
+    });
+  });
+
+  describe('getNextUnlock() 升级路径', () => {
+    it('0 小时 → 下一级曲速一级，还差 10 小时', () => {
+      expect(getNextUnlock(0)).toEqual({ tier: ENGINE_TIERS[1], hoursRemaining: 10 });
+    });
+
+    it('累计 30 小时 → 下一级曲速二级，还差 20 小时', () => {
+      expect(getNextUnlock(30)).toEqual({ tier: ENGINE_TIERS[2], hoursRemaining: 20 });
+    });
+
+    it('已解锁曲速三级 → 无下一级（跃迁为里程碑不列）', () => {
+      expect(getNextUnlock(200)).toBeNull();
+      expect(getNextUnlock(1000)).toBeNull();
+    });
+
+    it('focusHours 非法抛 RangeError', () => {
+      expect(() => getNextUnlock(-5)).toThrow(RangeError);
+    });
   });
 });

@@ -12,14 +12,16 @@ import {
   starDistanceLy,
 } from '@/data/destination-stars';
 import {
-  DEFAULT_ENGINE_TIER,
   LIGHT_SPEED,
   cruisePlan,
+  getNextUnlock,
   getTierForGamma,
+  getUnlockedTier,
   lorentzFactor,
   minFocusMinutes,
 } from '@/engine';
 import { useCatalogStore } from '@/store/useCatalogStore';
+import { useHistoryStore } from '@/store/useHistoryStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
 import {
@@ -41,6 +43,7 @@ export function SetupPanel() {
   const currentStarId = useSettingsStore((s) => s.settings.currentStarId) ?? 'hip-sol';
   const catalogStars = useCatalogStore((s) => s.stars);
   const catalogStatus = useCatalogStore((s) => s.status);
+  const totalFocusHours = useHistoryStore((s) => s.stats?.totalFocusHours ?? 0);
   const touchedRef = useRef(false);
 
   useEffect(() => {
@@ -95,11 +98,13 @@ export function SetupPanel() {
   );
   const gamma = plan?.gamma ?? lorentzFactor(vOverC * LIGHT_SPEED);
   const speed = plan?.vOverC ?? vOverC;
-  const reachable = plan == null || plan.gamma <= DEFAULT_ENGINE_TIER.gammaMax;
+  const currentEngine = useMemo(() => getUnlockedTier(totalFocusHours), [totalFocusHours]);
+  const nextUnlock = useMemo(() => getNextUnlock(totalFocusHours), [totalFocusHours]);
+  const reachable = plan == null || plan.gamma <= currentEngine.gammaMax;
   const upgradeTier =
-    plan != null && plan.gamma > DEFAULT_ENGINE_TIER.gammaMax ? getTierForGamma(plan.gamma) : null;
+    plan != null && plan.gamma > currentEngine.gammaMax ? getTierForGamma(plan.gamma) : null;
   const minFocusWithEngine =
-    destStar != null && legLy > 0 ? minFocusMinutes(legLy, DEFAULT_ENGINE_TIER.gammaMax) : null;
+    destStar != null && legLy > 0 ? minFocusMinutes(legLy, currentEngine.gammaMax) : null;
   const originOptions = useMemo(() => {
     if (originStar == null) return destinationOptions;
     return destinationOptions.map((d) => {
@@ -110,9 +115,9 @@ export function SetupPanel() {
   const recommendation = useMemo(
     () =>
       destStar == null
-        ? recommendDestination(originOptions, minutes, DEFAULT_ENGINE_TIER.gammaMax)
+        ? recommendDestination(originOptions, minutes, currentEngine.gammaMax)
         : null,
-    [destStar, originOptions, minutes],
+    [destStar, originOptions, minutes, currentEngine],
   );
 
   const handleCustomChange = (raw: string) => {
@@ -259,6 +264,26 @@ export function SetupPanel() {
             </>
           )}
         </div>
+
+        <div
+          data-testid="engine-status"
+          className="flex items-center justify-between border-t border-[var(--color-glass-border)] pt-5"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-deep-300">当前引擎</span>
+            <span className="rounded-md border border-star-gold/40 px-1.5 py-0.5 text-xs text-star-gold">
+              {currentEngine.name}
+            </span>
+          </div>
+          {nextUnlock != null ? (
+            <span className="text-xs text-deep-500">
+              下一级 {nextUnlock.tier.name} · 再{' '}
+              {formatFocusEstimate(nextUnlock.hoursRemaining * 60)}
+            </span>
+          ) : (
+            <span className="text-xs text-deep-500">已解锁全部曲速引擎</span>
+          )}
+        </div>
       </div>
 
       {plan != null && !reachable && destStar != null && (
@@ -267,10 +292,8 @@ export function SetupPanel() {
           className="rounded-xl border border-star-red/40 bg-star-red/5 px-4 py-3"
         >
           <p className="text-xs leading-relaxed text-deep-300">
-            {DEFAULT_ENGINE_TIER.name}（γ 上限{' '}
-            <span className="font-mono text-star-red">
-              {formatGamma(DEFAULT_ENGINE_TIER.gammaMax)}
-            </span>
+            {currentEngine.name}（γ 上限{' '}
+            <span className="font-mono text-star-red">{formatGamma(currentEngine.gammaMax)}</span>
             ）无法在 {formatMinuteLabel(minutes)} 内抵达 {destStar.name}
           </p>
           <p className="mt-1 text-xs leading-relaxed text-deep-400">
@@ -287,6 +310,15 @@ export function SetupPanel() {
               </>
             )}
           </p>
+          {nextUnlock != null && (
+            <p className="mt-1 text-xs leading-relaxed text-deep-400">
+              升级路径：再累计专注{' '}
+              <span className="text-deep-200">
+                {formatFocusEstimate(nextUnlock.hoursRemaining * 60)}
+              </span>{' '}
+              解锁 <span className="text-star-gold">{nextUnlock.tier.name}</span>
+            </p>
+          )}
         </div>
       )}
 

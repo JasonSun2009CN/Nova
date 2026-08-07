@@ -25,3 +25,31 @@ export function getTierForGamma(gamma: number): EngineTier | null {
   if (!Number.isFinite(gamma) || gamma <= 1) return null;
   return ENGINE_TIERS.find((t) => gamma <= t.gammaMax) ?? null;
 }
+
+export function getUnlockedTier(focusHours: number): EngineTier {
+  if (!Number.isFinite(focusHours) || focusHours < 0) {
+    throw new RangeError('getUnlockedTier: focusHours 必须为非负有限数值。');
+  }
+  let current = DEFAULT_ENGINE_TIER;
+  for (const tier of ENGINE_TIERS.slice(1)) {
+    if (tier.unlockFocusHours == null) break;
+    if (focusHours < tier.unlockFocusHours) break;
+    current = tier;
+  }
+  return current;
+}
+
+export function getNextUnlock(focusHours: number): {
+  tier: EngineTier;
+  hoursRemaining: number;
+} | null {
+  if (!Number.isFinite(focusHours) || focusHours < 0) {
+    throw new RangeError('getNextUnlock: focusHours 必须为非负有限数值。');
+  }
+  for (const tier of ENGINE_TIERS) {
+    if (tier.unlockFocusHours != null && focusHours < tier.unlockFocusHours) {
+      return { tier, hoursRemaining: tier.unlockFocusHours - focusHours };
+    }
+  }
+  return null;
+}
