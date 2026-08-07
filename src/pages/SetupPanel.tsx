@@ -114,10 +114,10 @@ export function SetupPanel() {
   }, [originStar, destinationOptions, catalogStars]);
   const recommendation = useMemo(
     () =>
-      destStar == null
+      destStar == null || !reachable
         ? recommendDestination(originOptions, minutes, currentEngine.gammaMax)
         : null,
-    [destStar, originOptions, minutes, currentEngine],
+    [destStar, originOptions, minutes, currentEngine, reachable],
   );
 
   const handleCustomChange = (raw: string) => {
@@ -216,7 +216,7 @@ export function SetupPanel() {
               className="mt-3 flex items-center justify-between gap-2"
             >
               <p className="text-xs text-deep-400">
-                推荐目的地：
+                {destStar != null && !reachable ? '当前目的地不可达，可改选：' : '推荐目的地：'}
                 <span className="text-deep-200">{recommendation.name}</span> ·{' '}
                 {formatLy(recommendation.distanceLy)}
               </p>

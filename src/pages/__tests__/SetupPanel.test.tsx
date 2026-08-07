@@ -147,6 +147,14 @@ describe('SetupPanel', () => {
     expect(screen.queryByText(/推荐目的地/)).not.toBeInTheDocument();
   });
 
+  it('选不可达目的地（织女星 25 分钟需曲速二级）→ 显示可改选推荐', () => {
+    render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
+    const recommend = screen.getByTestId('recommend-destination');
+    expect(recommend).toHaveTextContent(/当前目的地不可达，可改选/);
+    expect(recommend).toHaveTextContent(/·/);
+  });
+
   it('选中目的地后由专注时长推算航行速度（巡航速度+γ+地球历时）', () => {
     render(<SetupPanel />);
     fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-70890' } });
