@@ -4,9 +4,11 @@ import type { Mesh } from 'three';
 
 import type { Star } from '@/engine/contract/catalog-types';
 import { blueShiftColor, dopplerFactor } from '@/engine/renderer/doppler';
+import { NearFieldFlow } from '@/engine/renderer/NearFieldFlow';
 import { StarField } from '@/engine/renderer/StarField';
 import { spectralColor } from '@/engine/renderer/star-colors';
 import { VoyageCameraRig, type Position3 } from '@/engine/renderer/VoyageCameraRig';
+import { easeOutCubic, transitionProgress, type VoyagePhase } from '@/engine/renderer/warp-flow';
 
 const VOYAGE_SCALE = 0.45;
 const FREE_DRIFT_DIRECTION: Position3 = [0, 0, 1];
@@ -46,7 +48,10 @@ type VoyageStarFieldProps = {
   vOverC: number;
   traveledLy: number;
   legLy: number | null;
+  phase: VoyagePhase;
 };
+
+const ARRIVE_SETTLE_MIN = 0.92;
 
 function worldOf(star: Star): Position3 {
   const c = star.coords.cartesian;
@@ -57,23 +62,36 @@ function DestinationStar({
   position,
   color,
   fraction,
+  phase,
 }: {
   position: Position3;
   color: [number, number, number];
   fraction: number;
+  phase: VoyagePhase;
 }) {
   const camera = useThree((s) => s.camera);
   const height = useThree((s) => s.size.height);
   const ref = useRef<Mesh | null>(null);
+  const arriveClockRef = useRef(0);
+  const prevPhaseRef = useRef<VoyagePhase>(phase);
   const uniforms = useMemo(() => ({ uColor: { value: color } }), [color]);
 
-  useFrame(() => {
+  useFrame((_, delta) => {
+    if (prevPhaseRef.current !== phase) {
+      prevPhaseRef.current = phase;
+      arriveClockRef.current = 0;
+    }
+    arriveClockRef.current += delta * 1000;
+    const arrive =
+      phase === 'arriving' ? transitionProgress('arriving', arriveClockRef.current) : 0;
+
     const mesh = ref.current;
     if (mesh == null) return;
     mesh.position.set(position[0], position[1], position[2]);
     mesh.lookAt(camera.position);
+    const settle = ARRIVE_SETTLE_MIN + (1 - ARRIVE_SETTLE_MIN) * easeOutCubic(arrive);
     const pixels =
-      STAR_START_PX + (STAR_END_PX - STAR_START_PX) * Math.min(1, Math.max(0, fraction));
+      (STAR_START_PX + (STAR_END_PX - STAR_START_PX) * Math.min(1, Math.max(0, fraction))) * settle;
     const dist = Math.max(mesh.position.distanceTo(camera.position), 0.05);
     const halfFov = (FOV / 2) * (Math.PI / 180);
     const worldScale = (pixels / height) * 2 * dist * Math.tan(halfFov);
@@ -102,6 +120,7 @@ export function VoyageStarField({
   vOverC,
   traveledLy,
   legLy,
+  phase,
 }: VoyageStarFieldProps) {
   const originWorld = useMemo(
     () => (originStar != null ? worldOf(originStar) : null),
@@ -136,8 +155,14 @@ export function VoyageStarField({
           doppler={{ gamma, beta: vOverC }}
         />
         {destStar != null && destWorld != null && destColor != null && (
-          <DestinationStar position={destWorld} color={destColor} fraction={fraction} />
+          <DestinationStar
+            position={destWorld}
+            color={destColor}
+            fraction={fraction}
+            phase={phase}
+          />
         )}
+        {(phase === 'launching' || phase === 'braking') && <NearFieldFlow phase={phase} />}
         <VoyageCameraRig
           origin={originWorld}
           target={destWorld}
