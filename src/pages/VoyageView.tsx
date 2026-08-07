@@ -2,9 +2,10 @@ import { lazy, Suspense, useEffect, useMemo } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import { getDestinationName, starDisplayName } from '@/data/destination-stars';
-import { DEFAULT_ENGINE_TIER } from '@/engine';
+import { getUnlockedTier } from '@/engine';
 import type { VoyagePhase } from '@/engine/renderer/warp-flow';
 import { useCatalogStore } from '@/store/useCatalogStore';
+import { useHistoryStore } from '@/store/useHistoryStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
 import {
   formatDurationMs,
@@ -79,6 +80,7 @@ export function VoyageView({ phase = null }: { phase?: VoyagePhase }) {
   const resume = useVoyageStore((s) => s.resume);
   const abort = useVoyageStore((s) => s.abort);
   const catalogStars = useCatalogStore((s) => s.stars);
+  const totalFocusHours = useHistoryStore((s) => s.stats?.totalFocusHours ?? 0);
 
   useEffect(() => {
     void useCatalogStore.getState().load();
@@ -126,7 +128,7 @@ export function VoyageView({ phase = null }: { phase?: VoyagePhase }) {
   const fraction = destStar != null && legLy != null && legLy > 0 ? traveledLy / legLy : null;
   const earthElapsed = (elapsedFocusMs / 60000) * gamma;
   const earthRemaining = (remaining / 60000) * gamma;
-  const powerPct = Math.min(100, (gamma / DEFAULT_ENGINE_TIER.gammaMax) * 100);
+  const powerPct = Math.min(100, (gamma / getUnlockedTier(totalFocusHours).gammaMax) * 100);
 
   return (
     <section

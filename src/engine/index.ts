@@ -15,7 +15,9 @@ export {
   DEFAULT_ENGINE_TIER,
   ENGINE_TIERS,
   getEngineTierById,
+  getNextUnlock,
   getTierForGamma,
+  getUnlockedTier,
 } from './physics/engine-tiers';
 
 export type * from './contract/voyage-types';

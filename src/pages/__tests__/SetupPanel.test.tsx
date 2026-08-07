@@ -11,6 +11,7 @@ import {
   resetStoreDepsForTest,
   resetVoyageControllerForTest,
   useCatalogStore,
+  useHistoryStore,
   useSettingsStore,
   useVoyageStore,
 } from '@/store/index';
@@ -69,6 +70,12 @@ function resetStores() {
     error: null,
   });
   useCatalogStore.getState().reset();
+  useHistoryStore.setState({
+    records: [],
+    stats: null,
+    loading: false,
+    error: null,
+  });
   resetStoreDepsForTest();
 }
 
@@ -138,6 +145,14 @@ describe('SetupPanel', () => {
     render(<SetupPanel />);
     fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-70890' } });
     expect(screen.queryByText(/推荐目的地/)).not.toBeInTheDocument();
+  });
+
+  it('选不可达目的地（织女星 25 分钟需曲速二级）→ 显示可改选推荐', () => {
+    render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
+    const recommend = screen.getByTestId('recommend-destination');
+    expect(recommend).toHaveTextContent(/当前目的地不可达，可改选/);
+    expect(recommend).toHaveTextContent(/·/);
   });
 
   it('选中目的地后由专注时长推算航行速度（巡航速度+γ+地球历时）', () => {
@@ -263,5 +278,61 @@ describe('SetupPanel', () => {
     fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
     expect(screen.queryByTestId('unreachable-warning')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: '启动航行' })).toBeEnabled();
+  });
+
+  it('引擎解锁（S27）：累计 10h 解锁曲速一级，织女星 25 分钟需曲速二级 → 升级路径指向曲速二级', () => {
+    useHistoryStore.setState({
+      records: [],
+      stats: { total: 1, totalFocusHours: 10, totalTraveledLy: 0, completedVoyages: 1 },
+      loading: false,
+      error: null,
+    });
+    render(<SetupPanel />);
+    expect(screen.getByTestId('engine-status')).toHaveTextContent(/曲速一级/);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
+    const warning = screen.getByTestId('unreachable-warning');
+    expect(warning).toHaveTextContent(/曲速一级/);
+    expect(warning).toHaveTextContent(/解锁 曲速二级/);
+    expect(warning).toHaveTextContent(/升级路径/);
+    expect(screen.getByRole('button', { name: '启动航行' })).toBeDisabled();
+  });
+
+  it('引擎解锁（S27）：累计 50h 解锁曲速二级，织女星 25 分钟可达', () => {
+    useHistoryStore.setState({
+      records: [],
+      stats: { total: 1, totalFocusHours: 50, totalTraveledLy: 0, completedVoyages: 1 },
+      loading: false,
+      error: null,
+    });
+    render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
+    expect(screen.queryByTestId('unreachable-warning')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '启动航行' })).toBeEnabled();
+    expect(screen.getByTestId('engine-status')).toHaveTextContent(/曲速二级/);
+  });
+
+  it('引擎解锁（S27）：未解锁时显示升级路径「再累计 X 解锁下一级」', () => {
+    useHistoryStore.setState({
+      records: [],
+      stats: { total: 1, totalFocusHours: 3, totalTraveledLy: 0, completedVoyages: 1 },
+      loading: false,
+      error: null,
+    });
+    render(<SetupPanel />);
+    expect(screen.getByTestId('engine-status')).toHaveTextContent(/常规引擎/);
+    expect(screen.getByTestId('engine-status')).toHaveTextContent(/曲速一级/);
+    expect(screen.getByTestId('engine-status')).toHaveTextContent(/再 .*7 小时/);
+  });
+
+  it('引擎解锁（S27）：已解锁曲速三级 → 引擎状态显示已全部解锁', () => {
+    useHistoryStore.setState({
+      records: [],
+      stats: { total: 1, totalFocusHours: 200, totalTraveledLy: 0, completedVoyages: 1 },
+      loading: false,
+      error: null,
+    });
+    render(<SetupPanel />);
+    expect(screen.getByTestId('engine-status')).toHaveTextContent(/曲速三级/);
+    expect(screen.getByTestId('engine-status')).toHaveTextContent(/已解锁全部曲速引擎/);
   });
 });
