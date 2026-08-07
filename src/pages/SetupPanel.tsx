@@ -9,6 +9,7 @@ import {
   findDestinationOption,
   recommendDestination,
   starDisplayName,
+  starDistanceLy,
 } from '@/data/destination-stars';
 import { LIGHT_SPEED, cruisePlan, lorentzFactor } from '@/engine';
 import { useCatalogStore } from '@/store/useCatalogStore';
@@ -67,6 +68,11 @@ export function SetupPanel() {
     }
     return destStar?.distanceLy ?? 0;
   }, [originStar, destStarObj, destStar]);
+  const originSolarLy =
+    originStar != null
+      ? starDistanceLy(originStar)
+      : (findDestinationOption(originStarId, catalogStars)?.distanceLy ?? 0);
+  const destSolarLy = destStar?.distanceLy ?? 0;
   const plan = useMemo(
     () =>
       destStar != null && legLy > 0
@@ -123,11 +129,19 @@ export function SetupPanel() {
     >
       <div>
         <h2 className="font-display text-xl font-medium tracking-wide">规划一次星际航行</h2>
-        <p className="mt-1.5 text-sm text-deep-400">
-          {destStar != null
-            ? `${originName} → ${destStar.name} · ${formatLy(legLy)}`
-            : `设定专注时长，飞船将从 ${originName} 出发`}
-        </p>
+        <div className="mt-1.5 space-y-1">
+          <p className="text-sm text-deep-400">
+            {destStar != null
+              ? `${originName} → ${destStar.name}`
+              : `设定专注时长，飞船将从 ${originName} 出发`}
+          </p>
+          {destStar != null && (
+            <p className="font-mono text-xs text-deep-500 tabular-nums">
+              出发地距太阳 {formatLy(originSolarLy)} · 目的地距太阳 {formatLy(destSolarLy)} ·
+              航行距离 {formatLy(legLy)}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="glass-card space-y-8 rounded-2xl p-8">

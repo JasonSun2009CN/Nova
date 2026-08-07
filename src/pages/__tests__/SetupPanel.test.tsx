@@ -6,6 +6,7 @@ import { cruisePlan } from '@/engine';
 import { protoToStar, type ProtoStar } from '@/engine/data/star-mapper';
 import { SetupPanel } from '@/pages/SetupPanel';
 import { DEFAULT_SETTINGS } from '@/storage/SettingsRepository';
+import { formatLy } from '@/utils/format';
 import {
   resetStoreDepsForTest,
   resetVoyageControllerForTest,
@@ -23,6 +24,30 @@ const ROSS_154: ProtoStar = {
   vMag: 10.4,
   absMag: 13.07,
   spectral: 'M3.5V',
+  tier: 'tier1-nearby-100ly',
+};
+
+const PROXIMA: ProtoStar = {
+  id: 'hip-70890',
+  properName: '比邻星',
+  raDeg: 217.4,
+  decDeg: -62.68,
+  distanceLy: 4.246,
+  vMag: 11.05,
+  absMag: 15.6,
+  spectral: 'M5.5V',
+  tier: 'tier1-nearby-100ly',
+};
+
+const VEGA: ProtoStar = {
+  id: 'hip-91262',
+  properName: '织女星',
+  raDeg: 279.23,
+  decDeg: 38.78,
+  distanceLy: 25.04,
+  vMag: 0.03,
+  absMag: 0.58,
+  spectral: 'A0V',
   tier: 'tier1-nearby-100ly',
 };
 
@@ -142,28 +167,6 @@ describe('SetupPanel', () => {
   });
 
   it('从非太阳系出发：预计专注按两星 leg 距离反推而非目的星太阳距', () => {
-    const PROXIMA: ProtoStar = {
-      id: 'hip-70890',
-      properName: '比邻星',
-      raDeg: 217.4,
-      decDeg: -62.68,
-      distanceLy: 4.246,
-      vMag: 11.05,
-      absMag: 15.6,
-      spectral: 'M5.5V',
-      tier: 'tier1-nearby-100ly',
-    };
-    const VEGA: ProtoStar = {
-      id: 'hip-91262',
-      properName: '织女星',
-      raDeg: 279.23,
-      decDeg: 38.78,
-      distanceLy: 25.04,
-      vMag: 0.03,
-      absMag: 0.58,
-      spectral: 'A0V',
-      tier: 'tier1-nearby-100ly',
-    };
     useSettingsStore.setState({
       settings: { ...DEFAULT_SETTINGS, currentStarId: 'hip-70890' },
       hydrated: true,
@@ -190,5 +193,50 @@ describe('SetupPanel', () => {
     const startedGamma = started?.gamma ?? 0;
     expect(startedGamma / plan.gamma).toBeCloseTo(1, 3);
     expect(startedGamma).not.toBeCloseTo(sunPlan.gamma, 1);
+  });
+
+  it('选择目的地后显示航行距离 + 两地距太阳（太阳系出发）', () => {
+    render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-70890' } });
+    expect(screen.getByText(/太阳系 → 比邻星/)).toBeInTheDocument();
+    expect(screen.getByText(/出发地距太阳 0\.000 ly/)).toBeInTheDocument();
+    expect(screen.getByText(/目的地距太阳 4\.25 ly/)).toBeInTheDocument();
+    expect(screen.getByText(/航行距离 4\.25 ly/)).toBeInTheDocument();
+  });
+
+  it('从非太阳系出发：显示出发地/目的地距太阳 + 航行距离（leg）', () => {
+    useSettingsStore.setState({
+      settings: { ...DEFAULT_SETTINGS, currentStarId: 'hip-70890' },
+      hydrated: true,
+      loading: false,
+      error: null,
+    });
+    useCatalogStore.setState({
+      stars: [protoToStar(PROXIMA), protoToStar(VEGA)],
+      status: 'ready',
+      source: 'cache',
+      error: null,
+    });
+    render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
+    const legLy = distanceBetweenStars(protoToStar(PROXIMA), protoToStar(VEGA));
+    expect(screen.getByText(/比邻星 → 织女星/)).toBeInTheDocument();
+    expect(screen.getByText(/出发地距太阳 4\.25 ly/)).toBeInTheDocument();
+    expect(screen.getByText(/目的地距太阳 25\.04 ly/)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`航行距离 ${formatLy(legLy)}`))).toBeInTheDocument();
+  });
+
+  it('非太阳出发但星表未加载：出发地距太阳回退硬编码表而非 0', () => {
+    useSettingsStore.setState({
+      settings: { ...DEFAULT_SETTINGS, currentStarId: 'hip-70890' },
+      hydrated: true,
+      loading: false,
+      error: null,
+    });
+    render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
+    expect(screen.getByText(/比邻星 Proxima Centauri → 织女一/)).toBeInTheDocument();
+    expect(screen.getByText(/出发地距太阳 4\.25 ly/)).toBeInTheDocument();
+    expect(screen.getByText(/目的地距太阳 25\.04 ly/)).toBeInTheDocument();
   });
 });
