@@ -45,11 +45,11 @@ describe('StarInfoCard', () => {
     });
   });
 
-  it('显示星名、距离与预计专注时长', () => {
+  it('显示星名、距离与最短专注', () => {
     render(<StarInfoCard star={protoToStar(ROSS_154)} onClose={() => {}} onComplete={() => {}} />);
     expect(screen.getByText(/Ross 154/)).toBeInTheDocument();
     expect(screen.getByText(/9.70 ly/)).toBeInTheDocument();
-    expect(screen.getByText(/预计专注时长/)).toBeInTheDocument();
+    expect(screen.getByText(/最短专注/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '设为目的地' })).toBeInTheDocument();
   });
 
@@ -60,7 +60,7 @@ describe('StarInfoCard', () => {
     expect(screen.getByRole('button', { name: '完成' })).toBeInTheDocument();
   });
 
-  it('无名字的星不可设目的地且不显示预计时长', () => {
+  it('无名字的星不可设目的地且不显示最短专注', () => {
     render(
       <StarInfoCard
         star={protoToStar({ ...ROSS_154, properName: undefined })}
@@ -68,7 +68,7 @@ describe('StarInfoCard', () => {
         onComplete={() => {}}
       />,
     );
-    expect(screen.queryByText(/预计专注时长/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/最短专注/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '设为目的地' })).not.toBeInTheDocument();
   });
 });

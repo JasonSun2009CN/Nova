@@ -17,10 +17,11 @@
 - **S20 星图搜索 + 推荐目的地（未 commit，等用户确认）**：`src/data/star-search.ts` `searchStars`（常用名 / bayer / flamsteed / HIP 编号 / 星座，评分排序）→ 星图弹窗顶部搜索框 `StarSearch`（下拉即选 → 弹信息卡）；`recommendDestination(options, focusMinutes)`（`cruisePlan` 反推 γ ≤ `RECOMMEND_MAX_GAMMA=50000` 的最远可达星，无可达时回退最近星）→ 设置页「推荐目的地」提示 + 选用按钮。星表加载中搜索显示「星表加载中…」而非误报无结果。
 - **增量3 变动出发地（已 commit `3f39e62`，随 S21 分支未 push，ADR-0013）**：出发地 = `settings.currentStarId`（上次目的地，完成航行后已写；默认 `hip-sol`）。`SetupPanel.handleStart` 与 `ResultView.handleRestart` 不再硬编码 `hip-sol`——改为以 `currentStarId` 为 origin；规划/推荐按出发地→目的地**实际两星距离**（`src/data/destination-stars.ts` 新增 `distanceBetweenStars` leg 距离），首航（太阳系出发）退化为目的地太阳距；设置页副标题显示「出发地 → 目的地」。
 - **S21 Phase 2 收尾 QA（已 commit `fbc3bae` + 空星图修复 `68c80bd`，均在 origin）**：`starmap-perf`（FPS 下限 + 无长卡顿 + 缩放/轨道/平移流畅度）+ `starmap.spec` 验收走查（半人马座α → 点星 → 设为目的地 → 航行）+ `generated-catalog` 抽样校验（13 颗已知星距离，8 单测通过）。ROADMAP 2.3 三项 + 验收标准已全部勾选。
+- **S22 统一飞行模型 + 引擎 γ 分级（ADR-0012，已提交分支 `feature/S22-unified-flight-model` 未合并）**：d=β·γ·τ 单一模型（`travelDistance`/`cruisePlan`/`requiredFocusMinutes` 收拢为同族）+ `ENGINE_TIERS` 五档引擎（常规 10万 / 曲速一级 40万 / 二级 120万 / 三级 500万 / 跃迁 2000万 × 解锁条件，跃迁为里程碑）+ 可达性 API（`requiredGamma` / `minFocusMinutes` / `reachableRadiusLy` / `isReachable`，引擎层纯函数）+ 退役 `RECOMMEND_MAX_GAMMA`（`recommendDestination` 改传 γ_max）+ 推荐按默认引擎 γ_max（默认 25 分钟 → 半人马座 α A）+ SetupPanel 不可达阻止（红色警告：所需 γ / 解锁档位 / 当前引擎最短专注，禁用启动）+ StarInfoCard 信息卡改「最短专注」（比邻星 ≈22 分钟）。升级路径「还需累计专注 X 小时」随 S27（跨历史 stats 聚合器）。
 - **Phase 3 重规划（本次讨论，三处文档已同步至 S38）**：S22~S38 重排——新增 **S22 统一飞行模型**（合并 `travelDistance`/`cruisePlan` 为 d=β·γ·τ + 引擎 γ_max 约束，退役 `RECOMMEND_MAX_GAMMA`，ADR-0012）；**S23 航行视图真实星表化**（R3F 复用 renderer，ADR-0011）；**S24 前向蓝移 Doppler**（只蓝不红，红移已砍）；**S27 引擎 γ 分级解锁** + 不可达阻止/升级路径；**砍掉瞬时跃迁**（跃迁 = 最高 γ 档）。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
-- **当前分支**：`feature/S21-phase2-qa`（HEAD `91e0655`；增量3 `3f39e62` + CLAUDE.md `91e0655` 已 commit 未 push，领先 origin 2 commits；S21 QA `fbc3bae` / `68c80bd` 已在 origin）。（基线：`pnpm check` 4/4、**234 单测**、27 test files，见下方 2.2。）
-- **文档已同步**：ROADMAP Phase 2 状态 + 2.1 搜索勾选 + **2.3 质量保障勾选**、ADR 索引（13 份）、**STAGES S21 已标完成**、本文件均已刷新至 S21 + 增量3。
+- **当前分支**：`feature/S22-unified-flight-model`（自 `feature/S21-phase2-qa` 分出；S22 已 commit 未 push；S21 收尾分支内容：增量3 `3f39e62` + CLAUDE.md `91e0655` + `c83e579` + S21 QA `fbc3bae` / `68c80bd`）。（基线：`pnpm check` 4/4、**258 单测**、28 test files，见下方 2.2。）
+- **文档已同步**：ROADMAP Phase 3 加状态行（S22 已交付）、ADR 索引（13 份）、**STAGES S22 已标 🚧 已提交**、本文件均已刷新至 S22。
 - **注意**：用户在某时刻编辑了 ROADMAP，移除了 2.2 的「推荐目的地 / 多级跃迁」两个 checkbox（已按建议实施推荐目的地但保留 checkbox 移除，勿擅自加回）。
 
 ---
@@ -140,28 +141,29 @@ pnpm test:e2e
 
 ### 2.2 当前已完成（S11~S21 + 用户驱动增量 + 增量3）
 
-| Sprint | 内容                                                                    | 状态                                       |
-| ------ | ----------------------------------------------------------------------- | ------------------------------------------ |
-| S11    | Zustand 3 stores                                                        | ✅ 7/10/6 actions + 测试                   |
-| S12    | React UI（Setup/Voyage/Result/History + App 路由）                      | ✅                                         |
-| S13    | Web Worker 计时 + localStorage 崩溃恢复                                 | ✅                                         |
-| S14    | GitHub Actions CI + mvp.e2e（3 浏览器）                                 | ✅                                         |
-| S15    | PWA 离线 + manifest + README 指引                                       | ✅                                         |
-| S16    | R3F 3D 星空渲染器 + 星图视图（懒加载）                                  | ✅                                         |
-| S17    | 星图弹窗 + 点星确认设目的地 + 当前位置标记（+ 拾取/分层）               | ✅                                         |
-| 增量   | UI 极简克制化重设计 + 术语弹窗 + 单一暗色 Neutral 主题                  | ✅                                         |
-| 增量2  | 星图双视角（出发地/全览）+ 半径圈 + 出发地随航行更新                    | ✅                                         |
-| 增量3  | 变动出发地（出发地 = 上次目的地）+ 两星 leg 距离规划（ADR-0013）        | ✅ commit 3f39e62 未 push                  |
-| S18    | 目的地数据源统一（真实星表）+ 反推预计专注时长                          | ✅ 已合并（PR #3）                         |
-| S19    | 时长滑杆 `DurationScrubber` + `cruisePlan` 反推航线                     | ✅ commit 945ec2e 未合并                   |
-| S20    | 星图搜索 `searchStars`/`StarSearch` + 推荐目的地 `recommendDestination` | ✅ commit c3817bf 未合并                   |
-| S21    | Phase 2 收尾 QA：perf / 验收走查 / 抽样校验，关闭 v0.2                  | ✅ commit fbc3bae + 68c80bd（已在 origin） |
+| Sprint | 内容                                                                                                      | 状态                                                 |
+| ------ | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| S11    | Zustand 3 stores                                                                                          | ✅ 7/10/6 actions + 测试                             |
+| S12    | React UI（Setup/Voyage/Result/History + App 路由）                                                        | ✅                                                   |
+| S13    | Web Worker 计时 + localStorage 崩溃恢复                                                                   | ✅                                                   |
+| S14    | GitHub Actions CI + mvp.e2e（3 浏览器）                                                                   | ✅                                                   |
+| S15    | PWA 离线 + manifest + README 指引                                                                         | ✅                                                   |
+| S16    | R3F 3D 星空渲染器 + 星图视图（懒加载）                                                                    | ✅                                                   |
+| S17    | 星图弹窗 + 点星确认设目的地 + 当前位置标记（+ 拾取/分层）                                                 | ✅                                                   |
+| 增量   | UI 极简克制化重设计 + 术语弹窗 + 单一暗色 Neutral 主题                                                    | ✅                                                   |
+| 增量2  | 星图双视角（出发地/全览）+ 半径圈 + 出发地随航行更新                                                      | ✅                                                   |
+| 增量3  | 变动出发地（出发地 = 上次目的地）+ 两星 leg 距离规划（ADR-0013）                                          | ✅ commit 3f39e62 未 push                            |
+| S18    | 目的地数据源统一（真实星表）+ 反推预计专注时长                                                            | ✅ 已合并（PR #3）                                   |
+| S19    | 时长滑杆 `DurationScrubber` + `cruisePlan` 反推航线                                                       | ✅ commit 945ec2e 未合并                             |
+| S20    | 星图搜索 `searchStars`/`StarSearch` + 推荐目的地 `recommendDestination`                                   | ✅ commit c3817bf 未合并                             |
+| S21    | Phase 2 收尾 QA：perf / 验收走查 / 抽样校验，关闭 v0.2                                                    | ✅ commit fbc3bae + 68c80bd（已在 origin）           |
+| S22    | 统一飞行模型 d=β·γ·τ + ENGINE_TIERS 五档 + 可达性 API + 退役 RECOMMEND_MAX_GAMMA + 不可达阻止（ADR-0012） | 🚧 commit（feature/S22-unified-flight-model 未合并） |
 
-**验证基线**：`pnpm check` 4/4（**234 单测**，27 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap WebGL 仅 chromium）；`pnpm build` 主包 ~64KB（three 967KB 懒加载进星图弹窗 chunk）。
+**验证基线**：`pnpm check` 4/4（**258 单测**，28 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap WebGL 仅 chromium）；`pnpm build` 主包 ~64KB（three 967KB 懒加载进星图弹窗 chunk）。
 
-### 2.3 下一步（Phase 2 星图导航，按 ROADMAP）
+### 2.3 下一步（Phase 3 航行系统，按 ROADMAP）
 
-Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭，下一阶段为 S22 统一飞行模型。Phase 2 期间的建议顺序回顾：
+Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型 + 引擎 γ 分级已交付**（ADR-0012，见上方当前进度）。下一阶段为 **S23 航行视图真实星表化**（R3F 复用 renderer，ADR-0011）→ S24 前向蓝移 → S26 跃迁过渡 →（S25 仪表盘可并行）→ S27 引擎解锁 + 任务模式 → S28 白噪音 → S29 收尾 v0.3，顺序见 STAGES 第五节。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
 
 | 顺序 | 内容                                                                                                    | 说明                                                                                                                 |
 | ---- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -172,7 +174,7 @@ Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注�
 | 5    | ~~星图搜索（常用名 + HIP 编号）~~（**已交付 S20**）+ 定位当前 + 多级跃迁                                | `searchStars` + `StarSearch` 弹窗顶部搜索下拉即选；定位当前/多级跃迁远期                                             |
 | 6    | ~~Phase 2 收尾：2.3 质量保障（60fps / 缩放平移流畅度 / 数据抽样校验）+ 验收标准走查~~（**已交付 S21**） | `starmap-perf` + `starmap.spec` 验收走查 + `generated-catalog` 抽样校验（commit `fbc3bae`）                          |
 
-**远期**：S24 前向蓝移 Doppler（只蓝不红）；S36 Gaia 百万星（tier3 单独 KDTree + GPU BufferGeometry）。
+**远期**：S36 Gaia 百万星（tier3 单独 KDTree + GPU BufferGeometry）；星图「定位当前位置」一键回中 + 多级跃迁（STAGES 第六节）。
 
 ---
 

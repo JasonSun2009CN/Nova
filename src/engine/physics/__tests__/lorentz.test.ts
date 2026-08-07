@@ -3,8 +3,12 @@ import { describe, expect, it } from 'vitest';
 import {
   LIGHT_SPEED,
   cruisePlan,
+  isReachable,
   lorentzFactor,
+  minFocusMinutes,
+  reachableRadiusLy,
   requiredFocusMinutes,
+  requiredGamma,
   travelDistance,
 } from '@/engine/physics/lorentz';
 
@@ -158,6 +162,101 @@ describe('engine/physics/lorentz', () => {
       expect(() => cruisePlan({ focusMinutes: -1, distanceLy: 4.246 })).toThrow(RangeError);
       expect(() => cruisePlan({ focusMinutes: 25, distanceLy: 0 })).toThrow(RangeError);
       expect(() => cruisePlan({ focusMinutes: 25, distanceLy: Number.NaN })).toThrow(RangeError);
+    });
+  });
+
+  describe('requiredGamma() 所需 γ（d=β·γ·τ 统一模型）', () => {
+    it('25 分钟 → 比邻星 4.246ly：γ≈89,300，与 cruisePlan 一致', () => {
+      const gamma = requiredGamma(4.246, 25);
+      expect(gamma).toBeGreaterThan(89_000);
+      expect(gamma).toBeLessThan(90_000);
+      expect(gamma).toBeCloseTo(cruisePlan({ focusMinutes: 25, distanceLy: 4.246 }).gamma, 6);
+    });
+
+    it('25 分钟 → 织女 25.04ly：γ≈526,000，超出常规引擎 γ_max（10 万）', () => {
+      const gamma = requiredGamma(25.04, 25);
+      expect(gamma).toBeGreaterThan(520_000);
+      expect(gamma).toBeLessThan(530_000);
+    });
+
+    it('distanceLy 或 focusMinutes 非正抛 RangeError', () => {
+      expect(() => requiredGamma(0, 25)).toThrow(RangeError);
+      expect(() => requiredGamma(-1, 25)).toThrow(RangeError);
+      expect(() => requiredGamma(4.246, 0)).toThrow(RangeError);
+      expect(() => requiredGamma(4.246, Number.NaN)).toThrow(RangeError);
+    });
+  });
+
+  describe('minFocusMinutes() 当前引擎最短专注', () => {
+    it('比邻星 @γ_max=10 万 ≈ 22 分钟（ADR 默认引擎 25 分钟可达近星）', () => {
+      const minutes = minFocusMinutes(4.246, 100_000);
+      expect(minutes).toBeGreaterThan(22);
+      expect(minutes).toBeLessThan(23);
+    });
+
+    it('织女 25.04ly @γ_max=10 万 ≈ 2.2 小时', () => {
+      const minutes = minFocusMinutes(25.04, 100_000);
+      expect(minutes).toBeGreaterThan(130);
+      expect(minutes).toBeLessThan(133);
+    });
+
+    it('γ_max 更大 → 最短专注更少；距离更远 → 最短专注更多', () => {
+      expect(minFocusMinutes(4.246, 400_000)).toBeLessThan(minFocusMinutes(4.246, 100_000));
+      expect(minFocusMinutes(25.04, 100_000)).toBeGreaterThan(minFocusMinutes(4.246, 100_000));
+    });
+
+    it('distanceLy 非正或 gammaMax ≤ 1 抛 RangeError', () => {
+      expect(() => minFocusMinutes(0, 100_000)).toThrow(RangeError);
+      expect(() => minFocusMinutes(-1, 100_000)).toThrow(RangeError);
+      expect(() => minFocusMinutes(4.246, 1)).toThrow(RangeError);
+      expect(() => minFocusMinutes(4.246, Number.NaN)).toThrow(RangeError);
+    });
+  });
+
+  describe('reachableRadiusLy() 引擎可达半径', () => {
+    it('25 分钟 @γ_max=10 万 ≈ 4.76ly（ADR 表 常规引擎 ~4.8ly）', () => {
+      const radius = reachableRadiusLy(100_000, 25);
+      expect(radius).toBeGreaterThan(4.7);
+      expect(radius).toBeLessThan(4.8);
+    });
+
+    it('25 分钟各档引擎可达半径对照 ADR 表（~19 / ~57 / ~238 / ~951ly）', () => {
+      expect(reachableRadiusLy(400_000, 25)).toBeCloseTo(19.0, 1);
+      expect(reachableRadiusLy(1_200_000, 25)).toBeCloseTo(57.0, 1);
+      expect(reachableRadiusLy(5_000_000, 25)).toBeCloseTo(237.7, 0);
+      expect(reachableRadiusLy(20_000_000, 25)).toBeCloseTo(950.7, 0);
+    });
+
+    it('专注更长 → 可达半径更大', () => {
+      expect(reachableRadiusLy(100_000, 50)).toBeGreaterThan(reachableRadiusLy(100_000, 25));
+    });
+
+    it('gammaMax ≤ 1 或 focusMinutes 非正抛 RangeError', () => {
+      expect(() => reachableRadiusLy(1, 25)).toThrow(RangeError);
+      expect(() => reachableRadiusLy(100_000, 0)).toThrow(RangeError);
+      expect(() => reachableRadiusLy(100_000, Number.NaN)).toThrow(RangeError);
+    });
+  });
+
+  describe('isReachable() 可达性判定', () => {
+    it('比邻星 25 分钟 @常规引擎（γ_max=10 万）可达', () => {
+      expect(isReachable(4.246, 25, 100_000)).toBe(true);
+    });
+
+    it('织女 25 分钟 @常规引擎不可达，@曲速二级（1.2M）可达', () => {
+      expect(isReachable(25.04, 25, 100_000)).toBe(false);
+      expect(isReachable(25.04, 25, 1_200_000)).toBe(true);
+    });
+
+    it('拉长专注至 150 分钟 → 织女在常规引擎下变为可达', () => {
+      expect(isReachable(25.04, 120, 100_000)).toBe(false);
+      expect(isReachable(25.04, 150, 100_000)).toBe(true);
+    });
+
+    it('参数非法抛 RangeError', () => {
+      expect(() => isReachable(0, 25, 100_000)).toThrow(RangeError);
+      expect(() => isReachable(4.246, 0, 100_000)).toThrow(RangeError);
+      expect(() => isReachable(4.246, 25, 1)).toThrow(RangeError);
     });
   });
 });

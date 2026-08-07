@@ -183,8 +183,8 @@ test.describe('星图视图 (S16 R3F)', () => {
     const destValue = await page.getByLabel('目的地').inputValue();
     expect(destValue.length).toBeGreaterThan(0);
 
-    // 填 1 分钟 → 启动航行
-    await page.getByLabel('自定义专注时长（分钟）').fill('1');
+    // 填 25 分钟（常规引擎 γ_max=10 万下最短专注约 23 分钟，25 分钟可达）→ 启动航行
+    await page.getByLabel('自定义专注时长（分钟）').fill('25');
     await page.getByRole('button', { name: '启动航行' }).click();
     await expect(page.getByTestId('voyage-view')).toBeVisible({ timeout: 20_000 });
 

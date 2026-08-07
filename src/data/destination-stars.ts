@@ -79,16 +79,18 @@ export function isSettableDestination(star: Star): boolean {
   return star.properName != null;
 }
 
-export const RECOMMEND_MAX_GAMMA = 50_000;
-
 export function recommendDestination(
   options: readonly DestinationStar[],
   focusMinutes: number,
+  gammaMax: number,
 ): DestinationStar | null {
+  if (!(Number.isFinite(gammaMax) && gammaMax > 1)) {
+    throw new RangeError('recommendDestination: gammaMax 必须大于 1。');
+  }
   const withGamma = options
     .filter((s) => s.distanceLy > 0)
     .map((s) => ({ star: s, gamma: cruisePlan({ focusMinutes, distanceLy: s.distanceLy }).gamma }));
-  const reachable = withGamma.filter((r) => r.gamma <= RECOMMEND_MAX_GAMMA);
+  const reachable = withGamma.filter((r) => r.gamma <= gammaMax);
   if (reachable.length > 0) {
     return reachable.sort((a, b) => b.star.distanceLy - a.star.distanceLy)[0]!.star;
   }

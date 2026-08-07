@@ -124,14 +124,14 @@ describe('SetupPanel', () => {
     expect(screen.getByText(/太阳系 → Ross 154/)).toBeInTheDocument();
   });
 
-  it('未选目的地时显示推荐目的地（默认 25 分钟 → 比邻星）且点选用即选中', () => {
+  it('未选目的地时显示推荐目的地（默认 25 分钟 → 最远可达的半人马座 α A）且点选用即选中', () => {
     render(<SetupPanel />);
     const recommend = screen.getByTestId('recommend-destination');
     expect(recommend).toBeInTheDocument();
     expect(recommend).toHaveTextContent('推荐目的地');
-    expect(recommend).toHaveTextContent('比邻星');
+    expect(recommend).toHaveTextContent('半人马座 α A');
     fireEvent.click(screen.getByRole('button', { name: '选用' }));
-    expect(useVoyageStore.getState().destStarId).toBe('hip-70890');
+    expect(useVoyageStore.getState().destStarId).toBe('hip-71683');
   });
 
   it('选中目的地后不再显示推荐', () => {
@@ -180,13 +180,16 @@ describe('SetupPanel', () => {
       error: null,
     });
     render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('自定义专注时长（分钟）'), {
+      target: { value: '300' },
+    });
     fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
     expect(screen.getByText(/比邻星 → 织女星/)).toBeInTheDocument();
     const legLy = distanceBetweenStars(protoToStar(PROXIMA), protoToStar(VEGA));
     const sunLy = 25.04;
     expect(legLy).not.toBeCloseTo(sunLy, 1);
-    const plan = cruisePlan({ focusMinutes: 25, distanceLy: legLy });
-    const sunPlan = cruisePlan({ focusMinutes: 25, distanceLy: sunLy });
+    const plan = cruisePlan({ focusMinutes: 300, distanceLy: legLy });
+    const sunPlan = cruisePlan({ focusMinutes: 300, distanceLy: sunLy });
     expect(screen.getByText('航行速度（推算）')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '启动航行' }));
     const started = useVoyageStore.getState().progress;
@@ -238,5 +241,27 @@ describe('SetupPanel', () => {
     expect(screen.getByText(/比邻星 Proxima Centauri → 织女一/)).toBeInTheDocument();
     expect(screen.getByText(/出发地距太阳 4\.25 ly/)).toBeInTheDocument();
     expect(screen.getByText(/目的地距太阳 25\.04 ly/)).toBeInTheDocument();
+  });
+
+  it('25 分钟选织女星不可达（需 γ 超常规引擎上限）→ 显示不可达提示并禁用启动', () => {
+    render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
+    const warning = screen.getByTestId('unreachable-warning');
+    expect(warning).toBeInTheDocument();
+    expect(warning).toHaveTextContent(/无法在 25分钟 内抵达/);
+    expect(warning).toHaveTextContent(/需 γ ×/);
+    expect(warning).toHaveTextContent(/解锁 曲速二级/);
+    expect(warning).toHaveTextContent(/当前引擎最短专注/);
+    expect(screen.getByRole('button', { name: '启动航行' })).toBeDisabled();
+  });
+
+  it('拉长专注时长至可达 → 不可达提示消失、可启动', () => {
+    render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('自定义专注时长（分钟）'), {
+      target: { value: '150' },
+    });
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
+    expect(screen.queryByTestId('unreachable-warning')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '启动航行' })).toBeEnabled();
   });
 });

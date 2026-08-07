@@ -11,11 +11,24 @@ import {
   starDisplayName,
   starDistanceLy,
 } from '@/data/destination-stars';
-import { LIGHT_SPEED, cruisePlan, lorentzFactor } from '@/engine';
+import {
+  DEFAULT_ENGINE_TIER,
+  LIGHT_SPEED,
+  cruisePlan,
+  getTierForGamma,
+  lorentzFactor,
+  minFocusMinutes,
+} from '@/engine';
 import { useCatalogStore } from '@/store/useCatalogStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
-import { formatGamma, formatLy, formatMinuteLabel, formatVOverC } from '@/utils/format';
+import {
+  formatFocusEstimate,
+  formatGamma,
+  formatLy,
+  formatMinuteLabel,
+  formatVOverC,
+} from '@/utils/format';
 
 export function SetupPanel() {
   const defaultMinutes = useSettingsStore((s) => s.settings.defaultFocusMinutes);
@@ -82,6 +95,11 @@ export function SetupPanel() {
   );
   const gamma = plan?.gamma ?? lorentzFactor(vOverC * LIGHT_SPEED);
   const speed = plan?.vOverC ?? vOverC;
+  const reachable = plan == null || plan.gamma <= DEFAULT_ENGINE_TIER.gammaMax;
+  const upgradeTier =
+    plan != null && plan.gamma > DEFAULT_ENGINE_TIER.gammaMax ? getTierForGamma(plan.gamma) : null;
+  const minFocusWithEngine =
+    destStar != null && legLy > 0 ? minFocusMinutes(legLy, DEFAULT_ENGINE_TIER.gammaMax) : null;
   const originOptions = useMemo(() => {
     if (originStar == null) return destinationOptions;
     return destinationOptions.map((d) => {
@@ -90,7 +108,10 @@ export function SetupPanel() {
     });
   }, [originStar, destinationOptions, catalogStars]);
   const recommendation = useMemo(
-    () => (destStar == null ? recommendDestination(originOptions, minutes) : null),
+    () =>
+      destStar == null
+        ? recommendDestination(originOptions, minutes, DEFAULT_ENGINE_TIER.gammaMax)
+        : null,
     [destStar, originOptions, minutes],
   );
 
@@ -112,7 +133,7 @@ export function SetupPanel() {
   };
 
   const handleStart = () => {
-    if (!valid) return;
+    if (!valid || !reachable) return;
     useVoyageStore.getState().prepare({
       focusMinutes: minutes,
       vOverC: speed,
@@ -240,13 +261,42 @@ export function SetupPanel() {
         </div>
       </div>
 
+      {plan != null && !reachable && destStar != null && (
+        <div
+          data-testid="unreachable-warning"
+          className="rounded-xl border border-star-red/40 bg-star-red/5 px-4 py-3"
+        >
+          <p className="text-xs leading-relaxed text-deep-300">
+            {DEFAULT_ENGINE_TIER.name}（γ 上限{' '}
+            <span className="font-mono text-star-red">
+              {formatGamma(DEFAULT_ENGINE_TIER.gammaMax)}
+            </span>
+            ）无法在 {formatMinuteLabel(minutes)} 内抵达 {destStar.name}
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-deep-400">
+            需 γ <span className="font-mono text-star-red">{formatGamma(plan.gamma)}</span>
+            {upgradeTier != null && (
+              <>
+                {' · '}解锁 <span className="text-deep-200">{upgradeTier.name}</span>
+              </>
+            )}
+            {minFocusWithEngine != null && (
+              <>
+                {' · '}当前引擎最短专注{' '}
+                <span className="text-deep-200">{formatFocusEstimate(minFocusWithEngine)}</span>
+              </>
+            )}
+          </p>
+        </div>
+      )}
+
       <button
         type="button"
         onClick={handleStart}
-        disabled={!valid}
+        disabled={!valid || !reachable}
         className={twMerge(
           'h-14 w-full rounded-xl font-display text-base font-medium tracking-wider transition-colors duration-200',
-          valid
+          valid && reachable
             ? 'bg-star-gold text-[#0a1032] hover:opacity-85'
             : 'cursor-not-allowed border border-[var(--color-glass-border)] text-deep-500',
         )}

@@ -106,29 +106,37 @@ describe('distanceBetweenStars 两星 leg 距离（变动出发地）', () => {
   });
 });
 
-describe('recommendDestination 基于剩余专注时长的目的地推荐', () => {
-  it('默认 25 分钟无星可达 → 回退推荐最近目标比邻星', () => {
-    const rec = recommendDestination(DESTINATION_STARS, 25);
-    expect(rec?.id).toBe('hip-70890');
-  });
-
-  it('45 分钟比邻星可达 → 推荐比邻星（唯一可达）', () => {
-    const rec = recommendDestination(DESTINATION_STARS, 45);
-    expect(rec?.id).toBe('hip-70890');
-  });
-
-  it('50 分钟可达上限约 4.75ly → 推荐最远的半人马座 α（4.36ly，巴纳德 5.96 不可达）', () => {
-    const rec = recommendDestination(DESTINATION_STARS, 50);
+describe('recommendDestination 基于剩余专注时长 + 引擎 γ_max 的目的地推荐（S22）', () => {
+  it('25 分钟 @常规引擎（γ_max=10 万）→ 比邻星/半人马座 α 均可达，推荐最远的半人马座 α A', () => {
+    const rec = recommendDestination(DESTINATION_STARS, 25, 100_000);
+    expect(rec?.id).toBe('hip-71683');
     expect(rec?.distanceLy).toBeCloseTo(4.36, 2);
   });
 
-  it('600 分钟（10 小时）→ 推荐最远可达目标五车二（42.9ly）', () => {
-    const rec = recommendDestination(DESTINATION_STARS, 600);
+  it('45 分钟 @常规引擎 → 推荐最远可达的拉兰德 21185（8.31ly，可达半径约 8.56ly）', () => {
+    const rec = recommendDestination(DESTINATION_STARS, 45, 100_000);
+    expect(rec?.id).toBe('hip-54035');
+  });
+
+  it('600 分钟（10 小时）@常规引擎 → 50ly 目录全部可达，推荐最远的五车二（42.9ly）', () => {
+    const rec = recommendDestination(DESTINATION_STARS, 600, 100_000);
     expect(rec?.id).toBe('hip-24608');
   });
 
+  it('低引擎（γ_max=5 万）25 分钟无可达 → 回退推荐最近目标比邻星', () => {
+    const rec = recommendDestination(DESTINATION_STARS, 25, 50_000);
+    expect(rec?.id).toBe('hip-70890');
+  });
+
+  it('gammaMax 非正抛 RangeError', () => {
+    expect(() => recommendDestination(DESTINATION_STARS, 25, 0)).toThrow(RangeError);
+    expect(() => recommendDestination(DESTINATION_STARS, 25, Number.NaN)).toThrow(RangeError);
+  });
+
   it('空候选或全部无距离 → 返回 null', () => {
-    expect(recommendDestination([], 60)).toBeNull();
-    expect(recommendDestination([{ id: 'hip-sol', name: '太阳', distanceLy: 0 }], 60)).toBeNull();
+    expect(recommendDestination([], 60, 100_000)).toBeNull();
+    expect(
+      recommendDestination([{ id: 'hip-sol', name: '太阳', distanceLy: 0 }], 60, 100_000),
+    ).toBeNull();
   });
 });
