@@ -52,4 +52,57 @@ test.describe('航行视图真实星表化 (S23 R3F)', () => {
     await page.waitForTimeout(1200);
     expect(errors).toHaveLength(0);
   });
+
+  test('启动过渡：点火标签显示后 3s 消失进入巡航（S26）', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('setup-panel')).toBeVisible();
+
+    await page.getByLabel('目的地').selectOption('hip-70890');
+    await page.getByRole('button', { name: '启动航行' }).click();
+    await expect(page.getByTestId('voyage-view')).toBeVisible({ timeout: 20_000 });
+
+    const launching = page.getByText(/引擎点火/);
+    await expect(launching).toBeVisible();
+    await expect(page.getByRole('button', { name: '暂停' })).toBeVisible();
+
+    await expect(launching).toBeHidden({ timeout: 5_000 });
+  });
+
+  test('到达过渡：计时归零 → 入轨标签 3s → 切结果视图（S26）', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('setup-panel')).toBeVisible();
+
+    await page.getByLabel('目的地').selectOption('hip-70890');
+    await page.getByRole('button', { name: '启动航行' }).click();
+    await expect(page.getByTestId('voyage-view')).toBeVisible({ timeout: 20_000 });
+
+    await page.waitForTimeout(3500);
+    await page.evaluate(() => window.__TEST_ONLY__!.fastForward(1_600_000));
+
+    await expect(page.getByText(/正在减速入轨/)).toBeVisible();
+    await expect(page.getByTestId('voyage-view')).toBeVisible();
+    await expect(page.getByTestId('result-view')).toBeHidden();
+
+    await expect(page.getByTestId('result-view')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText(/本次航行完成/)).toBeVisible();
+  });
+
+  test('中断过渡：结束 → 紧急刹车标签 3s → 切中止结果（S26）', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('setup-panel')).toBeVisible();
+
+    await page.getByLabel('目的地').selectOption('hip-70890');
+    await page.getByRole('button', { name: '启动航行' }).click();
+    await expect(page.getByTestId('voyage-view')).toBeVisible({ timeout: 20_000 });
+
+    await page.waitForTimeout(3500);
+    await page.getByRole('button', { name: '结束' }).click();
+
+    await expect(page.getByText(/紧急刹车/)).toBeVisible();
+    await expect(page.getByTestId('voyage-view')).toBeVisible();
+    await expect(page.getByTestId('result-view')).toBeHidden();
+
+    await expect(page.getByTestId('result-view')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText(/航行已中止/)).toBeVisible();
+  });
 });

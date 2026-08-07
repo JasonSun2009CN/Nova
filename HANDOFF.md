@@ -20,9 +20,11 @@
 - **S22 统一飞行模型 + 引擎 γ 分级（ADR-0012，已提交分支 `feature/S22-unified-flight-model` 未合并）**：d=β·γ·τ 单一模型（`travelDistance`/`cruisePlan`/`requiredFocusMinutes` 收拢为同族）+ `ENGINE_TIERS` 五档引擎（常规 10万 / 曲速一级 40万 / 二级 120万 / 三级 500万 / 跃迁 2000万 × 解锁条件，跃迁为里程碑）+ 可达性 API（`requiredGamma` / `minFocusMinutes` / `reachableRadiusLy` / `isReachable`，引擎层纯函数）+ 退役 `RECOMMEND_MAX_GAMMA`（`recommendDestination` 改传 γ_max）+ 推荐按默认引擎 γ_max（默认 25 分钟 → 半人马座 α A）+ SetupPanel 不可达阻止（红色警告：所需 γ / 解锁档位 / 当前引擎最短专注，禁用启动）+ StarInfoCard 信息卡改「最短专注」（比邻星 ≈22 分钟）。升级路径「还需累计专注 X 小时」随 S27（跨历史 stats 聚合器）。
 - **S23 航行视图真实星表化 + S25 仪表盘提前（ADR-0011 修订 + ADR-0014，已提交分支 `feature/S23-voyage-real-stars` 未合并）**：VoyageView 从 Canvas 2D 抽象星流升级为 R3F（`React.lazy` 懒加载，three 967KB chunk 不进主包，build 实测主包 70KB），相机立出发地星朝目的地真实推进（封顶 98%）；**主视角 = 目的地单星居中放大（8→300px，光谱色核心 + 光晕）+ 暗星点阵背景**（StarField 撤销光行差/拖尾、加 opacity 0.3/sizeScale 0.5）；`VoyageStarFlow` 退役删除；**S25 实时仪表盘提前交付**：航行进度仪表（出发地→目的地两星 + 名称 + 金线填充 `voyage-progress-gauge`）、主/客观双时间（船上/地球已过）、速度/γ/已航行/剩余距离/ETA/引擎功率（γ÷γ_max %）。验证：259 单测 / 28 文件、e2e chromium 12 过、build exit 0。
 - **S24 前向蓝移 Doppler（已提交分支 `feature/S24-doppler-blueshift` 未合并）**：`doppler.ts` 纯函数（`dopplerFactor`=γ(1+βcosθ) / `blueShiftAmount` / `blueShiftColor`，**只蓝不红**）+ StarField `doppler` prop（vertex 按前方程度算 `vDoppler`，fragment 蓝移，默认关不影响星图）+ 目的地星光晕色按 γ 蓝移（αCen γ≈91k e≈0.78 强蓝、自由漂流 0.99c e≈0.17 轻微蓝）。验证：270 单测 / 29 文件、e2e chromium 7/7、build exit 0。
+- **S22/S23/S24 已合并 main**（`521f477`，fast-forward 到 origin/main 后 merge，无冲突；基线 270 单测 / 29 文件）。
+- **S26 跃迁过渡动画（已开发，分支 `feature/S26-warp-transition` 未合并）**：`VoyagePhase` 相位状态机（`launching/cruising/arriving/braking`，放 `useVoyageStore.voyagePhase` 与 status 同批同步防闪烁，3s 定时推进放 App effect，`VoyageController` 引擎零改动）+ `warp-flow.ts` 纯函数（`flowIntensity` 缓入/缓出流速曲线、`transitionProgress`、`nextPhaseAfterDuration`，12 单测）+ **近观星流 `NearFieldFlow`**（相机局部 LineSegments 星流，launching/braking 挂载，streak 随流速拉长，巡航/到达不出现，落地 ADR-0014「近观星流留 S26 评估」→ 引入但仅过渡期）+ 到达目标星 settle 放大入轨 + 三过渡状态标签（点火/入轨/刹车）+ 过渡期按钮禁用。**坑：R3F hooks 只能在 Canvas 内层用**——相位时钟移进 `DestinationStar`，放 Canvas 外层会抛 "Hooks can only be used within the Canvas component"。验证：**282 单测 / 30 文件**、voyage e2e chromium 5/5（含 3 新过渡测试）、build exit 0（主包 71.8KB，three 967KB 仍在懒加载 chunk）。
 - **Phase 3 重规划（本次讨论，三处文档已同步至 S38）**：S22~S38 重排——新增 **S22 统一飞行模型**（合并 `travelDistance`/`cruisePlan` 为 d=β·γ·τ + 引擎 γ_max 约束，退役 `RECOMMEND_MAX_GAMMA`，ADR-0012）；**S23 航行视图真实星表化**（修订：主视角 = 目的地单星放大 + 暗星点阵，ADR-0011 + ADR-0014，S25 仪表盘随 S23 提前）；**S24 前向蓝移 Doppler**（已交付）；**S27 引擎 γ 分级解锁** + 不可达阻止/升级路径；**砍掉瞬时跃迁**（跃迁 = 最高 γ 档）。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
-- **当前分支**：`feature/S24-doppler-blueshift`（自 `feature/S23-voyage-real-stars` 分出；S24 已 commit 未 push；S23 分支内容：航行视图单星放大 + S25 仪表盘）。上一级链：S22 统一飞行模型 → S21 收尾分支（增量3 `3f39e62` + CLAUDE.md `91e0655` + `c83e579` + S21 QA `fbc3bae` / `68c80bd`）。（基线：`pnpm check` 4/4、**270 单测**、29 test files，见下方 2.2。）
+- **当前分支**：`feature/S26-warp-transition`（自合并后的 main `521f477` 分出；S26 已开发未 commit）。上一级链：S22/S23/S24 已合并 main（`521f477`，origin/main 之上）。（基线：`pnpm check` 4/4、**282 单测**、30 test files，见下方 2.2。）
 - **文档已同步**：ROADMAP Phase 3 加状态行 + 3.1 主视角/仪表盘/蓝移更新、ADR 索引（14 份，含 ADR-0014）、**STAGES S22/S23/S24 已标 🚧 已提交 + S25 提前**、本文件均已刷新至 S24。
 - **注意**：用户在某时刻编辑了 ROADMAP，移除了 2.2 的「推荐目的地 / 多级跃迁」两个 checkbox（已按建议实施推荐目的地但保留 checkbox 移除，勿擅自加回）。
 
@@ -43,7 +45,7 @@
 
 1. [README.md](file:///Users/fiona/Documents/trae_projects/Nova/README.md) — 项目定义、技术选型原因、用户故事、**用户使用指引**。
 2. [docs/ROADMAP.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/ROADMAP.md) — **唯一的阶段验收依据**。Phase 1 MVP 验收已全部勾选。当前在 **Phase 3 完整航行系统 + 相对论视觉（v0.3）**：航行视图真实星表化（S23 已交付）、实时仪表盘（S25 已交付）、引擎等级系统、跃迁过渡、白噪音。每次接事先看对应 Phase 的 Acceptance Criteria，别自己加 scope。
-3. [docs/adr/README.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/adr/README.md) + 10 份 ADR — **所有「为什么这么做」全在这**。尤其是 **ADR-003 分层架构**（引擎 vs 渲染 vs UI vs 数据 vs 基础设施严格隔离，不允许跨层 import）。最新 ADR-0010（真实星表数据集成）。
+3. [docs/adr/README.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/adr/README.md) + 14 份 ADR — **所有「为什么这么做」全在这**。尤其是 **ADR-003 分层架构**（引擎 vs 渲染 vs UI vs 数据 vs 基础设施严格隔离，不允许跨层 import）。最新 ADR-0014（航行单星放大 + S25 仪表盘提前，修订 ADR-0011）。
 
 ### 1.2 开发规范 & 工程化（写代码前必读，避免 CI 红）
 
@@ -161,13 +163,14 @@ pnpm test:e2e
 | S21    | Phase 2 收尾 QA：perf / 验收走查 / 抽样校验，关闭 v0.2                                                                                 | ✅ commit fbc3bae + 68c80bd（已在 origin）           |
 | S22    | 统一飞行模型 d=β·γ·τ + ENGINE_TIERS 五档 + 可达性 API + 退役 RECOMMEND_MAX_GAMMA + 不可达阻止（ADR-0012）                              | 🚧 commit（feature/S22-unified-flight-model 未合并） |
 | S23    | 航行视图真实星表化（主视角 = 目的地单星放大 + 暗星点阵，ADR-0011 修订 + ADR-0014）+ S25 仪表盘提前（进度/双时间/速度/γ/距离/ETA/功率） | 🚧 commit（feature/S23-voyage-real-stars 未合并）    |
-| S24    | 前向蓝移 Doppler：doppler.ts 纯函数 + StarField doppler prop（只蓝不红）+ 目的地星蓝移                                                 | 🚧 commit（feature/S24-doppler-blueshift 未合并）    |
+| S24    | 前向蓝移 Doppler：doppler.ts 纯函数 + StarField doppler prop（只蓝不红）+ 目的地星蓝移                                                 | ✅ 已合并 main（`521f477`）                          |
+| S26    | 跃迁过渡动画：VoyagePhase 相位状态机（store + App 3s 定时）+ warp-flow 纯函数 + 近观星流 NearFieldFlow + 到达入轨放大 + 三过渡标签     | 🚧 已开发（feature/S26-warp-transition 未合并）      |
 
-**验证基线**：`pnpm check` 4/4（**270 单测**，29 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap/voyage WebGL 仅 chromium）；`pnpm build` 主包 ~70KB（three 967KB 懒加载进星图/航行 chunk）。
+**验证基线**：`pnpm check` 4/4（**282 单测**，30 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap/voyage WebGL 仅 chromium）；`pnpm build` 主包 ~72KB（three 967KB 懒加载进星图/航行 chunk）。
 
 ### 2.3 下一步（Phase 3 航行系统，按 ROADMAP）
 
-Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型已交付**（ADR-0012）；**S23 航行视图真实星表化 + S25 仪表盘已交付**（ADR-0011 修订 + ADR-0014）；**S24 前向蓝移已交付**（见上方当前进度）。下一阶段为 **S26 跃迁过渡动画**（启动点火 / 到达目标星变大入轨 / 中断刹车）→ S27 引擎解锁 + 任务模式 → S28 白噪音 → S29 收尾 v0.3，顺序见 STAGES 第五节。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
+Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型已交付**（ADR-0012）；**S23 航行视图真实星表化 + S25 仪表盘已交付**（ADR-0011 修订 + ADR-0014）；**S24 前向蓝移已交付**（见上方当前进度）；**S26 跃迁过渡动画已交付**（见上方当前进度）。下一阶段为 **S27 引擎解锁 + 任务模式**（按累计专注解锁 γ 分级，需跨历史 stats 聚合器，与 S30 船长日志共享）→ S28 白噪音 → S29 收尾 v0.3，顺序见 STAGES 第五节。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
 
 | 顺序 | 内容                                                                                                    | 说明                                                                                                                 |
 | ---- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
