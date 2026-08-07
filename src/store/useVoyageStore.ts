@@ -8,9 +8,10 @@ import type {
   VoyageProgress,
   VoyageSnapshot,
 } from '@/engine/contract/voyage-types';
+import type { EventSoundType } from '@/engine/audio/audio-engine';
 import { VoyageController } from '@/engine/navigation/VoyageController';
 import { clearLiveVoyage, loadLiveVoyage, saveLiveVoyage } from '@/storage/live-voyage-storage';
-import { getStoreDeps } from '@/store/store-deps';
+import { ensureAudioEngineStarted, getStoreDeps } from '@/store/store-deps';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import type { VoyagePhase } from '@/engine/renderer/warp-flow';
@@ -57,6 +58,12 @@ let lastLivePersistAt = 0;
 
 function isWorkerSupported(): boolean {
   return typeof Worker !== 'undefined';
+}
+
+function playEventSound(type: EventSoundType): void {
+  const enabled = useSettingsStore.getState().settings.eventSoundsEnabled;
+  if (!enabled) return;
+  getStoreDeps().audioEngine.playEvent(type);
 }
 
 function startWorker(): void {
@@ -110,6 +117,7 @@ function attachControllerListeners(
   controller.on('complete', (progress) => {
     stopWorker();
     clearLiveVoyage();
+    playEventSound('arrive');
     const { destStarId } = useVoyageStore.getState();
     if (destStarId != null) {
       void useSettingsStore.getState().setCurrentStar(destStarId);
@@ -125,6 +133,7 @@ function attachControllerListeners(
   controller.on('abort', (progress) => {
     stopWorker();
     clearLiveVoyage();
+    playEventSound('brake');
     set({
       progress,
       snapshot: controller.snapshot(),
@@ -188,12 +197,14 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
     if (controller == null) {
       throw new Error('VoyageStore.start: controller not prepared');
     }
+    ensureAudioEngineStarted();
     const progress = controller.start();
     set({
       progress,
       snapshot: controller.snapshot(),
       voyagePhase: 'launching',
     });
+    playEventSound('launch');
     if (isWorkerSupported()) startWorker();
     return progress;
   },

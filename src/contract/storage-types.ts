@@ -29,10 +29,15 @@ export type SettingsKey =
   | 'defaultVOverC'
   | 'soundVolume'
   | 'musicVolume'
+  | 'engineSoundEnabled'
+  | 'eventSoundsEnabled'
+  | 'ambientSoundType'
   | 'enableReducedMotion'
   | 'lastViewedStarId'
   | 'acceptedTermsVersion'
   | 'currentStarId';
+
+export type AmbientSoundTypeKey = 'none' | 'cmb' | 'pulsar';
 
 export type SettingsValueMap = {
   theme: ThemeKey;
@@ -40,6 +45,9 @@ export type SettingsValueMap = {
   defaultVOverC: number;
   soundVolume: number;
   musicVolume: number;
+  engineSoundEnabled: boolean;
+  eventSoundsEnabled: boolean;
+  ambientSoundType: AmbientSoundTypeKey;
   enableReducedMotion: boolean;
   lastViewedStarId: string | null;
   acceptedTermsVersion: string | null;

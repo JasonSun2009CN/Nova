@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { GlossaryDialog } from '@/components/GlossaryDialog';
 import { HistoryPanel } from '@/components/HistoryPanel';
 import { SpaceBackdrop } from '@/components/SpaceBackdrop';
+import { useAudioEngine } from '@/components/useAudioEngine';
 import { ResultView } from '@/pages/ResultView';
 import { SetupPanel } from '@/pages/SetupPanel';
 import { VoyageView } from '@/pages/VoyageView';
@@ -21,6 +22,8 @@ function App() {
   const theme = useSettingsStore((s) => s.settings.theme);
   const [starMapOpen, setStarMapOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
+
+  useAudioEngine();
 
   useEffect(() => {
     void useSettingsStore.getState().load();

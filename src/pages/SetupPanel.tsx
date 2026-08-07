@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import { DurationScrubber } from '@/components/DurationScrubber';
+import { SoundSettingsPanel } from '@/components/SoundSettingsPanel';
 import {
   DESTINATION_STARS,
   destinationOptionsFromStars,
@@ -285,6 +286,8 @@ export function SetupPanel() {
           )}
         </div>
       </div>
+
+      <SoundSettingsPanel />
 
       {plan != null && !reachable && destStar != null && (
         <div
