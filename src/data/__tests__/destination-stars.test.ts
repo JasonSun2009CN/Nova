@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest';
 import {
   DESTINATION_STARS,
   destinationOptionsFromStars,
+  distanceBetweenStars,
   findDestinationOption,
   recommendDestination,
+  starDistanceLy,
 } from '@/data/destination-stars';
 import { protoToStar, type ProtoStar } from '@/engine/data/star-mapper';
 
@@ -53,29 +55,88 @@ describe('destination-stars 目录驱动的目的地解析', () => {
   });
 });
 
-describe('recommendDestination 基于剩余专注时长的目的地推荐', () => {
-  it('默认 25 分钟无星可达 → 回退推荐最近目标比邻星', () => {
-    const rec = recommendDestination(DESTINATION_STARS, 25);
-    expect(rec?.id).toBe('hip-70890');
+describe('distanceBetweenStars 两星 leg 距离（变动出发地）', () => {
+  it('太阳出发时退化为目的星的太阳距（太阳在原点）', () => {
+    const sol = protoToStar({
+      ...ROSS_154,
+      id: 'hip-sol',
+      properName: '太阳',
+      distanceLy: 0,
+      raDeg: 0,
+      decDeg: 0,
+    });
+    expect(distanceBetweenStars(sol, star())).toBeCloseTo(9.7, 1);
   });
 
-  it('45 分钟比邻星可达 → 推荐比邻星（唯一可达）', () => {
-    const rec = recommendDestination(DESTINATION_STARS, 45);
-    expect(rec?.id).toBe('hip-70890');
+  it('两星距离 = cartesian 坐标差的欧氏距离（对称性）', () => {
+    const a = protoToStar({ ...ROSS_154, id: 'hip-a', distanceLy: 6, raDeg: 0, decDeg: 0 });
+    const b = protoToStar({ ...ROSS_154, id: 'hip-b', distanceLy: 6, raDeg: 0, decDeg: 90 });
+    const ab = distanceBetweenStars(a, b);
+    expect(ab).toBeCloseTo(Math.sqrt(72), 1);
+    expect(distanceBetweenStars(b, a)).toBeCloseTo(ab, 5);
   });
 
-  it('50 分钟可达上限约 4.75ly → 推荐最远的半人马座 α（4.36ly，巴纳德 5.96 不可达）', () => {
-    const rec = recommendDestination(DESTINATION_STARS, 50);
+  it('非太阳出发地：leg 距离不等于目的星太阳距，且小于两星到太阳距离之和', () => {
+    const proxima = protoToStar({
+      id: 'hip-70890',
+      properName: '比邻星',
+      raDeg: 217.4,
+      decDeg: -62.68,
+      distanceLy: 4.246,
+      vMag: 11.05,
+      absMag: 15.6,
+      spectral: 'M5.5V',
+      tier: 'tier1-nearby-100ly',
+    });
+    const vega = protoToStar({
+      id: 'hip-91262',
+      properName: '织女星',
+      raDeg: 279.23,
+      decDeg: 38.78,
+      distanceLy: 25.04,
+      vMag: 0.03,
+      absMag: 0.58,
+      spectral: 'A0V',
+      tier: 'tier1-nearby-100ly',
+    });
+    const leg = distanceBetweenStars(proxima, vega);
+    expect(leg).toBeGreaterThan(0);
+    expect(leg).toBeLessThan(starDistanceLy(proxima) + starDistanceLy(vega));
+    expect(leg).not.toBeCloseTo(starDistanceLy(vega), 1);
+  });
+});
+
+describe('recommendDestination 基于剩余专注时长 + 引擎 γ_max 的目的地推荐（S22）', () => {
+  it('25 分钟 @常规引擎（γ_max=10 万）→ 比邻星/半人马座 α 均可达，推荐最远的半人马座 α A', () => {
+    const rec = recommendDestination(DESTINATION_STARS, 25, 100_000);
+    expect(rec?.id).toBe('hip-71683');
     expect(rec?.distanceLy).toBeCloseTo(4.36, 2);
   });
 
-  it('600 分钟（10 小时）→ 推荐最远可达目标五车二（42.9ly）', () => {
-    const rec = recommendDestination(DESTINATION_STARS, 600);
+  it('45 分钟 @常规引擎 → 推荐最远可达的拉兰德 21185（8.31ly，可达半径约 8.56ly）', () => {
+    const rec = recommendDestination(DESTINATION_STARS, 45, 100_000);
+    expect(rec?.id).toBe('hip-54035');
+  });
+
+  it('600 分钟（10 小时）@常规引擎 → 50ly 目录全部可达，推荐最远的五车二（42.9ly）', () => {
+    const rec = recommendDestination(DESTINATION_STARS, 600, 100_000);
     expect(rec?.id).toBe('hip-24608');
   });
 
+  it('低引擎（γ_max=5 万）25 分钟无可达 → 回退推荐最近目标比邻星', () => {
+    const rec = recommendDestination(DESTINATION_STARS, 25, 50_000);
+    expect(rec?.id).toBe('hip-70890');
+  });
+
+  it('gammaMax 非正抛 RangeError', () => {
+    expect(() => recommendDestination(DESTINATION_STARS, 25, 0)).toThrow(RangeError);
+    expect(() => recommendDestination(DESTINATION_STARS, 25, Number.NaN)).toThrow(RangeError);
+  });
+
   it('空候选或全部无距离 → 返回 null', () => {
-    expect(recommendDestination([], 60)).toBeNull();
-    expect(recommendDestination([{ id: 'hip-sol', name: '太阳', distanceLy: 0 }], 60)).toBeNull();
+    expect(recommendDestination([], 60, 100_000)).toBeNull();
+    expect(
+      recommendDestination([{ id: 'hip-sol', name: '太阳', distanceLy: 0 }], 60, 100_000),
+    ).toBeNull();
   });
 });

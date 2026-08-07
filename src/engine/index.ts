@@ -2,10 +2,21 @@ export type * from './physics/lorentz';
 export {
   LIGHT_SPEED,
   cruisePlan,
+  isReachable,
   lorentzFactor,
+  minFocusMinutes,
+  reachableRadiusLy,
   requiredFocusMinutes,
+  requiredGamma,
   travelDistance,
 } from './physics/lorentz';
+export type * from './physics/engine-tiers';
+export {
+  DEFAULT_ENGINE_TIER,
+  ENGINE_TIERS,
+  getEngineTierById,
+  getTierForGamma,
+} from './physics/engine-tiers';
 
 export type * from './contract/voyage-types';
 export { VoyageController, IllegalStateError } from './navigation/VoyageController';

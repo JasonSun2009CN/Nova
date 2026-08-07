@@ -68,6 +68,29 @@ describe('ResultView', () => {
     expect(useVoyageStore.getState().progress?.status).toBe('running');
   });
 
+  it('完成航行后「再来一次」→ 从上次目的地出发（出发地 = 上次目的地）', () => {
+    completeVoyage();
+    render(<ResultView />);
+    fireEvent.click(screen.getByRole('button', { name: '再来一次' }));
+    expect(useVoyageStore.getState().progress?.status).toBe('running');
+    expect(useVoyageStore.getState().originStarId).toBe('hip-70890');
+  });
+
+  it('中止航行后「再来一次」→ 从本次出发地出发（位置未变）', () => {
+    useVoyageStore.getState().prepare({
+      focusMinutes: 25,
+      vOverC: 0.99,
+      originStarId: 'hip-70890',
+      destStarId: 'hip-91262',
+    });
+    useVoyageStore.getState().start();
+    useVoyageStore.getState().abort();
+    render(<ResultView />);
+    fireEvent.click(screen.getByRole('button', { name: '再来一次' }));
+    expect(useVoyageStore.getState().progress?.status).toBe('running');
+    expect(useVoyageStore.getState().originStarId).toBe('hip-70890');
+  });
+
   it('回到首页 → progress 清空回 idle', () => {
     completeVoyage();
     render(<ResultView />);

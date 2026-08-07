@@ -91,6 +91,55 @@ export function cruisePlan(input: CruisePlanInput): CruisePlan {
   return { vOverC, gamma, earthYears: focusYears * gamma };
 }
 
+export function requiredGamma(distanceLy: number, focusMinutes: number): number {
+  if (!(Number.isFinite(distanceLy) && distanceLy > 0)) {
+    throw new RangeError('requiredGamma: distanceLy 必须为正数。');
+  }
+  if (!(Number.isFinite(focusMinutes) && focusMinutes > 0)) {
+    throw new RangeError('requiredGamma: focusMinutes 必须为正数。');
+  }
+  const focusYears = (focusMinutes * 60) / SECONDS_PER_YEAR;
+  const rapidity = distanceLy / focusYears;
+  return Math.sqrt(1 + rapidity * rapidity);
+}
+
+export function minFocusMinutes(distanceLy: number, gammaMax: number): number {
+  if (!(Number.isFinite(distanceLy) && distanceLy > 0)) {
+    throw new RangeError('minFocusMinutes: distanceLy 必须为正数。');
+  }
+  if (!(Number.isFinite(gammaMax) && gammaMax > 1)) {
+    throw new RangeError('minFocusMinutes: gammaMax 必须大于 1。');
+  }
+  const beta = Math.sqrt(1 - 1 / (gammaMax * gammaMax));
+  const years = distanceLy / (beta * gammaMax);
+  return (years * SECONDS_PER_YEAR) / 60;
+}
+
+export function reachableRadiusLy(gammaMax: number, focusMinutes: number): number {
+  if (!(Number.isFinite(gammaMax) && gammaMax > 1)) {
+    throw new RangeError('reachableRadiusLy: gammaMax 必须大于 1。');
+  }
+  if (!(Number.isFinite(focusMinutes) && focusMinutes > 0)) {
+    throw new RangeError('reachableRadiusLy: focusMinutes 必须为正数。');
+  }
+  const focusYears = (focusMinutes * 60) / SECONDS_PER_YEAR;
+  const beta = Math.sqrt(1 - 1 / (gammaMax * gammaMax));
+  return beta * gammaMax * focusYears;
+}
+
+export function isReachable(distanceLy: number, focusMinutes: number, gammaMax: number): boolean {
+  if (!(Number.isFinite(distanceLy) && distanceLy > 0)) {
+    throw new RangeError('isReachable: distanceLy 必须为正数。');
+  }
+  if (!(Number.isFinite(focusMinutes) && focusMinutes > 0)) {
+    throw new RangeError('isReachable: focusMinutes 必须为正数。');
+  }
+  if (!(Number.isFinite(gammaMax) && gammaMax > 1)) {
+    throw new RangeError('isReachable: gammaMax 必须大于 1。');
+  }
+  return requiredGamma(distanceLy, focusMinutes) <= gammaMax;
+}
+
 export const __internal = {
   SECONDS_PER_YEAR,
   METERS_PER_LIGHT_YEAR,

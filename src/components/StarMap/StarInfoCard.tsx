@@ -1,6 +1,5 @@
-import { requiredFocusMinutes, type Star } from '@/engine';
+import { DEFAULT_ENGINE_TIER, minFocusMinutes, type Star } from '@/engine';
 import { isSettableDestination, starDisplayName } from '@/data/destination-stars';
-import { useSettingsStore } from '@/store/useSettingsStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
 import {
   formatFocusEstimate,
@@ -27,12 +26,12 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 export function StarInfoCard({ star, onClose, onComplete }: StarInfoCardProps) {
   const destStarId = useVoyageStore((s) => s.destStarId);
-  const defaultVOverC = useSettingsStore((s) => s.settings.defaultVOverC);
   const isDest = destStarId === star.id;
   const settable = isSettableDestination(star);
   const c = star.coords.cartesian;
   const distanceLy = Math.hypot(c.xLy, c.yLy, c.zLy);
-  const estimateMinutes = distanceLy > 0 ? requiredFocusMinutes(distanceLy, defaultVOverC) : null;
+  const estimateMinutes =
+    distanceLy > 0 ? minFocusMinutes(distanceLy, DEFAULT_ENGINE_TIER.gammaMax) : null;
 
   return (
     <div
@@ -65,7 +64,7 @@ export function StarInfoCard({ star, onClose, onComplete }: StarInfoCardProps) {
       <p className="mt-1 text-sm text-deep-300">{formatLy(distanceLy)}</p>
       {settable && estimateMinutes != null && (
         <p className="mt-1 text-xs text-deep-500">
-          预计专注时长 {formatFocusEstimate(estimateMinutes)}
+          最短专注 {formatFocusEstimate(estimateMinutes)}
         </p>
       )}
 
