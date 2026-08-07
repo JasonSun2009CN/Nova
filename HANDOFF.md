@@ -45,7 +45,7 @@
 
 1. [README.md](file:///Users/fiona/Documents/trae_projects/Nova/README.md) — 项目定义、技术选型原因、用户故事、**用户使用指引**。
 2. [docs/ROADMAP.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/ROADMAP.md) — **唯一的阶段验收依据**。Phase 1 MVP 验收已全部勾选。当前在 **Phase 3 完整航行系统 + 相对论视觉（v0.3）**：航行视图真实星表化（S23 已交付）、实时仪表盘（S25 已交付）、引擎等级系统、跃迁过渡、白噪音。每次接事先看对应 Phase 的 Acceptance Criteria，别自己加 scope。
-3. [docs/adr/README.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/adr/README.md) + 10 份 ADR — **所有「为什么这么做」全在这**。尤其是 **ADR-003 分层架构**（引擎 vs 渲染 vs UI vs 数据 vs 基础设施严格隔离，不允许跨层 import）。最新 ADR-0010（真实星表数据集成）。
+3. [docs/adr/README.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/adr/README.md) + 14 份 ADR — **所有「为什么这么做」全在这**。尤其是 **ADR-003 分层架构**（引擎 vs 渲染 vs UI vs 数据 vs 基础设施严格隔离，不允许跨层 import）。最新 ADR-0014（航行单星放大 + S25 仪表盘提前，修订 ADR-0011）。
 
 ### 1.2 开发规范 & 工程化（写代码前必读，避免 CI 红）
 

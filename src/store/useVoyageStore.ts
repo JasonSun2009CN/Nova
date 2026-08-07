@@ -13,6 +13,7 @@ import { clearLiveVoyage, loadLiveVoyage, saveLiveVoyage } from '@/storage/live-
 import { getStoreDeps } from '@/store/store-deps';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import type { VoyagePhase } from '@/engine/renderer/warp-flow';
 
 type VoyageStoreState = {
   progress: VoyageProgress | null;
@@ -22,6 +23,7 @@ type VoyageStoreState = {
   lastSavedRecord: VoyageRecord | null;
   controllerReady: boolean;
   resumedFromSnapshot: boolean;
+  voyagePhase: VoyagePhase;
 };
 
 type VoyageStoreActions = {
@@ -41,6 +43,7 @@ type VoyageStoreActions = {
   dispose: () => void;
   saveToHistory: () => Promise<VoyageRecord | null>;
   resumeFromLiveVoyage: () => boolean;
+  setVoyagePhase: (phase: VoyagePhase) => void;
 };
 
 export type VoyageStore = VoyageStoreState & VoyageStoreActions;
@@ -114,6 +117,7 @@ function attachControllerListeners(
     set({
       progress,
       snapshot: controller.snapshot(),
+      voyagePhase: 'arriving',
     });
     void useVoyageStore.getState().saveToHistory();
   });
@@ -124,6 +128,7 @@ function attachControllerListeners(
     set({
       progress,
       snapshot: controller.snapshot(),
+      voyagePhase: 'braking',
     });
     void useVoyageStore.getState().saveToHistory();
   });
@@ -167,6 +172,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
   lastSavedRecord: null,
   controllerReady: false,
   resumedFromSnapshot: false,
+  voyagePhase: null,
 
   prepare: (opts) => {
     const { originStarId = null, destStarId = null, ...voyageOpts } = opts;
@@ -186,6 +192,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
     set({
       progress,
       snapshot: controller.snapshot(),
+      voyagePhase: 'launching',
     });
     if (isWorkerSupported()) startWorker();
     return progress;
@@ -201,6 +208,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
     set({
       progress,
       snapshot: controller.snapshot(),
+      voyagePhase: 'cruising',
     });
     return progress;
   },
@@ -214,6 +222,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
     set({
       progress,
       snapshot: controller.snapshot(),
+      voyagePhase: 'cruising',
     });
     if (isWorkerSupported()) startWorker();
     return progress;
@@ -228,6 +237,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
     set({
       progress,
       snapshot: controller.snapshot(),
+      voyagePhase: 'braking',
     });
     return progress;
   },
@@ -241,6 +251,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
     set({
       progress,
       snapshot: controller.snapshot(),
+      voyagePhase: 'arriving',
     });
     return progress;
   },
@@ -259,6 +270,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
       destStarId: meta?.destStarId ?? get().destStarId,
       lastSavedRecord: null,
       resumedFromSnapshot: true,
+      voyagePhase: 'cruising',
     });
     if (isWorkerSupported() && controller.getProgress().status === 'running') {
       startWorker();
@@ -278,7 +290,12 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
       destStarId: null,
       controllerReady: false,
       resumedFromSnapshot: false,
+      voyagePhase: null,
     });
+  },
+
+  setVoyagePhase: (phase) => {
+    set({ voyagePhase: phase });
   },
 
   saveToHistory: async () => {

@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { getDestinationName, starDisplayName } from '@/data/destination-stars';
 import { getUnlockedTier } from '@/engine';
+import type { VoyagePhase } from '@/engine/renderer/warp-flow';
 import { useCatalogStore } from '@/store/useCatalogStore';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
@@ -70,7 +71,7 @@ function VoyageProgressGauge({
   );
 }
 
-export function VoyageView() {
+export function VoyageView({ phase = null }: { phase?: VoyagePhase }) {
   const progress = useVoyageStore((s) => s.progress);
   const destStarId = useVoyageStore((s) => s.destStarId);
   const originStarId = useVoyageStore((s) => s.originStarId);
@@ -117,6 +118,7 @@ export function VoyageView() {
 
   const status = progress.status;
   const active = status === 'running';
+  const transitioning = phase === 'arriving' || phase === 'braking';
   const remaining = progress.remainingFocusMs ?? progress.elapsedFocusMs;
   const elapsedFocusMs = progress.elapsedFocusMs;
   const gamma = progress.gamma;
@@ -153,6 +155,7 @@ export function VoyageView() {
             vOverC={progress.vOverC}
             traveledLy={progress.traveledLy}
             legLy={legLy}
+            phase={phase}
           />
         </Suspense>
       </div>
@@ -193,6 +196,24 @@ export function VoyageView() {
               已暂停
             </div>
           )}
+          {phase === 'launching' && (
+            <div className="mt-3 inline-flex items-center gap-2 text-sm text-star-gold">
+              <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
+              引擎点火·星光加速…
+            </div>
+          )}
+          {phase === 'arriving' && (
+            <div className="mt-3 inline-flex items-center gap-2 text-sm text-star-gold">
+              <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
+              正在减速入轨…
+            </div>
+          )}
+          {phase === 'braking' && (
+            <div className="mt-3 inline-flex items-center gap-2 text-sm text-star-red">
+              <span className="h-1 w-1 rounded-full bg-star-red" aria-hidden="true" />
+              紧急刹车…
+            </div>
+          )}
           <div className="mt-3 text-xs text-deep-400">
             船上已过 {formatDurationMs(elapsedFocusMs)} · 地球已过{' '}
             {formatFocusEstimate(earthElapsed)}
@@ -215,20 +236,26 @@ export function VoyageView() {
           <div className="flex items-stretch gap-3">
             <button
               type="button"
+              disabled={transitioning}
               onClick={() => (active ? pause() : resume())}
               className={twMerge(
-                'h-14 flex-1 cursor-pointer rounded-xl font-display text-base font-medium tracking-wider transition-colors duration-200',
+                'h-14 flex-1 rounded-xl font-display text-base font-medium tracking-wider transition-colors duration-200',
                 active
                   ? 'glass-card text-deep-200 hover:text-foreground'
                   : 'bg-star-gold text-[#0a1032] hover:opacity-85',
+                transitioning && 'cursor-not-allowed opacity-50',
               )}
             >
               {active ? '暂停' : '继续'}
             </button>
             <button
               type="button"
+              disabled={transitioning}
               onClick={() => abort()}
-              className="glass-card h-14 w-28 cursor-pointer rounded-xl text-base text-star-red transition-colors duration-200 hover:bg-star-red/10"
+              className={twMerge(
+                'glass-card h-14 w-28 rounded-xl text-base text-star-red transition-colors duration-200 hover:bg-star-red/10',
+                transitioning && 'cursor-not-allowed opacity-50',
+              )}
             >
               结束
             </button>

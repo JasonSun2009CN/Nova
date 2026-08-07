@@ -97,6 +97,7 @@
 
 - **S23 航行视图真实星表化（修订，ADR-0011 + ADR-0014）**：VoyageView 从 Canvas 2D 抽象星流（`VoyageStarFlow`）升级为 R3F，相机立于 `currentStarId` 看向 `destStarId`；主视角 = 目的地单星居中放大 + 暗星点阵背景（撤销光行差/拖尾，StarField 新增 opacity）。three ~967KB chunk 懒加载（与星图弹窗共享）；**S25 仪表盘随本阶段交付**。
 - **S22 统一飞行模型 + 引擎 γ 分级（已定，ADR-0012）**：合并 `travelDistance` 与 `cruisePlan` 为 d=β·γ·τ 单一模型；引擎按 γ_max 分级（100k/400k/1.2M/5M/20M），可达距离 = γ_max × 专注时长；退役 `RECOMMEND_MAX_GAMMA`；不可达 → 阻止 + 显示升级路径；**无瞬时跃迁**。
+- **S26 跃迁过渡（已定，落地 ADR-0014 遗留评估）**：近观星流**引入但仅限过渡期**——launching/braking 3s 内镜头旁 LineSegments 星流高速掠过（`NearFieldFlow`，相机局部坐标 + `flowIntensity` 缓入/缓出曲线），巡航/到达不出现，保持 ADR-0014 主视角（单星放大 + 暗星点阵）；相位状态机 `VoyagePhase` 放 store（与 status 同批同步，避免闪烁），3s 定时推进放 App effect；引擎 `VoyageController` 零改动（动画为纯视觉覆盖层）。
 - **S36 Gaia 百万星**：tier3 单独 KDTree + Points 改 GPU BufferGeometry 批量上屏，遵循 ADR-0006 L5 分块 + Z-order 空间预取；Gaia 为 CC-BY-SA，需在关于页标注数据源。
 - **S34 好友雏形**：引入账户/云端，突破「本地优先」现状，需新的数据层 ADR；若延期可先只做「本地生成分享链接」。
 

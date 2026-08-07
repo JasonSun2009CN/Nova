@@ -9,6 +9,7 @@ import { VoyageView } from '@/pages/VoyageView';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
+import { nextPhaseAfterDuration, phaseDurationMs } from '@/engine/renderer/warp-flow';
 
 const StarMapDialog = lazy(() =>
   import('@/pages/StarMapDialog').then((m) => ({ default: m.StarMapDialog })),
@@ -16,6 +17,7 @@ const StarMapDialog = lazy(() =>
 
 function App() {
   const progress = useVoyageStore((s) => s.progress);
+  const voyagePhase = useVoyageStore((s) => s.voyagePhase);
   const theme = useSettingsStore((s) => s.settings.theme);
   const [starMapOpen, setStarMapOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
@@ -30,8 +32,21 @@ function App() {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
+  useEffect(() => {
+    if (voyagePhase == null || voyagePhase === 'cruising') return;
+    const timer = window.setTimeout(
+      () => useVoyageStore.getState().setVoyagePhase(nextPhaseAfterDuration(voyagePhase)),
+      phaseDurationMs(voyagePhase),
+    );
+    return () => window.clearTimeout(timer);
+  }, [voyagePhase]);
+
   const status = progress?.status ?? 'idle';
-  const voyaging = status === 'running' || status === 'paused';
+  const voyaging =
+    status === 'running' ||
+    status === 'paused' ||
+    voyagePhase === 'arriving' ||
+    voyagePhase === 'braking';
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col text-foreground transition-colors duration-500">
@@ -76,7 +91,7 @@ function App() {
 
       <main className="relative z-10 flex min-h-0 flex-1 flex-col">
         {voyaging ? (
-          <VoyageView />
+          <VoyageView phase={voyagePhase} />
         ) : status === 'idle' ? (
           <div className="flex-1 overflow-y-auto">
             <SetupPanel />
