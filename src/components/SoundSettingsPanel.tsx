@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import { Toggle } from '@/components/Toggle';
 import type { AmbientSoundTypeKey } from '@/contract/storage-types';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
@@ -38,35 +39,6 @@ function Slider({
       onChange={(e) => onChange(Number(e.target.value))}
       className="h-8 w-32 cursor-pointer accent-[var(--color-star-gold)]"
     />
-  );
-}
-
-function Toggle({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 cursor-pointer rounded-full transition-colors duration-200 ${
-        checked ? 'bg-star-gold' : 'bg-surface-elevated'
-      }`}
-    >
-      <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-[#0a1032] transition-transform duration-200 ${
-          checked ? 'translate-x-5' : 'translate-x-0.5'
-        }`}
-      />
-    </button>
   );
 }
 

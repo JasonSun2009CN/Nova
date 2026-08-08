@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { distanceBetweenStars } from '@/data/destination-stars';
@@ -334,5 +334,12 @@ describe('SetupPanel', () => {
     render(<SetupPanel />);
     expect(screen.getByTestId('engine-status')).toHaveTextContent(/曲速三级/);
     expect(screen.getByTestId('engine-status')).toHaveTextContent(/已解锁全部曲速引擎/);
+  });
+
+  it('点击快捷预设 45 → 当前分钟与 defaultFocusMinutes 同步为 45（S33）', async () => {
+    render(<SetupPanel />);
+    fireEvent.click(screen.getByRole('button', { name: '45' }));
+    expect(screen.getByLabelText('自定义专注时长（分钟）')).toHaveValue(45);
+    await waitFor(() => expect(useSettingsStore.getState().settings.defaultFocusMinutes).toBe(45));
   });
 });

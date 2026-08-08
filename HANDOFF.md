@@ -28,9 +28,10 @@
 - **响应式布局（ADR-0015，随 S30 分支）**：主视图 idle 按屏幕比例给不同 UI——**电脑/iPad 横屏（≥1024px `lg`）`SetupPanel` 与 `HistoryPanel` 双栏并排**（`App.tsx` idle 容器 `mx-auto grid max-w-6xl lg:grid-cols-2 lg:gap-10 lg:px-8`，两 panel 容器各追加 `lg:max-w-none lg:mx-0 lg:px-0` 填充列宽）；**手机/iPad 竖屏（<1024px）保持单栏堆叠**（`max-w-md mx-auto` 现状）。纯 Tailwind 断点无 JS；testID 不变，e2e `toBeVisible` 语义不受影响；航行/结果/弹窗视图维持现状。断点依据：iPad 全系横屏 ≥1024px、竖屏 768–834px。
 - **S31 旅行日志导出（用户决策，随 S30 分支）**：**星图高亮已砍**（在星图上高亮已探索路径，实现太麻烦）；保留「导出」但简化为**旅行经过文件**——船长日志弹窗顶栏「导出」按钮，全部航行记录 + 统计摘要头导出为 **Markdown**（`nova-travel-log-YYYY-MM-DD.md`），纯函数 `src/utils/export-log.ts`（摘要头复用 `summarizeCaptainsLog`，逐条用 `formatFocusEstimate`/`formatLy`，记录按 store 顺序即 createdAt 倒序）。ROADMAP/STAGES/UI-UX-DESIGN 已同步（S31 = 旅行日志导出，星图高亮从计划移除）。
 - **S32 成就系统（ADR-0016，分支 `feature/S32-achievements` 自 S30 分出，未合并）**：引擎层纯函数 `src/engine/achievements/`（types/catalog/evaluate/star-facts，15 成就 510 点：里程 1/10/100/1000ly、探索 初航/离日/红矮星访客/开拓者、专注 番茄钟/七日/百时、挑战 耐力 4h、里程碑 半人马/天狼星/织女），**从航行记录派生无持久化**（清空历史即清空成就，与 S30 同构）；新解锁检测 = ResultView 对比 `records` 与「去 `lastSavedRecord.id`」解锁集增量（无跨会话状态）；`distance-1000` 成就 `grantsEngineTier:'jump'` 兑现 ADR-0012 跃迁解锁，`engine-tiers.ts` 新增 `resolveEngineTier(focusHours, grantedTiers)`（SetupPanel/VoyageView 功率表/StarInfoCard 改用它）；UI = header「成就」弹窗（AchievementDialog + AchievementPanel 分类墙）+ ResultView 新成就揭示。星元数据 `BUILTIN_STAR_FACTS`（17 目的地星光谱）+ 目录注入合并（`buildAchievementStarFacts`）。**延后**：12 黄道星座（星表 60 颗可访问星仅 7/12 覆盖，S35 评估）、系外行星（无数据）。验证：**371 单测 / 37 文件**、`pnpm check` 4/4、build exit 0（主包 100KB，three 967KB 仍懒加载）、e2e 3 浏览器 35 过 + 28 跳过（成就墙 2 条全浏览器过，WebGL 仅 chromium）。
+- **S33 个性化设置（分支 `feature/S33-settings` 自 S32 分出，未合并）**：**默认专注时长快捷预设**（SetupPanel 专注时长卡内 25/45/60/90 chips，点击设当前值 + 存 `defaultFocusMinutes`，高亮当前默认；S19 已有 `setDefaultFocusMinutes` 只缺 UI）+ **浏览器通知**（`browserNotificationsEnabled` 设置项默认 false；`src/utils/notifications.ts` 纯浏览器包装 `isNotificationSupported`/`getNotificationPermission`/`requestNotificationPermission`/`focusNotificationContent`/`sendFocusNotification`；`useFocusNotifications` hook 在 App 挂载，监听 `progress.status` running→completed/aborted 迁移触发，带目的星名；`NotificationSettingsPanel` 设置页开关 + 权限状态提示（已授权/被拒/不支持），抽取共享 `Toggle` 组件复用 SoundSettingsPanel）。**引擎外观暂缓**（用户决策）；**振动不做**（仅移动端浏览器生效）。e2e：预设 3 浏览器过；通知真实 OS 投递无头不可测（无头 permission 恒 denied + Playwright 注入 Notification 与 stub 冲突崩溃），改 jsdom 确定性单测覆盖 hook 触发（4 条）+ 面板 + 内容构建。验证：**379 单测 / 40 文件**、`pnpm check` 4/4、build exit 0、e2e 预设 3 浏览器过。
 - **Phase 3 重规划（本次讨论，三处文档已同步至 S38）**：S22~S38 重排——新增 **S22 统一飞行模型**（合并 `travelDistance`/`cruisePlan` 为 d=β·γ·τ + 引擎 γ_max 约束，退役 `RECOMMEND_MAX_GAMMA`，ADR-0012）；**S23 航行视图真实星表化**（修订：主视角 = 目的地单星放大 + 暗星点阵，ADR-0011 + ADR-0014，S25 仪表盘随 S23 提前）；**S24 前向蓝移 Doppler**（已交付）；**S27 引擎 γ 分级解锁** + 不可达阻止/升级路径；**砍掉瞬时跃迁**（跃迁 = 最高 γ 档）。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
-- **当前分支**：`feature/S32-achievements`（自 `feature/S30-captains-log` 分出；S30/S31 已 commit 未合并 main，S32 已开发未 commit）。上一级链：S22~S28 已全部合并 main。（基线：`pnpm check` 4/4、**371 单测**、37 test files，见下方 2.2。）
+- **当前分支**：`feature/S33-settings`（自 `feature/S32-achievements` 分出；S30/S31/S32 已 commit 未合并 main，S33 已开发未 commit）。上一级链：S22~S28 已全部合并 main。（基线：`pnpm check` 4/4、**379 单测**、40 test files，见下方 2.2。）
 - **文档已同步**：ROADMAP Phase 3 加状态行 + 3.1 主视角/仪表盘/蓝移更新、ADR 索引（15 份，含 ADR-0015）、**STAGES S22/S23/S24 已标 🚧 已提交 + S25 提前**、本文件均已刷新至 S24。
 - **注意**：用户在某时刻编辑了 ROADMAP，移除了 2.2 的「推荐目的地 / 多级跃迁」两个 checkbox（已按建议实施推荐目的地但保留 checkbox 移除，勿擅自加回）。
 
@@ -116,6 +117,9 @@ src/
 │   ├── CaptainLog/            ✅ S30 船长日志（CaptainLogDialog 弹窗 + CaptainLogPanel 总览 + HeatmapGrid 热力图 + WeeklyBarChart 周月柱状图）
 │   ├── Achievements/          ✅ S32 成就墙（AchievementDialog 弹窗 + AchievementPanel 分类墙，锁定/解锁 + 成就点）
 │   ├── useAchievements.ts     ✅ S32 成就派生 hook（records + catalogStars → states/points/grantedEngineTiers）
+│   ├── NotificationSettingsPanel.tsx ✅ S33 浏览器通知设置（开关 + 权限状态提示）
+│   ├── Toggle.tsx             ✅ S33 共享开关（SoundSettingsPanel / NotificationSettingsPanel 复用）
+│   ├── useFocusNotifications.ts ✅ S33 通知触发 hook（监听 progress.status running→completed/aborted）
 │   └── StarMap/
 │       ├── StarInfoCard.tsx   ✅ 点星确认卡（详情 + 设为目的地/取消/完成）
 │       └── StarSearch.tsx     ✅ S20 星图搜索框（下拉即选；星表加载中显示加载态）
@@ -129,6 +133,7 @@ src/
 ├── styles/index.css           ✅ 单一 Neutral 主题 tokens（暗色灰阶 + 金色强调）+ Space Grotesk @font-face + duration-scrubber 样式
 ├── main.tsx / App.tsx         ✅ App：idle 主视图（设置/日志）+ 星图弹窗 + 术语弹窗 + data-theme=neutral
 ├── utils/format.ts            ✅ formatDurationMs/formatLy/formatGamma/formatVOverC/formatFocusEstimate/formatMinuteLabel/... + 34 tests
+├── utils/notifications.ts     ✅ S33 浏览器通知纯包装（isNotificationSupported / getNotificationPermission / requestNotificationPermission / focusNotificationContent / sendFocusNotification）+ 2 tests
 └── vite-env.d.ts              ✅ Window.__TEST_ONLY__ 增强（declare global interface Window）
 ```
 
@@ -156,37 +161,38 @@ pnpm test:e2e
 
 ### 2.2 当前已完成（S11~S21 + 用户驱动增量 + 增量3）
 
-| Sprint | 内容                                                                                                                                   | 状态                                                   |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| S11    | Zustand 3 stores                                                                                                                       | ✅ 7/10/6 actions + 测试                               |
-| S12    | React UI（Setup/Voyage/Result/History + App 路由）                                                                                     | ✅                                                     |
-| S13    | Web Worker 计时 + localStorage 崩溃恢复                                                                                                | ✅                                                     |
-| S14    | GitHub Actions CI + mvp.e2e（3 浏览器）                                                                                                | ✅                                                     |
-| S15    | PWA 离线 + manifest + README 指引                                                                                                      | ✅                                                     |
-| S16    | R3F 3D 星空渲染器 + 星图视图（懒加载）                                                                                                 | ✅                                                     |
-| S17    | 星图弹窗 + 点星确认设目的地 + 当前位置标记（+ 拾取/分层）                                                                              | ✅                                                     |
-| 增量   | UI 极简克制化重设计 + 术语弹窗 + 单一暗色 Neutral 主题                                                                                 | ✅                                                     |
-| 增量2  | 星图双视角（出发地/全览）+ 半径圈 + 出发地随航行更新                                                                                   | ✅                                                     |
-| 增量3  | 变动出发地（出发地 = 上次目的地）+ 两星 leg 距离规划（ADR-0013）                                                                       | ✅ commit 3f39e62 未 push                              |
-| S18    | 目的地数据源统一（真实星表）+ 反推预计专注时长                                                                                         | ✅ 已合并（PR #3）                                     |
-| S19    | 时长滑杆 `DurationScrubber` + `cruisePlan` 反推航线                                                                                    | ✅ commit 945ec2e 未合并                               |
-| S20    | 星图搜索 `searchStars`/`StarSearch` + 推荐目的地 `recommendDestination`                                                                | ✅ commit c3817bf 未合并                               |
-| S21    | Phase 2 收尾 QA：perf / 验收走查 / 抽样校验，关闭 v0.2                                                                                 | ✅ commit fbc3bae + 68c80bd（已在 origin）             |
-| S22    | 统一飞行模型 d=β·γ·τ + ENGINE_TIERS 五档 + 可达性 API + 退役 RECOMMEND_MAX_GAMMA + 不可达阻止（ADR-0012）                              | 🚧 commit（feature/S22-unified-flight-model 未合并）   |
-| S23    | 航行视图真实星表化（主视角 = 目的地单星放大 + 暗星点阵，ADR-0011 修订 + ADR-0014）+ S25 仪表盘提前（进度/双时间/速度/γ/距离/ETA/功率） | 🚧 commit（feature/S23-voyage-real-stars 未合并）      |
-| S24    | 前向蓝移 Doppler：doppler.ts 纯函数 + StarField doppler prop（只蓝不红）+ 目的地星蓝移                                                 | ✅ 已合并 main                                         |
-| S26    | 跃迁过渡动画：VoyagePhase 相位状态机 + warp-flow 纯函数 + 近观星流 + 到达入轨放大 + 三过渡标签                                         | ✅ 已合并 main（PR #10）                               |
-| S27    | 引擎解锁（getUnlockedTier/getNextUnlock）+ 设置页当前引擎/升级路径 + 不可达推荐 + 推荐/最短专注/功率按当前引擎 γ_max                   | ✅ 已合并 main（PR #11）                               |
-| S28    | 白噪音（Web Audio 合成：嗡鸣/CMB/脉冲星 + 三事件音效）+ 设置页 SoundSettingsPanel + autoplay 规避                                      | ✅ 已合并 main                                         |
-| S29    | Phase 3 收尾：运行时帧率降级 FpsGovernor + γ 极端精度对拍 + 8h 加速模拟 + voyage QA 验收走查，关闭 v0.3                                | 🚧 已 commit `eec0d88`（feature/S29-phase3-qa 未合并） |
-| S30    | 船长日志：引擎 stats 聚合（summarize/streak/热力图/周月）+ header「日志」弹窗（tiles/热力图/柱状图/时间线）                            | 🚧 已开发（feature/S30-captains-log 未合并）           |
-| S32    | 成就系统：引擎 achievements 模块（15 成就/510 点，ADR-0016）+ 成就墙弹窗 + ResultView 新成就揭示 + 跃迁引擎授权（resolveEngineTier）   | 🚧 已开发（feature/S32-achievements 未合并）           |
+| Sprint | 内容                                                                                                                                           | 状态                                                   |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| S11    | Zustand 3 stores                                                                                                                               | ✅ 7/10/6 actions + 测试                               |
+| S12    | React UI（Setup/Voyage/Result/History + App 路由）                                                                                             | ✅                                                     |
+| S13    | Web Worker 计时 + localStorage 崩溃恢复                                                                                                        | ✅                                                     |
+| S14    | GitHub Actions CI + mvp.e2e（3 浏览器）                                                                                                        | ✅                                                     |
+| S15    | PWA 离线 + manifest + README 指引                                                                                                              | ✅                                                     |
+| S16    | R3F 3D 星空渲染器 + 星图视图（懒加载）                                                                                                         | ✅                                                     |
+| S17    | 星图弹窗 + 点星确认设目的地 + 当前位置标记（+ 拾取/分层）                                                                                      | ✅                                                     |
+| 增量   | UI 极简克制化重设计 + 术语弹窗 + 单一暗色 Neutral 主题                                                                                         | ✅                                                     |
+| 增量2  | 星图双视角（出发地/全览）+ 半径圈 + 出发地随航行更新                                                                                           | ✅                                                     |
+| 增量3  | 变动出发地（出发地 = 上次目的地）+ 两星 leg 距离规划（ADR-0013）                                                                               | ✅ commit 3f39e62 未 push                              |
+| S18    | 目的地数据源统一（真实星表）+ 反推预计专注时长                                                                                                 | ✅ 已合并（PR #3）                                     |
+| S19    | 时长滑杆 `DurationScrubber` + `cruisePlan` 反推航线                                                                                            | ✅ commit 945ec2e 未合并                               |
+| S20    | 星图搜索 `searchStars`/`StarSearch` + 推荐目的地 `recommendDestination`                                                                        | ✅ commit c3817bf 未合并                               |
+| S21    | Phase 2 收尾 QA：perf / 验收走查 / 抽样校验，关闭 v0.2                                                                                         | ✅ commit fbc3bae + 68c80bd（已在 origin）             |
+| S22    | 统一飞行模型 d=β·γ·τ + ENGINE_TIERS 五档 + 可达性 API + 退役 RECOMMEND_MAX_GAMMA + 不可达阻止（ADR-0012）                                      | 🚧 commit（feature/S22-unified-flight-model 未合并）   |
+| S23    | 航行视图真实星表化（主视角 = 目的地单星放大 + 暗星点阵，ADR-0011 修订 + ADR-0014）+ S25 仪表盘提前（进度/双时间/速度/γ/距离/ETA/功率）         | 🚧 commit（feature/S23-voyage-real-stars 未合并）      |
+| S24    | 前向蓝移 Doppler：doppler.ts 纯函数 + StarField doppler prop（只蓝不红）+ 目的地星蓝移                                                         | ✅ 已合并 main                                         |
+| S26    | 跃迁过渡动画：VoyagePhase 相位状态机 + warp-flow 纯函数 + 近观星流 + 到达入轨放大 + 三过渡标签                                                 | ✅ 已合并 main（PR #10）                               |
+| S27    | 引擎解锁（getUnlockedTier/getNextUnlock）+ 设置页当前引擎/升级路径 + 不可达推荐 + 推荐/最短专注/功率按当前引擎 γ_max                           | ✅ 已合并 main（PR #11）                               |
+| S28    | 白噪音（Web Audio 合成：嗡鸣/CMB/脉冲星 + 三事件音效）+ 设置页 SoundSettingsPanel + autoplay 规避                                              | ✅ 已合并 main                                         |
+| S29    | Phase 3 收尾：运行时帧率降级 FpsGovernor + γ 极端精度对拍 + 8h 加速模拟 + voyage QA 验收走查，关闭 v0.3                                        | 🚧 已 commit `eec0d88`（feature/S29-phase3-qa 未合并） |
+| S30    | 船长日志：引擎 stats 聚合（summarize/streak/热力图/周月）+ header「日志」弹窗（tiles/热力图/柱状图/时间线）                                    | 🚧 已开发（feature/S30-captains-log 未合并）           |
+| S32    | 成就系统：引擎 achievements 模块（15 成就/510 点，ADR-0016）+ 成就墙弹窗 + ResultView 新成就揭示 + 跃迁引擎授权（resolveEngineTier）           | 🚧 已开发（feature/S32-achievements 未合并）           |
+| S33    | 个性化设置：时长快捷预设（25/45/60/90→defaultFocusMinutes）+ 浏览器通知（notifications.ts + useFocusNotifications + 设置页开关）；引擎外观暂缓 | 🚧 已开发（feature/S33-settings 未合并）               |
 
-**验证基线**：`pnpm check` 4/4（**341 单测**，34 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap/voyage WebGL 仅 chromium）；`pnpm build` 主包 ~80KB（three 967KB 懒加载进星图/航行 chunk）。
+**验证基线**：`pnpm check` 4/4（**379 单测**，40 test files）；e2e 3 浏览器 38 过 + 28 跳过（starmap/voyage WebGL 仅 chromium；通知真实投递无头不可测，改 jsdom 单测）；`pnpm build` 主包 ~100KB（three 967KB 懒加载进星图/航行 chunk）。
 
 ### 2.3 下一步（Phase 3 航行系统，按 ROADMAP）
 
-Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型已交付**（ADR-0012）；**S23 航行视图真实星表化 + S25 仪表盘已交付**（ADR-0011 修订 + ADR-0014）；**S24 前向蓝移已交付**；**S26 跃迁过渡动画已交付**；**S27 引擎解锁已交付**；**S28 白噪音已交付**；**S29 Phase 3 收尾已交付（v0.3 关闭）**（见上方当前进度）。**S30 船长日志 + S31 旅行日志导出 + S32 成就系统均已开发**（未合并，见上方当前进度）。下一阶段为 **S33 个性化设置**（引擎外观/通知偏好/默认专注时长预设），顺序见 STAGES 第五节。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
+Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型已交付**（ADR-0012）；**S23 航行视图真实星表化 + S25 仪表盘已交付**（ADR-0011 修订 + ADR-0014）；**S24 前向蓝移已交付**；**S26 跃迁过渡动画已交付**；**S27 引擎解锁已交付**；**S28 白噪音已交付**；**S29 Phase 3 收尾已交付（v0.3 关闭）**（见上方当前进度）。**S30 船长日志 + S31 旅行日志导出 + S32 成就系统 + S33 个性化设置均已开发**（未合并，见上方当前进度）。下一阶段为 **S34 好友雏形**（本地/云端账户 + 个人分享链接 + 好友状态，可推迟，STAGES 5.1），顺序见 STAGES 第五节。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
 
 | 顺序 | 内容                                                                                                    | 说明                                                                                                                 |
 | ---- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |

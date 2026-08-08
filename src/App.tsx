@@ -6,6 +6,7 @@ import { GlossaryDialog } from '@/components/GlossaryDialog';
 import { HistoryPanel } from '@/components/HistoryPanel';
 import { SpaceBackdrop } from '@/components/SpaceBackdrop';
 import { useAudioEngine } from '@/components/useAudioEngine';
+import { useFocusNotifications } from '@/components/useFocusNotifications';
 import { ResultView } from '@/pages/ResultView';
 import { SetupPanel } from '@/pages/SetupPanel';
 import { VoyageView } from '@/pages/VoyageView';
@@ -28,6 +29,7 @@ function App() {
   const [achievementOpen, setAchievementOpen] = useState(false);
 
   useAudioEngine();
+  useFocusNotifications();
 
   useEffect(() => {
     void useSettingsStore.getState().load();
