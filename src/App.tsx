@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 
+import { CaptainLogDialog } from '@/components/CaptainLog/CaptainLogDialog';
 import { GlossaryDialog } from '@/components/GlossaryDialog';
 import { HistoryPanel } from '@/components/HistoryPanel';
 import { SpaceBackdrop } from '@/components/SpaceBackdrop';
@@ -22,6 +23,7 @@ function App() {
   const theme = useSettingsStore((s) => s.settings.theme);
   const [starMapOpen, setStarMapOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
+  const [captainLogOpen, setCaptainLogOpen] = useState(false);
 
   useAudioEngine();
 
@@ -61,13 +63,22 @@ function App() {
         </h1>
         <div className="flex items-center gap-2">
           {status === 'idle' && (
-            <button
-              type="button"
-              onClick={() => setStarMapOpen(true)}
-              className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
-            >
-              星图
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => setCaptainLogOpen(true)}
+                className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
+              >
+                日志
+              </button>
+              <button
+                type="button"
+                onClick={() => setStarMapOpen(true)}
+                className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
+              >
+                星图
+              </button>
+            </>
           )}
           <button
             type="button"
@@ -118,6 +129,8 @@ function App() {
           <StarMapDialog onClose={() => setStarMapOpen(false)} />
         </Suspense>
       )}
+
+      {captainLogOpen && <CaptainLogDialog onClose={() => setCaptainLogOpen(false)} />}
 
       <GlossaryDialog open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
     </div>
