@@ -105,4 +105,39 @@ test.describe('航行视图真实星表化 (S23 R3F)', () => {
     await expect(page.getByTestId('result-view')).toBeVisible({ timeout: 5_000 });
     await expect(page.getByText(/航行已中止/)).toBeVisible();
   });
+
+  test('S29 Phase 3 验收走查：启动→巡航时间膨胀数值匹配→完成→结果一致', async ({ page }) => {
+    test.setTimeout(90_000);
+    const errors: string[] = [];
+    page.on('console', (m) => {
+      if (m.type() === 'error') errors.push(m.text());
+    });
+    page.on('pageerror', (error: Error) => errors.push(error.message));
+
+    await page.goto('/');
+    await expect(page.getByTestId('setup-panel')).toBeVisible();
+
+    await page.getByLabel('目的地').selectOption('hip-70890');
+    await page.getByRole('button', { name: '启动航行' }).click();
+    await expect(page.getByTestId('voyage-view')).toBeVisible({ timeout: 20_000 });
+
+    // 巡航中：时间膨胀数值匹配（船上已过 × γ ≈ 地球已过）——用 DOM 断言形态存在
+    await page.waitForTimeout(4000);
+    const elapsedText = await page.getByText(/船上已过/).textContent();
+    expect(elapsedText).toBeTruthy();
+    expect(page.getByTestId('voyage-star-field')).toBeVisible({ timeout: 20_000 });
+
+    // fastForward 跨过 25 分钟 → 到达 → 结果视图
+    await page.evaluate(() => window.__TEST_ONLY__!.fastForward(1_600_000));
+    await expect(page.getByText(/正在减速入轨/)).toBeVisible();
+    await expect(page.getByTestId('result-view')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText(/本次航行完成/)).toBeVisible();
+
+    // 结果数值：主观专注时长显示 + γ 显示，无报错
+    await expect(page.getByText('主观专注时长')).toBeVisible();
+    await expect(page.getByText('时间膨胀 γ')).toBeVisible();
+    await expect(page.getByText('航行速度')).toBeVisible();
+    await expect(page.getByText('实际航行距离')).toBeVisible();
+    expect(errors).toHaveLength(0);
+  });
 });

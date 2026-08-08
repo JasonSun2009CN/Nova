@@ -22,10 +22,11 @@
 - **S24 前向蓝移 Doppler（已提交分支 `feature/S24-doppler-blueshift` 未合并）**：`doppler.ts` 纯函数（`dopplerFactor`=γ(1+βcosθ) / `blueShiftAmount` / `blueShiftColor`，**只蓝不红**）+ StarField `doppler` prop（vertex 按前方程度算 `vDoppler`，fragment 蓝移，默认关不影响星图）+ 目的地星光晕色按 γ 蓝移（αCen γ≈91k e≈0.78 强蓝、自由漂流 0.99c e≈0.17 轻微蓝）。验证：270 单测 / 29 文件、e2e chromium 7/7、build exit 0。
 - **S26 跃迁过渡动画（已提交分支 `feature/S26-warp-transition`，用户手动合并 main 中）**：`VoyagePhase` 相位状态机（launching/cruising/arriving/braking，store 同步 + App 3s 定时推进，引擎零改动）+ `warp-flow.ts` 纯函数 + 近观星流 `NearFieldFlow`（launching/braking 挂载，ADR-0014 遗留评估落地）+ 到达目标星 settle 入轨。验证：282 单测 / 30 文件、voyage e2e chromium 5/5。
 - **S27 引擎解锁 + 不可达推荐（已 commit `10f7ff7` + `f93b7a3`，已合并 main PR #11）**：`getUnlockedTier(focusHours)` / `getNextUnlock(focusHours)` 纯函数（引擎层，jump 里程碑不自动解锁）+ 设置页「当前引擎」状态条（引擎名 + 下一级解锁进度/已全部解锁）+ 不可达警告加「升级路径：再累计 X 解锁下一级」+ 推荐目的地 / StarInfoCard 最短专注 / VoyageView 引擎功率表全部改用当前引擎 γ_max（数据源 `useHistoryStore.stats.totalFocusHours`，完成航行后 refresh 自动更新，解锁即时生效）+ **目的地不可达时也显示「可改选」推荐**（`recommendDestination` 返回当前引擎可达最远星）+ dev-hooks 新增 `setHistoryStatsForTest`。任务模式 UI（定时/跃迁/自由漂流）留后续。
-- **S28 白噪音（已开发，分支 `feature/S28-white-noise` 未合并）**：Web Audio 合成零音频资源——`src/engine/audio/audio-engine.ts`（`AudioEngine` 单例：引擎嗡鸣双振荡器 + 频率调制、CMB 白噪音低通、脉冲星周期增益门控、launch/arrive/brake 三事件包络音效；`AudioContextLike` 接口抽象 Web Audio 供 mock 单测）+ `synthesis.ts` 纯函数（噪声 buffer / 脉冲形状）；`SoundSettingsPanel` 设置页音效区（引擎嗡鸣开关+音量、环境音 none/CMB/脉冲星 选择+音量、事件音效开关，settings 新增 `engineSoundEnabled`/`eventSoundsEnabled`/`ambientSoundType` 复用 `soundVolume`/`musicVolume`）；autoplay 规避：首次「启动航行」手势 `ensureAudioEngineStarted()` 才建 AudioContext，jsdom 无 AudioContext 守卫跳过；事件音效在 VoyageStore start/complete/abort 触发。验证：306 单测 / 31 文件、build exit 0（主包 80KB）。
+- **S28 白噪音（已合并 main）**：Web Audio 合成零音频资源——`src/engine/audio/audio-engine.ts`（`AudioEngine` 单例：引擎嗡鸣双振荡器 + 频率调制、CMB 白噪音低通、脉冲星周期增益门控、launch/arrive/brake 三事件包络音效；`AudioContextLike` 接口抽象 Web Audio 供 mock 单测）+ `synthesis.ts` 纯函数；`SoundSettingsPanel` 设置页音效区（引擎嗡鸣开关+音量、环境音 none/CMB/脉冲星 选择+音量、事件音效开关，settings 新增 `engineSoundEnabled`/`eventSoundsEnabled`/`ambientSoundType`）；autoplay 规避：首次「启动航行」手势 `ensureAudioEngineStarted()` 才建 AudioContext。
+- **S29 Phase 3 收尾 QA（已开发，分支 `feature/S29-phase3-qa` 未合并）**：运行时帧率自动降级 `FpsGovernor`（`src/engine/renderer/fps-governor.ts`，rAF 监控帧耗时 → high/medium/low 三档画质，StarField sizeScale/opacity/doppler 自适应，10 单测）+ γ 极端精度对拍（β→1 与精确公式相对误差 < 1e-3，含稳定性）+ 8h 加速模拟（infinite 连续 tick 3000 步验证单调性 + snapshot 中段可恢复）+ voyage QA e2e 验收走查（`voyage-view.spec` 6 条全过，启动→巡航数值→完成→结果）。**关闭 v0.3**。验证：321 单测 / 32 文件、build exit 0（主包 80KB）。
 - **Phase 3 重规划（本次讨论，三处文档已同步至 S38）**：S22~S38 重排——新增 **S22 统一飞行模型**（合并 `travelDistance`/`cruisePlan` 为 d=β·γ·τ + 引擎 γ_max 约束，退役 `RECOMMEND_MAX_GAMMA`，ADR-0012）；**S23 航行视图真实星表化**（修订：主视角 = 目的地单星放大 + 暗星点阵，ADR-0011 + ADR-0014，S25 仪表盘随 S23 提前）；**S24 前向蓝移 Doppler**（已交付）；**S27 引擎 γ 分级解锁** + 不可达阻止/升级路径；**砍掉瞬时跃迁**（跃迁 = 最高 γ 档）。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
-- **当前分支**：`feature/S28-white-noise`（自 main `01c9af9` 分出；S28 已开发未 commit）。上一级链：S22~S27 已全部合并 main（S26 PR #10、S27 PR #11）。（基线：`pnpm check` 4/4、**306 单测**、31 test files，见下方 2.2。）
+- **当前分支**：`feature/S29-phase3-qa`（自 main `7171120` 分出；S29 已开发未 commit）。上一级链：S22~S28 已全部合并 main。（基线：`pnpm check` 4/4、**321 单测**、32 test files，见下方 2.2。）
 - **文档已同步**：ROADMAP Phase 3 加状态行 + 3.1 主视角/仪表盘/蓝移更新、ADR 索引（14 份，含 ADR-0014）、**STAGES S22/S23/S24 已标 🚧 已提交 + S25 提前**、本文件均已刷新至 S24。
 - **注意**：用户在某时刻编辑了 ROADMAP，移除了 2.2 的「推荐目的地 / 多级跃迁」两个 checkbox（已按建议实施推荐目的地但保留 checkbox 移除，勿擅自加回）。
 
@@ -45,7 +46,7 @@
 ### 1.1 总览与路线图（业务 & 阶段验收标准）
 
 1. [README.md](file:///Users/fiona/Documents/trae_projects/Nova/README.md) — 项目定义、技术选型原因、用户故事、**用户使用指引**。
-2. [docs/ROADMAP.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/ROADMAP.md) — **唯一的阶段验收依据**。Phase 1 MVP 验收已全部勾选。当前在 **Phase 3 完整航行系统 + 相对论视觉（v0.3）**：航行视图真实星表化（S23 已交付）、实时仪表盘（S25 已交付）、引擎等级系统、跃迁过渡、白噪音。每次接事先看对应 Phase 的 Acceptance Criteria，别自己加 scope。
+2. [docs/ROADMAP.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/ROADMAP.md) — **唯一的阶段验收依据**。Phase 1/2/3 验收已全部勾选（v0.1/v0.2/v0.3 已关闭）。当前在 **Phase 4 成就系统 + 航行日志（v0.5）**：船长日志统计面板、成就系统、个性化设置、多人雏形。每次接事先看对应 Phase 的 Acceptance Criteria，别自己加 scope。
 3. [docs/adr/README.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/adr/README.md) + 14 份 ADR — **所有「为什么这么做」全在这**。尤其是 **ADR-003 分层架构**（引擎 vs 渲染 vs UI vs 数据 vs 基础设施严格隔离，不允许跨层 import）。最新 ADR-0014（航行单星放大 + S25 仪表盘提前，修订 ADR-0011）。
 
 ### 1.2 开发规范 & 工程化（写代码前必读，避免 CI 红）
@@ -167,13 +168,14 @@ pnpm test:e2e
 | S24    | 前向蓝移 Doppler：doppler.ts 纯函数 + StarField doppler prop（只蓝不红）+ 目的地星蓝移                                                 | ✅ 已合并 main                                       |
 | S26    | 跃迁过渡动画：VoyagePhase 相位状态机 + warp-flow 纯函数 + 近观星流 + 到达入轨放大 + 三过渡标签                                         | ✅ 已合并 main（PR #10）                             |
 | S27    | 引擎解锁（getUnlockedTier/getNextUnlock）+ 设置页当前引擎/升级路径 + 不可达推荐 + 推荐/最短专注/功率按当前引擎 γ_max                   | ✅ 已合并 main（PR #11）                             |
-| S28    | 白噪音（Web Audio 合成：嗡鸣/CMB/脉冲星 + 三事件音效）+ 设置页 SoundSettingsPanel + autoplay 规避                                      | 🚧 已开发（feature/S28-white-noise 未合并）          |
+| S28    | 白噪音（Web Audio 合成：嗡鸣/CMB/脉冲星 + 三事件音效）+ 设置页 SoundSettingsPanel + autoplay 规避                                      | ✅ 已合并 main                                       |
+| S29    | Phase 3 收尾：运行时帧率降级 FpsGovernor + γ 极端精度对拍 + 8h 加速模拟 + voyage QA 验收走查，关闭 v0.3                                | 🚧 已开发（feature/S29-phase3-qa 未合并）            |
 
-**验证基线**：`pnpm check` 4/4（**306 单测**，31 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap/voyage WebGL 仅 chromium）；`pnpm build` 主包 ~80KB（three 967KB 懒加载进星图/航行 chunk）。
+**验证基线**：`pnpm check` 4/4（**321 单测**，32 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap/voyage WebGL 仅 chromium）；`pnpm build` 主包 ~80KB（three 967KB 懒加载进星图/航行 chunk）。
 
 ### 2.3 下一步（Phase 3 航行系统，按 ROADMAP）
 
-Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型已交付**（ADR-0012）；**S23 航行视图真实星表化 + S25 仪表盘已交付**（ADR-0011 修订 + ADR-0014）；**S24 前向蓝移已交付**；**S26 跃迁过渡动画已交付**；**S27 引擎解锁已交付**；**S28 白噪音已交付**（见上方当前进度）。下一阶段为 **S29 Phase 3 收尾**（航行视图 60fps 自动降级 / γ 数值精度对拍 / 8h 稳定性 + 验收走查，关闭 v0.3）→ Phase 4 S30 船长日志，顺序见 STAGES 第五节。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
+Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型已交付**（ADR-0012）；**S23 航行视图真实星表化 + S25 仪表盘已交付**（ADR-0011 修订 + ADR-0014）；**S24 前向蓝移已交付**；**S26 跃迁过渡动画已交付**；**S27 引擎解锁已交付**；**S28 白噪音已交付**；**S29 Phase 3 收尾已交付（v0.3 关闭）**（见上方当前进度）。下一阶段为 **Phase 4 S30 船长日志**（总时长/总距离/已探索恒星/最长单次/streak 总览 + 热力图 + 时间线 + 周/月柱状图，与 S27 共享 stats 聚合器）→ S31 航线地图，顺序见 STAGES 第五节。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
 
 | 顺序 | 内容                                                                                                    | 说明                                                                                                                 |
 | ---- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |

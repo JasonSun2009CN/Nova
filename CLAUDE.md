@@ -101,4 +101,4 @@ Data flow is one-way: **engine (source of truth) → EventEmitter → Zustand st
 
 ## Current state
 
-Phase 1 MVP (S11–S15) done; Phase 2 (S16 star renderer + S17 map dialog/interaction) is delivered on branch `feature/S16-starmap-renderer` with uncommitted changes awaiting user confirmation. Next per ROADMAP: integrate the full ~1800-star catalog within 50 ly (replacing the 500-star fixture), then navigation (pick destination → compute required focus duration). For anything architecture-level, **write a new ADR before code** — that is the project's rule.
+Phases 1–3 done (v0.1/v0.2/v0.3 closed): MVP timer (S11–S15), star-map navigation (S16–S21), full voyage system + relativistic visuals (S22–S29, incl. real-star voyage view, Doppler blueshift, warp transitions, engine unlock tiers, Web Audio white noise, runtime FPS governor). Next per ROADMAP: **Phase 4 (v0.5) S30 Captain's Log stats panel** (total focus/distance/explored stars/streak + heatmap + timeline). Current branch `feature/S29-phase3-qa` (unmerged). For anything architecture-level, **write a new ADR before code** — that is the project's rule.
