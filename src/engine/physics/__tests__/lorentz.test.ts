@@ -64,6 +64,38 @@ describe('engine/physics/lorentz', () => {
         expect(relErr).toBeLessThan(1e-9);
       }
     });
+
+    it('S29 极端相对论精度：β→1（1-1e-9 ~ 1-1e-14）相对误差 < 1e-3（v↔β 往返舍入界）', () => {
+      const epsilons = [1e-9, 1e-10, 1e-11, 1e-12, 1e-13, 1e-14];
+      for (const eps of epsilons) {
+        const beta = 1 - eps;
+        const v = beta * LIGHT_SPEED;
+        const exact = 1 / Math.sqrt(2 * eps - eps * eps);
+        const computed = lorentzFactor(v);
+        const relErr = Math.abs(computed - exact) / exact;
+        // lorentzFactor 对 β>0.999999 用 1/√(2ε) 近似；v→β 往返有 ~1e-16 舍入，极端 ε 下被放大
+        expect(relErr).toBeLessThan(1e-3);
+      }
+    });
+
+    it('S29 γ 数值稳定性：β=1-1e-9 时 γ ≈ 22360 且有限（接近 c 不 NaN）', () => {
+      const g = lorentzFactor((1 - 1e-9) * LIGHT_SPEED);
+      expect(Number.isFinite(g)).toBe(true);
+      const exact = 1 / Math.sqrt(2e-9);
+      const relErr = Math.abs(g - exact) / exact;
+      expect(relErr).toBeLessThan(1e-4);
+    });
+
+    it('S29 γ 精度单调：β 越大 γ 越大，且符合 γ ≥ 1', () => {
+      const betas = [0.5, 0.9, 0.99, 0.999, 0.9999, 0.99999];
+      let prev = 0;
+      for (const b of betas) {
+        const g = lorentzFactor(b * LIGHT_SPEED);
+        expect(g).toBeGreaterThanOrEqual(1);
+        expect(g).toBeGreaterThan(prev);
+        prev = g;
+      }
+    });
   });
 
   describe('travelDistance()', () => {

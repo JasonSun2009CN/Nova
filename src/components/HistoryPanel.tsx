@@ -18,7 +18,10 @@ export function HistoryPanel() {
   }, [load]);
 
   return (
-    <section data-testid="history-panel" className="mx-auto w-full max-w-md px-6 pb-12">
+    <section
+      data-testid="history-panel"
+      className="mx-auto w-full max-w-md px-6 pb-12 lg:mx-0 lg:max-w-none lg:px-0 lg:pt-10"
+    >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="font-display text-lg font-medium tracking-wide">航行日志</h2>
         {records.length > 0 && (

@@ -35,3 +35,14 @@ export { KdTree3, distanceSq3, distanceLy3 } from './data/KdTree3';
 export type { KdPoint3, FindNearestResult as KdFindNearestResult } from './data/KdTree3';
 export { StarCatalog } from './data/StarCatalog';
 export type { StarFilter } from './data/StarCatalog';
+
+export type * from './stats/captains-log';
+export {
+  HEATMAP_LEVEL_MINUTES,
+  aggregateMonthly,
+  aggregateWeekly,
+  buildHeatmap,
+  computeStreakDays,
+  dayStartMs,
+  summarizeCaptainsLog,
+} from './stats/captains-log';

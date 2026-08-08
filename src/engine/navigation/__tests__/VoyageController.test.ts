@@ -328,4 +328,58 @@ describe('VoyageController (引擎层 · 纯 TS · 无 React 依赖)', () => {
       ctrl.dispose();
     });
   });
+
+  describe('S29 长时间运行加速模拟（等价 8 小时）', () => {
+    it('连续 8h tick（infinite）：elapsed 精确累加、traveledLy 单调不减、无状态回退', () => {
+      const ctrl = new VoyageController({
+        infinite: true,
+        vOverC: V_OVER_C,
+        tickIntervalMs: 250,
+      });
+      const start = Date.now();
+      ctrl.start();
+
+      let prevLy = 0;
+      const EIGHT_HOURS_MS = 8 * ONE_HOUR_MS;
+      const steps = 3000;
+      for (let i = 0; i < steps; i++) {
+        ctrl.tick(start + (i + 1) * (EIGHT_HOURS_MS / steps));
+        const p = ctrl.getProgress();
+        expect(p.elapsedFocusMs).toBeLessThanOrEqual(EIGHT_HOURS_MS);
+        expect(p.traveledLy).toBeGreaterThanOrEqual(prevLy);
+        expect(Number.isFinite(p.traveledLy)).toBe(true);
+        prevLy = p.traveledLy;
+      }
+
+      const final = ctrl.getProgress();
+      expect(final.status).toBe('running');
+      expect(final.elapsedFocusMs).toBeCloseTo(EIGHT_HOURS_MS, 0);
+      expect(final.traveledLy).toBeCloseTo(expectedLy(8 * 60, V_OVER_C, GAMMA), 6);
+      ctrl.dispose();
+    });
+
+    it('8h 全程 snapshot 序列化稳定且可恢复（无累积状态泄漏）', () => {
+      const ctrl = new VoyageController({
+        infinite: true,
+        vOverC: V_OVER_C,
+        tickIntervalMs: 250,
+      });
+      const start = Date.now();
+      ctrl.start();
+
+      const EIGHT_HOURS_MS = 8 * ONE_HOUR_MS;
+      const steps = 1500;
+      let snapshot: VoyageSnapshot | null = null;
+      for (let i = 0; i < steps; i++) {
+        ctrl.tick(start + (i + 1) * (EIGHT_HOURS_MS / steps));
+        if (i === steps / 2 - 1) snapshot = ctrl.snapshot();
+      }
+      expect(snapshot).not.toBeNull();
+      const restored = VoyageController.fromSnapshot(snapshot!);
+      expect(restored.getProgress().status).toBe('running');
+      expect(restored.getProgress().elapsedFocusMs).toBeCloseTo(EIGHT_HOURS_MS / 2, 0);
+      restored.dispose();
+      ctrl.dispose();
+    });
+  });
 });

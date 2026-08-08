@@ -1,9 +1,10 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Mesh } from 'three';
 
 import type { Star } from '@/engine/contract/catalog-types';
 import { blueShiftColor, dopplerFactor } from '@/engine/renderer/doppler';
+import { FpsGovernor, QUALITY_CONFIGS, type RenderQuality } from '@/engine/renderer/fps-governor';
 import { NearFieldFlow } from '@/engine/renderer/NearFieldFlow';
 import { StarField } from '@/engine/renderer/StarField';
 import { spectralColor } from '@/engine/renderer/star-colors';
@@ -112,6 +113,29 @@ function DestinationStar({
   );
 }
 
+function FpsGovernorRig({
+  governor,
+  onQualityChange,
+}: {
+  governor: FpsGovernor;
+  onQualityChange: (q: RenderQuality) => void;
+}) {
+  const lastTimeRef = useRef<number | null>(null);
+
+  useFrame(({ clock }) => {
+    const now = clock.getElapsedTime() * 1000;
+    if (lastTimeRef.current != null) {
+      const delta = now - lastTimeRef.current;
+      if (governor.update(delta)) {
+        onQualityChange(governor.quality);
+      }
+    }
+    lastTimeRef.current = now;
+  });
+
+  return null;
+}
+
 export function VoyageStarField({
   stars,
   originStar,
@@ -143,6 +167,11 @@ export function VoyageStarField({
   );
   const fraction = safeLeg != null ? Math.min(1, traveledLy / safeLeg) : 0;
   const advance = traveledLy * VOYAGE_SCALE;
+  const governorRef = useRef<FpsGovernor | null>(null);
+  if (governorRef.current == null) governorRef.current = new FpsGovernor();
+  const [quality, setQuality] = useState<RenderQuality>('high');
+  const qualityConfig = QUALITY_CONFIGS[quality];
+  const handleQualityChange = useCallback((q: RenderQuality) => setQuality(q), []);
 
   return (
     <div data-testid="voyage-star-field" className="absolute inset-0">
@@ -150,10 +179,11 @@ export function VoyageStarField({
         <StarField
           stars={stars}
           scale={VOYAGE_SCALE}
-          opacity={BG_OPACITY}
-          sizeScale={BG_SIZE_SCALE}
-          doppler={{ gamma, beta: vOverC }}
+          opacity={BG_OPACITY * qualityConfig.starOpacity}
+          sizeScale={BG_SIZE_SCALE * qualityConfig.starSizeScale}
+          doppler={qualityConfig.doppler ? { gamma, beta: vOverC } : undefined}
         />
+        <FpsGovernorRig governor={governorRef.current} onQualityChange={handleQualityChange} />
         {destStar != null && destWorld != null && destColor != null && (
           <DestinationStar
             position={destWorld}
