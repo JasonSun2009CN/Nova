@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 
+import { AchievementDialog } from '@/components/Achievements/AchievementDialog';
 import { CaptainLogDialog } from '@/components/CaptainLog/CaptainLogDialog';
 import { GlossaryDialog } from '@/components/GlossaryDialog';
 import { HistoryPanel } from '@/components/HistoryPanel';
@@ -24,6 +25,7 @@ function App() {
   const [starMapOpen, setStarMapOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [captainLogOpen, setCaptainLogOpen] = useState(false);
+  const [achievementOpen, setAchievementOpen] = useState(false);
 
   useAudioEngine();
 
@@ -64,6 +66,13 @@ function App() {
         <div className="flex items-center gap-2">
           {status === 'idle' && (
             <>
+              <button
+                type="button"
+                onClick={() => setAchievementOpen(true)}
+                className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
+              >
+                成就
+              </button>
               <button
                 type="button"
                 onClick={() => setCaptainLogOpen(true)}
@@ -133,6 +142,8 @@ function App() {
       )}
 
       {captainLogOpen && <CaptainLogDialog onClose={() => setCaptainLogOpen(false)} />}
+
+      {achievementOpen && <AchievementDialog onClose={() => setAchievementOpen(false)} />}
 
       <GlossaryDialog open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
     </div>

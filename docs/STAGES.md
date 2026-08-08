@@ -11,7 +11,7 @@
 - **S 编号自 S11（Phase 1 MVP）起正式用于分支命名**；更早的引擎基础（S7~S9）按交接/代码标注逻辑编号，无独立分支。
 - **S1~S6、S10 从未定义**，保持留空，不要自行占用。
 - **S21~S38 已按第五节规划占用**（Phase 2 收尾 → Phase 5），开工前先读第五节「规划顺序与关键决策」，不要自行改号。
-- 交付新阶段时 **同步刷新三处**：本文档 + `HANDOFF.md` + `docs/ROADMAP.md`（现状：S30 船长日志开发中，规划至 S38）。
+- 交付新阶段时 **同步刷新三处**：本文档 + `HANDOFF.md` + `docs/ROADMAP.md`（现状：S32 成就系统开发中，规划至 S38）。
 
 ## 二、状态图例
 
@@ -55,7 +55,7 @@
 | S29    | Phase 3    | v0.3 | Phase 3 质量保障（关闭 v0.3）：运行时帧率自动降级 `FpsGovernor`（rAF 监控 → high/medium/low 画质切换，StarField sizeScale/opacity/doppler 自适应）+ γ 极端精度对拍（β→1 稳定性）+ 8h 加速模拟（infinite tick 单调性/snapshot 可恢复）+ voyage QA e2e 验收走查                                                                                                                                                                   | 🚧 已开发           | `feature/S29-phase3-qa`（未合并）                         |
 | S30    | Phase 4    | v0.5 | 船长日志统计面板：引擎层聚合纯函数（`src/engine/stats/captains-log.ts`：summarize/streak/热力图/周月聚合，注入 endTime 确定性）+ header「日志」弹窗（总览 tiles / 26 周热力图 / 周月柱状图切换 / 近期时间线）                                                                                                                                                                                                                   | 🚧 已开发           | `feature/S30-captains-log`（未合并）                      |
 | S31    | Phase 4    | v0.5 | 旅行日志导出：全部航行记录 + 统计摘要头导出为 Markdown 旅行经过文件（船长日志弹窗「导出」按钮 → `nova-travel-log-YYYY-MM-DD.md`，`src/utils/export-log.ts` 纯函数）；星图高亮已砍                                                                                                                                                                                                                                               | 🚧 已开发           | `feature/S30-captains-log`（未合并）                      |
-| S32    | Phase 4    | v0.5 | 成就系统：里程/探索/专注/特殊挑战/里程碑分类 + 成就墙 + 解锁动画 + 成就点                                                                                                                                                                                                                                                                                                                                                       | ⏳                  | —                                                         |
+| S32    | Phase 4    | v0.5 | 成就系统（ADR-0016）：引擎层纯函数评估 `src/engine/achievements/`（15 个成就：里程/探索/专注/特殊挑战/里程碑 + 从航行记录派生 + 内置/目录星事实合并）+ `resolveEngineTier` 跃迁引擎授权 + 成就墙弹窗（分类分组/锁定解锁/成就点）+ ResultView 新成就揭示；延后「访问全部 12 黄道星座」（星表仅 7/12 可访问）、「发现系外行星」（无数据）；「黑洞」以单次 4h 专注「耐力航行」替代                                                 | 🚧 已开发           | `feature/S32-achievements`（未合并）                      |
 | S33    | Phase 4    | v0.5 | 个性化设置：引擎外观（飞船视觉）+ 通知偏好（声音/振动/浏览器通知）+ 默认专注时长预设                                                                                                                                                                                                                                                                                                                                            | ⏳                  | —                                                         |
 | S34    | Phase 4    | v0.5 | 好友雏形：本地/云端账户 + 个人分享链接 + 好友当前状态（仅展示）                                                                                                                                                                                                                                                                                                                                                                 | ⏳                  | —                                                         |
 | S35    | Phase 5    | v1.0 | 星图数据扩展：500ly 亮星（Hipparcos L2，~10k）+ 星云/星团 + 银河结构叠加（按 ADR-0006）                                                                                                                                                                                                                                                                                                                                         | ⏳                  | —                                                         |
@@ -71,7 +71,7 @@
 | Phase 1 | v0.1.0 | MVP 基础专注闭环               | S7~S15                                                     | ✅ 已完成                                                                             |
 | Phase 2 | v0.2.0 | 星图导航系统                   | S16~S20 + 增量 / 增量 2 / 增量 3 + **S21（收尾）**         | ✅ v0.2 已关闭（S21 质量保障 + 验收走查完成；随 `feature/S21-phase2-qa` 待合并 main） |
 | Phase 3 | v0.3.0 | 完整航行系统 + 相对论视觉      | S22~S29                                                    | ✅ S22~S28 已合并 main；🚧 S29 收尾 QA 已开发未合并（关闭 v0.3 待合并）               |
-| Phase 4 | v0.5.0 | 成就系统 + 航行日志            | S30~S34                                                    | 🚧 S30 船长日志已开发未合并（v0.5 未关闭）                                            |
+| Phase 4 | v0.5.0 | 成就系统 + 航行日志            | S30~S34                                                    | 🚧 S30~S32 已开发未合并（v0.5 未关闭）                                                |
 | Phase 5 | v1.0.0 | 正式版发布                     | S35~S38                                                    | ⏳ 已规划                                                                             |
 | Phase 6 | v2.x   | 未来探索（多人/多端/高级天文） | 未编号                                                     | ⏳ backlog（第六节）                                                                  |
 
@@ -98,6 +98,7 @@
 - **S23 航行视图真实星表化（修订，ADR-0011 + ADR-0014）**：VoyageView 从 Canvas 2D 抽象星流（`VoyageStarFlow`）升级为 R3F，相机立于 `currentStarId` 看向 `destStarId`；主视角 = 目的地单星居中放大 + 暗星点阵背景（撤销光行差/拖尾，StarField 新增 opacity）。three ~967KB chunk 懒加载（与星图弹窗共享）；**S25 仪表盘随本阶段交付**。
 - **S22 统一飞行模型 + 引擎 γ 分级（已定，ADR-0012）**：合并 `travelDistance` 与 `cruisePlan` 为 d=β·γ·τ 单一模型；引擎按 γ_max 分级（100k/400k/1.2M/5M/20M），可达距离 = γ_max × 专注时长；退役 `RECOMMEND_MAX_GAMMA`；不可达 → 阻止 + 显示升级路径；**无瞬时跃迁**。
 - **S26 跃迁过渡（已定，落地 ADR-0014 遗留评估）**：近观星流**引入但仅限过渡期**——launching/braking 3s 内镜头旁 LineSegments 星流高速掠过（`NearFieldFlow`，相机局部坐标 + `flowIntensity` 缓入/缓出曲线），巡航/到达不出现，保持 ADR-0014 主视角（单星放大 + 暗星点阵）；相位状态机 `VoyagePhase` 放 store（与 status 同批同步，避免闪烁），3s 定时推进放 App effect；引擎 `VoyageController` 零改动（动画为纯视觉覆盖层）。
+- **S32 成就系统（已定，ADR-0016）**：引擎层纯函数评估 + **从航行记录派生**（无新持久化；清空历史即清空成就，与 S30 统计同构）；新解锁检测 = ResultView 打开时 `records` 与「去最新记录」解锁集增量；星元数据 `BUILTIN_STAR_FACTS`（17 目的地星）+ 目录注入合并；`distance-1000` 成就 `grantsEngineTier: 'jump'` 兑现 ADR-0012 跃迁解锁承诺（`resolveEngineTier(focusHours, grantedTiers)`）。延后项：12 黄道星座（星表仅 7/12 可访问）、系外行星（无数据）。
 - **S36 Gaia 百万星**：tier3 单独 KDTree + Points 改 GPU BufferGeometry 批量上屏，遵循 ADR-0006 L5 分块 + Z-order 空间预取；Gaia 为 CC-BY-SA，需在关于页标注数据源。
 - **S34 好友雏形**：引入账户/云端，突破「本地优先」现状，需新的数据层 ADR；若延期可先只做「本地生成分享链接」。
 

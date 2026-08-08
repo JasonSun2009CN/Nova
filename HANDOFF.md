@@ -27,9 +27,10 @@
 - **S30 船长日志（已开发，分支 `feature/S30-captains-log` 未合并）**：引擎层聚合纯函数 `src/engine/stats/captains-log.ts`（纯 TS，注入 `endTime` 保证确定性）——`summarizeCaptainsLog`（总专注/总距离/已探索=完成去重 destStarId/最长单次/streak）、`computeStreakDays`（本地日，今天无专注回退昨天不断签，完成/中止都计专注日）、`buildHeatmap`（26 周×7 天，金阶 0-4，阈值 1/25/50/100 分钟）、`aggregateWeekly`/`aggregateMonthly`（12 周/6 月桶）；UI header「日志」按钮（idle 时）→ `CaptainLogDialog` 弹窗（镜像 StarMapDialog）+ `CaptainLogPanel`（4 tiles + 最长单次/streak + 热力图 + 周/月柱状图切换 + 近期航行时间线），复用 `useHistoryStore.records` 无新 store；日归属用 `record.startWallTime`。验证：**341 单测 / 34 文件**、`pnpm check` 4/4、build exit 0、Playwright 种子数据 DOM 走查 10/10（tiles/热力图 182 格/12 周柱/6 月桶/时间线，0 console error）。
 - **响应式布局（ADR-0015，随 S30 分支）**：主视图 idle 按屏幕比例给不同 UI——**电脑/iPad 横屏（≥1024px `lg`）`SetupPanel` 与 `HistoryPanel` 双栏并排**（`App.tsx` idle 容器 `mx-auto grid max-w-6xl lg:grid-cols-2 lg:gap-10 lg:px-8`，两 panel 容器各追加 `lg:max-w-none lg:mx-0 lg:px-0` 填充列宽）；**手机/iPad 竖屏（<1024px）保持单栏堆叠**（`max-w-md mx-auto` 现状）。纯 Tailwind 断点无 JS；testID 不变，e2e `toBeVisible` 语义不受影响；航行/结果/弹窗视图维持现状。断点依据：iPad 全系横屏 ≥1024px、竖屏 768–834px。
 - **S31 旅行日志导出（用户决策，随 S30 分支）**：**星图高亮已砍**（在星图上高亮已探索路径，实现太麻烦）；保留「导出」但简化为**旅行经过文件**——船长日志弹窗顶栏「导出」按钮，全部航行记录 + 统计摘要头导出为 **Markdown**（`nova-travel-log-YYYY-MM-DD.md`），纯函数 `src/utils/export-log.ts`（摘要头复用 `summarizeCaptainsLog`，逐条用 `formatFocusEstimate`/`formatLy`，记录按 store 顺序即 createdAt 倒序）。ROADMAP/STAGES/UI-UX-DESIGN 已同步（S31 = 旅行日志导出，星图高亮从计划移除）。
+- **S32 成就系统（ADR-0016，分支 `feature/S32-achievements` 自 S30 分出，未合并）**：引擎层纯函数 `src/engine/achievements/`（types/catalog/evaluate/star-facts，15 成就 510 点：里程 1/10/100/1000ly、探索 初航/离日/红矮星访客/开拓者、专注 番茄钟/七日/百时、挑战 耐力 4h、里程碑 半人马/天狼星/织女），**从航行记录派生无持久化**（清空历史即清空成就，与 S30 同构）；新解锁检测 = ResultView 对比 `records` 与「去 `lastSavedRecord.id`」解锁集增量（无跨会话状态）；`distance-1000` 成就 `grantsEngineTier:'jump'` 兑现 ADR-0012 跃迁解锁，`engine-tiers.ts` 新增 `resolveEngineTier(focusHours, grantedTiers)`（SetupPanel/VoyageView 功率表/StarInfoCard 改用它）；UI = header「成就」弹窗（AchievementDialog + AchievementPanel 分类墙）+ ResultView 新成就揭示。星元数据 `BUILTIN_STAR_FACTS`（17 目的地星光谱）+ 目录注入合并（`buildAchievementStarFacts`）。**延后**：12 黄道星座（星表 60 颗可访问星仅 7/12 覆盖，S35 评估）、系外行星（无数据）。验证：**371 单测 / 37 文件**、`pnpm check` 4/4、build exit 0（主包 100KB，three 967KB 仍懒加载）、e2e 3 浏览器 35 过 + 28 跳过（成就墙 2 条全浏览器过，WebGL 仅 chromium）。
 - **Phase 3 重规划（本次讨论，三处文档已同步至 S38）**：S22~S38 重排——新增 **S22 统一飞行模型**（合并 `travelDistance`/`cruisePlan` 为 d=β·γ·τ + 引擎 γ_max 约束，退役 `RECOMMEND_MAX_GAMMA`，ADR-0012）；**S23 航行视图真实星表化**（修订：主视角 = 目的地单星放大 + 暗星点阵，ADR-0011 + ADR-0014，S25 仪表盘随 S23 提前）；**S24 前向蓝移 Doppler**（已交付）；**S27 引擎 γ 分级解锁** + 不可达阻止/升级路径；**砍掉瞬时跃迁**（跃迁 = 最高 γ 档）。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
-- **当前分支**：`feature/S30-captains-log`（自 `feature/S29-phase3-qa` 分出；S29 已 commit `eec0d88` 未合并 main，S30 已开发未 commit）。上一级链：S22~S28 已全部合并 main。（基线：`pnpm check` 4/4、**341 单测**、34 test files，见下方 2.2。）
+- **当前分支**：`feature/S32-achievements`（自 `feature/S30-captains-log` 分出；S30/S31 已 commit 未合并 main，S32 已开发未 commit）。上一级链：S22~S28 已全部合并 main。（基线：`pnpm check` 4/4、**371 单测**、37 test files，见下方 2.2。）
 - **文档已同步**：ROADMAP Phase 3 加状态行 + 3.1 主视角/仪表盘/蓝移更新、ADR 索引（15 份，含 ADR-0015）、**STAGES S22/S23/S24 已标 🚧 已提交 + S25 提前**、本文件均已刷新至 S24。
 - **注意**：用户在某时刻编辑了 ROADMAP，移除了 2.2 的「推荐目的地 / 多级跃迁」两个 checkbox（已按建议实施推荐目的地但保留 checkbox 移除，勿擅自加回）。
 
@@ -75,6 +76,7 @@ src/
 │   ├── physics/lorentz.ts     ✅ S7 γ = 1/√(1-β²) 泰勒分段；S18 requiredFocusMinutes 逆运算；S19 cruisePlan 反推航线（rapidity 双曲式）
 │   ├── navigation/VoyageController.ts ✅ S8 状态机 + snapshot↔恢复 + S13 tick(wallTime?)/setExternalTicker，22 tests
 │   ├── stats/captains-log.ts    ✅ S30 船长日志聚合纯函数（summarize/streak/热力图/周月桶，注入 endTime 确定性，15 tests）
+│   ├── achievements/            ✅ S32 成就系统（ADR-0016：types 类型 + catalog 15 成就/510 点 + evaluate 评估/newlyUnlocked + star-facts 星元数据，19 tests）
 │   ├── data/                  ✅ S9
 │   │   ├── KdTree3.ts         ✅ 手写 3D KD-Tree，5 tests
 │   │   ├── StarCatalog.ts     ✅ 4 tiered tree + 6 索引 + 8 StarFilter + LOD，10 tests
@@ -112,6 +114,8 @@ src/
 │   ├── HistoryPanel.tsx       ✅ 航行日志列表
 │   ├── GlossaryDialog.tsx     ✅ 星际航行术语弹窗（γ/光年/时间膨胀等 8 词条）
 │   ├── CaptainLog/            ✅ S30 船长日志（CaptainLogDialog 弹窗 + CaptainLogPanel 总览 + HeatmapGrid 热力图 + WeeklyBarChart 周月柱状图）
+│   ├── Achievements/          ✅ S32 成就墙（AchievementDialog 弹窗 + AchievementPanel 分类墙，锁定/解锁 + 成就点）
+│   ├── useAchievements.ts     ✅ S32 成就派生 hook（records + catalogStars → states/points/grantedEngineTiers）
 │   └── StarMap/
 │       ├── StarInfoCard.tsx   ✅ 点星确认卡（详情 + 设为目的地/取消/完成）
 │       └── StarSearch.tsx     ✅ S20 星图搜索框（下拉即选；星表加载中显示加载态）
@@ -176,12 +180,13 @@ pnpm test:e2e
 | S28    | 白噪音（Web Audio 合成：嗡鸣/CMB/脉冲星 + 三事件音效）+ 设置页 SoundSettingsPanel + autoplay 规避                                      | ✅ 已合并 main                                         |
 | S29    | Phase 3 收尾：运行时帧率降级 FpsGovernor + γ 极端精度对拍 + 8h 加速模拟 + voyage QA 验收走查，关闭 v0.3                                | 🚧 已 commit `eec0d88`（feature/S29-phase3-qa 未合并） |
 | S30    | 船长日志：引擎 stats 聚合（summarize/streak/热力图/周月）+ header「日志」弹窗（tiles/热力图/柱状图/时间线）                            | 🚧 已开发（feature/S30-captains-log 未合并）           |
+| S32    | 成就系统：引擎 achievements 模块（15 成就/510 点，ADR-0016）+ 成就墙弹窗 + ResultView 新成就揭示 + 跃迁引擎授权（resolveEngineTier）   | 🚧 已开发（feature/S32-achievements 未合并）           |
 
 **验证基线**：`pnpm check` 4/4（**341 单测**，34 test files）；e2e 3 浏览器 18 过 + 6 跳过（starmap/voyage WebGL 仅 chromium）；`pnpm build` 主包 ~80KB（three 967KB 懒加载进星图/航行 chunk）。
 
 ### 2.3 下一步（Phase 3 航行系统，按 ROADMAP）
 
-Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型已交付**（ADR-0012）；**S23 航行视图真实星表化 + S25 仪表盘已交付**（ADR-0011 修订 + ADR-0014）；**S24 前向蓝移已交付**；**S26 跃迁过渡动画已交付**；**S27 引擎解锁已交付**；**S28 白噪音已交付**；**S29 Phase 3 收尾已交付（v0.3 关闭）**（见上方当前进度）。下一阶段为 **Phase 4 S30 船长日志**（总时长/总距离/已探索恒星/最长单次/streak 总览 + 热力图 + 时间线 + 周/月柱状图，与 S27 共享 stats 聚合器）→ S31 旅行日志导出，顺序见 STAGES 第五节。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
+Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型已交付**（ADR-0012）；**S23 航行视图真实星表化 + S25 仪表盘已交付**（ADR-0011 修订 + ADR-0014）；**S24 前向蓝移已交付**；**S26 跃迁过渡动画已交付**；**S27 引擎解锁已交付**；**S28 白噪音已交付**；**S29 Phase 3 收尾已交付（v0.3 关闭）**（见上方当前进度）。**S30 船长日志 + S31 旅行日志导出 + S32 成就系统均已开发**（未合并，见上方当前进度）。下一阶段为 **S33 个性化设置**（引擎外观/通知偏好/默认专注时长预设），顺序见 STAGES 第五节。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
 
 | 顺序 | 内容                                                                                                    | 说明                                                                                                                 |
 | ---- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |

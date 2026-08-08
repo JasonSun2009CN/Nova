@@ -1,6 +1,10 @@
+import { useEffect, useMemo } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import { getDestinationName } from '@/data/destination-stars';
+import { ACHIEVEMENTS, buildAchievementStarFacts, newlyUnlockedAchievementIds } from '@/engine';
+import { useCatalogStore } from '@/store/useCatalogStore';
+import { useHistoryStore } from '@/store/useHistoryStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
 import { formatDurationMs, formatGamma, formatLy, formatVOverC } from '@/utils/format';
 
@@ -20,6 +24,22 @@ export function ResultView() {
   const dispose = useVoyageStore((s) => s.dispose);
   const prepare = useVoyageStore((s) => s.prepare);
   const start = useVoyageStore((s) => s.start);
+  const records = useHistoryStore((s) => s.records);
+  const lastSavedRecord = useVoyageStore((s) => s.lastSavedRecord);
+  const catalogStars = useCatalogStore((s) => s.stars);
+
+  useEffect(() => {
+    void useCatalogStore.getState().load();
+  }, []);
+
+  const newlyUnlockedDefinitions = useMemo(() => {
+    if (lastSavedRecord == null || records.length === 0) return [];
+    const starFacts = buildAchievementStarFacts(catalogStars);
+    const prevRecords = records.filter((record) => record.id !== lastSavedRecord.id);
+    return newlyUnlockedAchievementIds(prevRecords, records, Date.now(), starFacts)
+      .map((id) => ACHIEVEMENTS.find((a) => a.id === id))
+      .filter((a): a is NonNullable<typeof a> => a != null);
+  }, [records, lastSavedRecord, catalogStars]);
 
   if (progress == null) return null;
 
@@ -92,6 +112,24 @@ export function ResultView() {
         <p className="mt-2 text-sm text-deep-400">
           {destName != null ? `从 ${originName} 出发，目标 ${destName}` : '本次为自由漂流航行'}
         </p>
+        {newlyUnlockedDefinitions.length > 0 && (
+          <div
+            data-testid="new-achievements"
+            className="mt-4 rounded-xl border border-star-gold/40 bg-star-gold/5 px-4 py-3 text-left"
+          >
+            <p className="text-xs tracking-wide text-star-gold">新成就解锁</p>
+            <ul className="mt-2 space-y-1">
+              {newlyUnlockedDefinitions.map((achievement) => (
+                <li key={achievement.id} className="flex items-baseline justify-between gap-2">
+                  <span className="font-display text-sm text-foreground">{achievement.title}</span>
+                  <span className="font-mono text-xs text-star-gold tabular-nums">
+                    {achievement.points} 点
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       <div className="glass-card rounded-2xl px-6 py-2">

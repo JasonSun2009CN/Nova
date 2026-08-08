@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { DurationScrubber } from '@/components/DurationScrubber';
 import { SoundSettingsPanel } from '@/components/SoundSettingsPanel';
+import { useAchievements } from '@/components/useAchievements';
 import {
   DESTINATION_STARS,
   destinationOptionsFromStars,
@@ -17,9 +18,9 @@ import {
   cruisePlan,
   getNextUnlock,
   getTierForGamma,
-  getUnlockedTier,
   lorentzFactor,
   minFocusMinutes,
+  resolveEngineTier,
 } from '@/engine';
 import { useCatalogStore } from '@/store/useCatalogStore';
 import { useHistoryStore } from '@/store/useHistoryStore';
@@ -45,6 +46,7 @@ export function SetupPanel() {
   const catalogStars = useCatalogStore((s) => s.stars);
   const catalogStatus = useCatalogStore((s) => s.status);
   const totalFocusHours = useHistoryStore((s) => s.stats?.totalFocusHours ?? 0);
+  const { grantedEngineTiers } = useAchievements();
   const touchedRef = useRef(false);
 
   useEffect(() => {
@@ -99,7 +101,10 @@ export function SetupPanel() {
   );
   const gamma = plan?.gamma ?? lorentzFactor(vOverC * LIGHT_SPEED);
   const speed = plan?.vOverC ?? vOverC;
-  const currentEngine = useMemo(() => getUnlockedTier(totalFocusHours), [totalFocusHours]);
+  const currentEngine = useMemo(
+    () => resolveEngineTier(totalFocusHours, grantedEngineTiers),
+    [totalFocusHours, grantedEngineTiers],
+  );
   const nextUnlock = useMemo(() => getNextUnlock(totalFocusHours), [totalFocusHours]);
   const reachable = plan == null || plan.gamma <= currentEngine.gammaMax;
   const upgradeTier =

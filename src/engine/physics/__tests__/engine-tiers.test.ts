@@ -7,6 +7,7 @@ import {
   getNextUnlock,
   getTierForGamma,
   getUnlockedTier,
+  resolveEngineTier,
 } from '@/engine/physics/engine-tiers';
 import { reachableRadiusLy } from '@/engine/physics/lorentz';
 
@@ -90,6 +91,30 @@ describe('engine/physics/engine-tiers 引擎 γ 分级（ADR-0012）', () => {
     it('focusHours 非法抛 RangeError', () => {
       expect(() => getUnlockedTier(-1)).toThrow(RangeError);
       expect(() => getUnlockedTier(Number.NaN)).toThrow(RangeError);
+    });
+  });
+
+  describe('resolveEngineTier() 成就授权引擎档位（S32）', () => {
+    it('无授权时与 getUnlockedTier 完全一致（向后兼容）', () => {
+      expect(resolveEngineTier(0)).toEqual(getUnlockedTier(0));
+      expect(resolveEngineTier(55).id).toBe('warp-2');
+      expect(resolveEngineTier(500).id).toBe('warp-3');
+      expect(resolveEngineTier(0, [])).toEqual(getUnlockedTier(0));
+    });
+
+    it('授权跃迁引擎后直接取最高档，即使专注不足', () => {
+      expect(resolveEngineTier(0, ['jump']).id).toBe('jump');
+      expect(resolveEngineTier(0, ['jump']).gammaMax).toBe(20_000_000);
+    });
+
+    it('授权档低于专注档时不降级', () => {
+      expect(resolveEngineTier(55, ['warp-1']).id).toBe('warp-2');
+      expect(resolveEngineTier(0, ['standard']).id).toBe('standard');
+    });
+
+    it('未知授权 id 忽略，不影响结果', () => {
+      // @ts-expect-error - intentionally unknown id
+      expect(resolveEngineTier(0, ['nope']).id).toBe('standard');
     });
   });
 

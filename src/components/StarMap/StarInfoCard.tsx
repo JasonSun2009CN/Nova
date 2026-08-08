@@ -1,4 +1,5 @@
-import { getUnlockedTier, minFocusMinutes, type Star } from '@/engine';
+import { minFocusMinutes, resolveEngineTier, type Star } from '@/engine';
+import { useAchievements } from '@/components/useAchievements';
 import { isSettableDestination, starDisplayName } from '@/data/destination-stars';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
@@ -28,12 +29,15 @@ function Stat({ label, value }: { label: string; value: string }) {
 export function StarInfoCard({ star, onClose, onComplete }: StarInfoCardProps) {
   const destStarId = useVoyageStore((s) => s.destStarId);
   const totalFocusHours = useHistoryStore((s) => s.stats?.totalFocusHours ?? 0);
+  const { grantedEngineTiers } = useAchievements();
   const isDest = destStarId === star.id;
   const settable = isSettableDestination(star);
   const c = star.coords.cartesian;
   const distanceLy = Math.hypot(c.xLy, c.yLy, c.zLy);
   const estimateMinutes =
-    distanceLy > 0 ? minFocusMinutes(distanceLy, getUnlockedTier(totalFocusHours).gammaMax) : null;
+    distanceLy > 0
+      ? minFocusMinutes(distanceLy, resolveEngineTier(totalFocusHours, grantedEngineTiers).gammaMax)
+      : null;
 
   return (
     <div

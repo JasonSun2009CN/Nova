@@ -39,6 +39,20 @@ export function getUnlockedTier(focusHours: number): EngineTier {
   return current;
 }
 
+export function resolveEngineTier(
+  focusHours: number,
+  grantedTiers: readonly EngineTierId[] = [],
+): EngineTier {
+  let current = getUnlockedTier(focusHours);
+  for (const id of grantedTiers) {
+    const tier = getEngineTierById(id);
+    if (tier != null && ENGINE_TIERS.indexOf(tier) > ENGINE_TIERS.indexOf(current)) {
+      current = tier;
+    }
+  }
+  return current;
+}
+
 export function getNextUnlock(focusHours: number): {
   tier: EngineTier;
   hoursRemaining: number;
