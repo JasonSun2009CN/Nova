@@ -58,6 +58,7 @@ ADR (Architecture Decision Record) 是一种轻量级文档，用于记录重要
 | [ADR-0012](0012-unified-flight-model-engine-tiers.md)  | 统一飞行模型 + 引擎 γ 分级                                       | Accepted | 2026-08-05 |
 | [ADR-0013](0013-variable-departure-point.md)           | 变动出发地（出发地 = 上次目的地）                                | Accepted | 2026-08-06 |
 | [ADR-0014](0014-voyage-single-star-dashboard.md)       | 航行主视角改目的地单星放大 + S25 仪表盘提前交付（修订 ADR-0011） | Accepted | 2026-08-07 |
+| [ADR-0015](0015-responsive-layout.md)                  | 响应式布局：大屏横屏双栏并排 / 窄屏竖屏单栏堆叠                  | Accepted | 2026-08-08 |
 
 ---
 

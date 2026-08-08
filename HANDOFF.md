@@ -25,10 +25,11 @@
 - **S28 白噪音（已合并 main）**：Web Audio 合成零音频资源——`src/engine/audio/audio-engine.ts`（`AudioEngine` 单例：引擎嗡鸣双振荡器 + 频率调制、CMB 白噪音低通、脉冲星周期增益门控、launch/arrive/brake 三事件包络音效；`AudioContextLike` 接口抽象 Web Audio 供 mock 单测）+ `synthesis.ts` 纯函数；`SoundSettingsPanel` 设置页音效区（引擎嗡鸣开关+音量、环境音 none/CMB/脉冲星 选择+音量、事件音效开关，settings 新增 `engineSoundEnabled`/`eventSoundsEnabled`/`ambientSoundType`）；autoplay 规避：首次「启动航行」手势 `ensureAudioEngineStarted()` 才建 AudioContext。
 - **S29 Phase 3 收尾 QA（已 commit `eec0d88`，分支 `feature/S29-phase3-qa` 未合并）**：运行时帧率自动降级 `FpsGovernor`（`src/engine/renderer/fps-governor.ts`，rAF 监控帧耗时 → high/medium/low 三档画质，StarField sizeScale/opacity/doppler 自适应，10 单测）+ γ 极端精度对拍（β→1 与精确公式相对误差 < 1e-3，含稳定性）+ 8h 加速模拟（infinite 连续 tick 3000 步验证单调性 + snapshot 中段可恢复）+ voyage QA e2e 验收走查（`voyage-view.spec` 6 条全过，启动→巡航数值→完成→结果）。**关闭 v0.3**。验证：321 单测 / 32 文件、build exit 0（主包 80KB）。
 - **S30 船长日志（已开发，分支 `feature/S30-captains-log` 未合并）**：引擎层聚合纯函数 `src/engine/stats/captains-log.ts`（纯 TS，注入 `endTime` 保证确定性）——`summarizeCaptainsLog`（总专注/总距离/已探索=完成去重 destStarId/最长单次/streak）、`computeStreakDays`（本地日，今天无专注回退昨天不断签，完成/中止都计专注日）、`buildHeatmap`（26 周×7 天，金阶 0-4，阈值 1/25/50/100 分钟）、`aggregateWeekly`/`aggregateMonthly`（12 周/6 月桶）；UI header「日志」按钮（idle 时）→ `CaptainLogDialog` 弹窗（镜像 StarMapDialog）+ `CaptainLogPanel`（4 tiles + 最长单次/streak + 热力图 + 周/月柱状图切换 + 近期航行时间线），复用 `useHistoryStore.records` 无新 store；日归属用 `record.startWallTime`。验证：**341 单测 / 34 文件**、`pnpm check` 4/4、build exit 0、Playwright 种子数据 DOM 走查 10/10（tiles/热力图 182 格/12 周柱/6 月桶/时间线，0 console error）。
+- **响应式布局（ADR-0015，随 S30 分支）**：主视图 idle 按屏幕比例给不同 UI——**电脑/iPad 横屏（≥1024px `lg`）`SetupPanel` 与 `HistoryPanel` 双栏并排**（`App.tsx` idle 容器 `mx-auto grid max-w-6xl lg:grid-cols-2 lg:gap-10 lg:px-8`，两 panel 容器各追加 `lg:max-w-none lg:mx-0 lg:px-0` 填充列宽）；**手机/iPad 竖屏（<1024px）保持单栏堆叠**（`max-w-md mx-auto` 现状）。纯 Tailwind 断点无 JS；testID 不变，e2e `toBeVisible` 语义不受影响；航行/结果/弹窗视图维持现状。断点依据：iPad 全系横屏 ≥1024px、竖屏 768–834px。
 - **Phase 3 重规划（本次讨论，三处文档已同步至 S38）**：S22~S38 重排——新增 **S22 统一飞行模型**（合并 `travelDistance`/`cruisePlan` 为 d=β·γ·τ + 引擎 γ_max 约束，退役 `RECOMMEND_MAX_GAMMA`，ADR-0012）；**S23 航行视图真实星表化**（修订：主视角 = 目的地单星放大 + 暗星点阵，ADR-0011 + ADR-0014，S25 仪表盘随 S23 提前）；**S24 前向蓝移 Doppler**（已交付）；**S27 引擎 γ 分级解锁** + 不可达阻止/升级路径；**砍掉瞬时跃迁**（跃迁 = 最高 γ 档）。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
 - **当前分支**：`feature/S30-captains-log`（自 `feature/S29-phase3-qa` 分出；S29 已 commit `eec0d88` 未合并 main，S30 已开发未 commit）。上一级链：S22~S28 已全部合并 main。（基线：`pnpm check` 4/4、**341 单测**、34 test files，见下方 2.2。）
-- **文档已同步**：ROADMAP Phase 3 加状态行 + 3.1 主视角/仪表盘/蓝移更新、ADR 索引（14 份，含 ADR-0014）、**STAGES S22/S23/S24 已标 🚧 已提交 + S25 提前**、本文件均已刷新至 S24。
+- **文档已同步**：ROADMAP Phase 3 加状态行 + 3.1 主视角/仪表盘/蓝移更新、ADR 索引（15 份，含 ADR-0015）、**STAGES S22/S23/S24 已标 🚧 已提交 + S25 提前**、本文件均已刷新至 S24。
 - **注意**：用户在某时刻编辑了 ROADMAP，移除了 2.2 的「推荐目的地 / 多级跃迁」两个 checkbox（已按建议实施推荐目的地但保留 checkbox 移除，勿擅自加回）。
 
 ---
@@ -48,7 +49,7 @@
 
 1. [README.md](file:///Users/fiona/Documents/trae_projects/Nova/README.md) — 项目定义、技术选型原因、用户故事、**用户使用指引**。
 2. [docs/ROADMAP.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/ROADMAP.md) — **唯一的阶段验收依据**。Phase 1/2/3 验收已全部勾选（v0.1/v0.2/v0.3 已关闭）。当前在 **Phase 4 成就系统 + 航行日志（v0.5）**：船长日志统计面板、成就系统、个性化设置、多人雏形。每次接事先看对应 Phase 的 Acceptance Criteria，别自己加 scope。
-3. [docs/adr/README.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/adr/README.md) + 14 份 ADR — **所有「为什么这么做」全在这**。尤其是 **ADR-003 分层架构**（引擎 vs 渲染 vs UI vs 数据 vs 基础设施严格隔离，不允许跨层 import）。最新 ADR-0014（航行单星放大 + S25 仪表盘提前，修订 ADR-0011）。
+3. [docs/adr/README.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/adr/README.md) + 15 份 ADR — **所有「为什么这么做」全在这**。尤其是 **ADR-003 分层架构**（引擎 vs 渲染 vs UI vs 数据 vs 基础设施严格隔离，不允许跨层 import）。最新 ADR-0015（响应式布局：大屏横屏双栏 / 窄屏竖屏单栏）。
 
 ### 1.2 开发规范 & 工程化（写代码前必读，避免 CI 红）
 

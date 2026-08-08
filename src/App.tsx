@@ -108,8 +108,10 @@ function App() {
           <VoyageView phase={voyagePhase} />
         ) : status === 'idle' ? (
           <div className="flex-1 overflow-y-auto">
-            <SetupPanel />
-            <HistoryPanel />
+            <div className="mx-auto grid w-full max-w-6xl lg:grid-cols-2 lg:gap-10 lg:px-8">
+              <SetupPanel />
+              <HistoryPanel />
+            </div>
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto">

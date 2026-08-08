@@ -152,7 +152,7 @@ export function SetupPanel() {
   return (
     <section
       data-testid="setup-panel"
-      className="mx-auto flex w-full max-w-md animate-fade-up flex-1 flex-col gap-6 px-6 pb-12 pt-10"
+      className="mx-auto flex w-full max-w-md animate-fade-up flex-1 flex-col gap-6 px-6 pb-12 pt-10 lg:mx-0 lg:max-w-none lg:px-0"
     >
       <div>
         <h2 className="font-display text-xl font-medium tracking-wide">规划一次星际航行</h2>
