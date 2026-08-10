@@ -241,7 +241,7 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
               <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
               <circle cx="12" cy="12" r="2.6" />
             </svg>
-            <span className="text-[10px]">出发地</span>
+            <span className="text-[0.625rem]">出发地</span>
           </button>
           <button
             type="button"
@@ -266,7 +266,7 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
               <circle cx="12" cy="12" r="8" />
               <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
             </svg>
-            <span className="text-[10px]">全览</span>
+            <span className="text-[0.625rem]">全览</span>
           </button>
         </div>
       </div>

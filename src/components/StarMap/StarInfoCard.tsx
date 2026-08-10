@@ -69,7 +69,7 @@ export function StarInfoCard({ star, onClose, onComplete }: StarInfoCardProps) {
       </div>
       <p className="mt-1 text-sm text-deep-300">{formatLy(distanceLy)}</p>
       {settable && estimateMinutes != null && (
-        <p className="mt-1 text-xs text-deep-500">
+        <p className="mt-1 text-xs text-deep-400">
           最短专注 {formatFocusEstimate(estimateMinutes)}
         </p>
       )}

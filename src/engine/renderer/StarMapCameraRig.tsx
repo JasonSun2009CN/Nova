@@ -2,6 +2,8 @@ import type { OrbitControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useLayoutEffect, type ElementRef, type RefObject } from 'react';
 
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+
 export type StarMapViewMode = 'from-departure' | 'overview';
 
 export type WorldPosition = Readonly<{ x: number; y: number; z: number }>;
@@ -26,9 +28,11 @@ type StarMapCameraRigProps = {
  */
 export function StarMapCameraRig({ mode, focusPosition, controlsRef }: StarMapCameraRigProps) {
   const camera = useThree((s) => s.camera);
+  const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   // useLayoutEffect：在首帧绘制前摆好相机，避免首帧用默认朝向闪一下；
   // 出发地视角显式关闭 autoRotate / pan，防止从全览视角切回时残留绕转状态。
+  // reduced-motion 下禁用全览自动旋转（持续的镜头转动属非必要动画）。
   useLayoutEffect(() => {
     const controls = controlsRef.current;
     if (controls == null) return;
@@ -36,7 +40,7 @@ export function StarMapCameraRig({ mode, focusPosition, controlsRef }: StarMapCa
     if (mode === 'overview') {
       controls.target.set(0, 0, 0);
       camera.position.set(...OVERVIEW_CAMERA_POSITION);
-      controls.autoRotate = true;
+      controls.autoRotate = !prefersReducedMotion;
       controls.enablePan = true;
       controls.minDistance = 8;
       controls.maxDistance = 260;
@@ -54,7 +58,7 @@ export function StarMapCameraRig({ mode, focusPosition, controlsRef }: StarMapCa
       controls.maxDistance = 16;
     }
     controls.update();
-  }, [mode, focusPosition, camera, controlsRef]);
+  }, [mode, focusPosition, camera, controlsRef, prefersReducedMotion]);
 
   return null;
 }

@@ -55,7 +55,7 @@ export function SoundSettingsPanel() {
     <section data-testid="sound-settings" className="glass-card space-y-6 rounded-2xl p-8">
       <div className="flex items-center justify-between">
         <h3 className="font-display text-base font-medium tracking-wide">音效</h3>
-        <span className="text-xs text-deep-500">航行背景与事件提示</span>
+        <span className="text-xs text-deep-400">航行背景与事件提示</span>
       </div>
 
       <div className="space-y-5">
@@ -110,7 +110,7 @@ export function SoundSettingsPanel() {
         </Row>
 
         {ambientOption.value !== 'none' && (
-          <p className="text-xs text-deep-500">{ambientOption.label}将随航行播放</p>
+          <p className="text-xs text-deep-400">{ambientOption.label}将随航行播放</p>
         )}
       </div>
     </section>

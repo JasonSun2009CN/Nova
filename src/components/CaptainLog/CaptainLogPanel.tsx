@@ -60,7 +60,7 @@ export function CaptainLogPanel() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {tiles.map((tile) => (
           <div key={tile.label} className="glass-card rounded-2xl px-4 py-3">
-            <p className="text-[11px] text-deep-400">{tile.label}</p>
+            <p className="text-[0.6875rem] text-deep-400">{tile.label}</p>
             <p className="mt-1 truncate font-display text-xl tabular-nums text-foreground">
               {tile.value}
             </p>
@@ -112,7 +112,7 @@ export function CaptainLogPanel() {
                     </span>
                     <span
                       className={twMerge(
-                        'text-[11px]',
+                        'text-[0.6875rem]',
                         record.status === 'completed' ? 'text-star-gold' : 'text-star-red',
                       )}
                     >

@@ -26,7 +26,7 @@ export function WeeklyBarChart({
   return (
     <div className="glass-card rounded-2xl px-4 py-4">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-[11px] text-deep-400">专注柱状图</p>
+        <p className="text-[0.6875rem] text-deep-400">专注柱状图</p>
         <div className="flex rounded-lg border border-[var(--color-glass-border)] p-0.5 text-xs">
           <button
             type="button"
@@ -67,7 +67,7 @@ export function WeeklyBarChart({
         {buckets.map((bucket) => (
           <span
             key={bucket.startMs}
-            className="flex-1 truncate text-center text-[9px] text-deep-400"
+            className="flex-1 truncate text-center text-[0.5625rem] text-deep-400"
           >
             {bucketLabel(bucket, mode)}
           </span>

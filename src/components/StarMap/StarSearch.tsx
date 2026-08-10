@@ -48,7 +48,7 @@ export function StarSearch({ stars, status, onSelect }: StarSearchProps) {
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
-        className="glass-card h-10 w-full rounded-xl border border-[var(--color-glass-border)] bg-[var(--color-glass)] px-3.5 text-sm text-foreground placeholder:text-deep-500 focus:border-star-blue focus:outline-none"
+        className="glass-card h-10 w-full rounded-xl border border-[var(--color-glass-border)] bg-[var(--color-glass)] px-3.5 text-sm text-foreground placeholder:text-deep-400 focus:border-star-blue focus:outline-none"
       />
       {showDropdown && (
         <ul
@@ -56,9 +56,9 @@ export function StarSearch({ stars, status, onSelect }: StarSearchProps) {
           className="glass-card absolute left-0 right-0 top-11 z-20 max-h-64 overflow-auto rounded-xl border border-[var(--color-glass-border)] bg-[var(--color-glass)] py-1"
         >
           {loading ? (
-            <li className="px-3.5 py-2.5 text-xs text-deep-500">星表加载中…</li>
+            <li className="px-3.5 py-2.5 text-xs text-deep-400">星表加载中…</li>
           ) : results.length === 0 ? (
-            <li className="px-3.5 py-2.5 text-xs text-deep-500">未找到匹配恒星</li>
+            <li className="px-3.5 py-2.5 text-xs text-deep-400">未找到匹配恒星</li>
           ) : (
             results.map(({ star }) => (
               <li key={star.id}>
@@ -70,7 +70,7 @@ export function StarSearch({ stars, status, onSelect }: StarSearchProps) {
                   className="flex w-full cursor-pointer items-center justify-between gap-2 px-3.5 py-2 text-left text-sm transition-colors hover:bg-white/5"
                 >
                   <span className="truncate text-foreground">{starDisplayName(star)}</span>
-                  <span className="shrink-0 font-mono text-xs text-deep-500 tabular-nums">
+                  <span className="shrink-0 font-mono text-xs text-deep-400 tabular-nums">
                     {formatLy(starDistanceLy(star))}
                   </span>
                 </button>

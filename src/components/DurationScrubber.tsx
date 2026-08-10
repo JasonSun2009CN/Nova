@@ -73,7 +73,7 @@ export function DurationScrubber({ value, onChange }: DurationScrubberProps) {
           className="duration-scrubber relative z-10 h-full w-full"
         />
       </div>
-      <div className="flex justify-between px-1 text-[10px] text-deep-500 tabular-nums">
+      <div className="flex justify-between px-1 text-[0.625rem] text-deep-400 tabular-nums">
         <span>{SCRUBBER_MIN}</span>
         <span>{SCRUBBER_MAX}</span>
       </div>
