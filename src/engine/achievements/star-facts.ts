@@ -19,6 +19,11 @@ export const BUILTIN_STAR_FACTS: Readonly<Record<string, SpectralType>> = {
   'hip-57632': 'A',
   'hip-69673': 'K',
   'hip-24608': 'M',
+  'hip-36850': 'A',
+  'hip-21421': 'K',
+  'hip-49669': 'B',
+  'hip-65474': 'B',
+  'hip-30438': 'A',
 };
 
 export function buildAchievementStarFacts(catalogStars?: readonly Star[]): AchievementStarFacts {

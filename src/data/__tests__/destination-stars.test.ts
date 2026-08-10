@@ -118,9 +118,9 @@ describe('recommendDestination 基于剩余专注时长 + 引擎 γ_max 的目�
     expect(rec?.id).toBe('hip-54035');
   });
 
-  it('600 分钟（10 小时）@常规引擎 → 50ly 目录全部可达，推荐最远的五车二（42.9ly）', () => {
+  it('600 分钟（10 小时）@常规引擎 → 可达半径约 114ly，推荐最远可达的轩辕十四（79.3ly）', () => {
     const rec = recommendDestination(DESTINATION_STARS, 600, 100_000);
-    expect(rec?.id).toBe('hip-24608');
+    expect(rec?.id).toBe('hip-49669');
   });
 
   it('低引擎（γ_max=5 万）25 分钟无可达 → 回退推荐最近目标比邻星', () => {

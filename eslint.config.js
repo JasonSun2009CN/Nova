@@ -164,6 +164,7 @@ export default tseslint.config(
             'color',
             'opacity',
             'side',
+            'map',
           ],
         },
       ],

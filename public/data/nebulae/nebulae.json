@@ -1,0 +1,889 @@
+{
+  "sourceVersion": "nebulae-v1",
+  "count": 34,
+  "nebulae": [
+    {
+      "id": "m45",
+      "messierId": "M45",
+      "nameEn": "Pleiades",
+      "nameZh": "昴星团",
+      "type": "cluster-open",
+      "coords": {
+        "galactic": {
+          "lDeg": 166.5687189633483,
+          "bDeg": -23.518591246496435,
+          "distanceLy": 444
+        },
+        "cartesian": {
+          "xLy": -395.9822267969673,
+          "yLy": 94.56476198896817,
+          "zLy": -177.17669669255298
+        }
+      },
+      "apparentMagnitude": 1.6,
+      "sizeArcMin": {
+        "major": 110,
+        "minor": 110
+      },
+      "distanceLy": 444,
+      "visualRadiusLy": 7.103490055616921
+    },
+    {
+      "id": "hyades",
+      "nameEn": "Hyades",
+      "nameZh": "毕星团",
+      "type": "cluster-open",
+      "coords": {
+        "galactic": {
+          "lDeg": 180.06146335505878,
+          "bDeg": -22.34062780969565,
+          "distanceLy": 153
+        },
+        "cartesian": {
+          "xLy": -141.51580246703438,
+          "yLy": -0.1518094251242522,
+          "zLy": -58.15715438370201
+        }
+      },
+      "apparentMagnitude": 0.5,
+      "sizeArcMin": {
+        "major": 330,
+        "minor": 330
+      },
+      "distanceLy": 153,
+      "visualRadiusLy": 7.343472827766141
+    },
+    {
+      "id": "m44",
+      "messierId": "M44",
+      "nameEn": "Beehive Cluster",
+      "nameZh": "蜂巢星团",
+      "type": "cluster-open",
+      "coords": {
+        "galactic": {
+          "lDeg": 205.91594411806267,
+          "bDeg": 32.48582910609166,
+          "distanceLy": 610
+        },
+        "cartesian": {
+          "xLy": -462.8047387343129,
+          "yLy": -224.8850822495175,
+          "zLy": 327.62550814411895
+        }
+      },
+      "apparentMagnitude": 3.7,
+      "sizeArcMin": {
+        "major": 95,
+        "minor": 95
+      },
+      "distanceLy": 610,
+      "visualRadiusLy": 8.428485846089282
+    },
+    {
+      "id": "m41",
+      "messierId": "M41",
+      "nameEn": "Little Beehive",
+      "nameZh": "小蜂巢星团",
+      "type": "cluster-open",
+      "coords": {
+        "galactic": {
+          "lDeg": 231.0120234679504,
+          "bDeg": -10.444800417633887,
+          "distanceLy": 2300
+        },
+        "cartesian": {
+          "xLy": -1423.083990452377,
+          "yLy": -1758.1166081916422,
+          "zLy": -416.96276586627624
+        }
+      },
+      "apparentMagnitude": 4.5,
+      "sizeArcMin": {
+        "major": 38,
+        "minor": 38
+      },
+      "distanceLy": 2300,
+      "visualRadiusLy": 12.711814718692034
+    },
+    {
+      "id": "m35",
+      "messierId": "M35",
+      "nameEn": "Shoe-Buckle Cluster",
+      "nameZh": "M35 疏散星团",
+      "type": "cluster-open",
+      "coords": {
+        "galactic": {
+          "lDeg": 186.58764211343134,
+          "bDeg": 2.219520400130007,
+          "distanceLy": 2800
+        },
+        "cartesian": {
+          "xLy": -2779.426344752219,
+          "yLy": -320.98310717219334,
+          "zLy": 108.43910276004358
+        }
+      },
+      "apparentMagnitude": 5.3,
+      "sizeArcMin": {
+        "major": 28,
+        "minor": 28
+      },
+      "distanceLy": 2800,
+      "visualRadiusLy": 11.402817779696287
+    },
+    {
+      "id": "m7",
+      "messierId": "M7",
+      "nameEn": "Ptolemy Cluster",
+      "nameZh": "托勒密星团",
+      "type": "cluster-open",
+      "coords": {
+        "galactic": {
+          "lDeg": 355.84298412532,
+          "bDeg": -4.523048215907602,
+          "distanceLy": 980
+        },
+        "cartesian": {
+          "xLy": 974.377765262539,
+          "yLy": -70.8189362327669,
+          "zLy": -77.28291423619751
+        }
+      },
+      "apparentMagnitude": 3.3,
+      "sizeArcMin": {
+        "major": 80,
+        "minor": 80
+      },
+      "distanceLy": 980,
+      "visualRadiusLy": 11.402817779696287
+    },
+    {
+      "id": "ngc-869",
+      "ngcId": "869",
+      "nameEn": "Double Cluster (h Persei)",
+      "nameZh": "双星团",
+      "type": "cluster-open",
+      "coords": {
+        "galactic": {
+          "lDeg": 134.76007442015595,
+          "bDeg": -3.694138155790729,
+          "distanceLy": 7500
+        },
+        "cartesian": {
+          "xLy": -5270.074021896853,
+          "yLy": 5314.39666015716,
+          "zLy": -483.2265951273339
+        }
+      },
+      "apparentMagnitude": 3.7,
+      "sizeArcMin": {
+        "major": 60,
+        "minor": 60
+      },
+      "distanceLy": 7500,
+      "visualRadiusLy": 65.44984694978736
+    },
+    {
+      "id": "m13",
+      "messierId": "M13",
+      "nameEn": "Great Hercules Cluster",
+      "nameZh": "武仙座球状星团",
+      "type": "cluster-globular",
+      "coords": {
+        "galactic": {
+          "lDeg": 59.00824474697981,
+          "bDeg": 40.909904370337564,
+          "distanceLy": 25300
+        },
+        "cartesian": {
+          "xLy": 9845.287458333778,
+          "yLy": 16390.651970938387,
+          "zLy": 16568.24803141084
+        }
+      },
+      "apparentMagnitude": 5.8,
+      "sizeArcMin": {
+        "major": 20,
+        "minor": 20
+      },
+      "distanceLy": 25300,
+      "visualRadiusLy": 73.59471679242756
+    },
+    {
+      "id": "m92",
+      "messierId": "M92",
+      "nameEn": "Hercules Cluster",
+      "nameZh": "M92 球状星团",
+      "type": "cluster-globular",
+      "coords": {
+        "galactic": {
+          "lDeg": 68.33090092475572,
+          "bDeg": 34.86196802692299,
+          "distanceLy": 26700
+        },
+        "cartesian": {
+          "xLy": 8089.502935564641,
+          "yLy": 20359.979106261082,
+          "zLy": 15261.755896622877
+        }
+      },
+      "apparentMagnitude": 6.4,
+      "sizeArcMin": {
+        "major": 14,
+        "minor": 14
+      },
+      "distanceLy": 26700,
+      "visualRadiusLy": 54.36700619962337
+    },
+    {
+      "id": "m3",
+      "messierId": "M3",
+      "nameEn": "M3",
+      "nameZh": "M3 球状星团",
+      "type": "cluster-globular",
+      "coords": {
+        "galactic": {
+          "lDeg": 42.23160511602287,
+          "bDeg": 78.70483862195759,
+          "distanceLy": 33900
+        },
+        "cartesian": {
+          "xLy": 4916.308865706662,
+          "yLy": 4462.780723719405,
+          "zLy": 33243.397770820186
+        }
+      },
+      "apparentMagnitude": 6.2,
+      "sizeArcMin": {
+        "major": 18,
+        "minor": 18
+      },
+      "distanceLy": 33900,
+      "visualRadiusLy": 88.74999246391165
+    },
+    {
+      "id": "m22",
+      "messierId": "M22",
+      "nameEn": "Sagittarius Cluster",
+      "nameZh": "人马座球状星团",
+      "type": "cluster-globular",
+      "coords": {
+        "galactic": {
+          "lDeg": 9.896897085678027,
+          "bDeg": -7.55003003790168,
+          "distanceLy": 10600
+        },
+        "cartesian": {
+          "xLy": 10351.72848500279,
+          "yLy": 1806.0881568456484,
+          "zLy": -1392.7537264296707
+        }
+      },
+      "apparentMagnitude": 6.2,
+      "sizeArcMin": {
+        "major": 32,
+        "minor": 32
+      },
+      "distanceLy": 10600,
+      "visualRadiusLy": 49.33464018970638
+    },
+    {
+      "id": "ngc-5139",
+      "ngcId": "5139",
+      "nameEn": "Omega Centauri",
+      "nameZh": "半人马座ω",
+      "type": "cluster-globular",
+      "coords": {
+        "galactic": {
+          "lDeg": 309.10443382519503,
+          "bDeg": 14.967725452522796,
+          "distanceLy": 15800
+        },
+        "cartesian": {
+          "xLy": 9627.507474670696,
+          "yLy": -11844.772385217722,
+          "zLy": 4080.7434331924737
+        }
+      },
+      "apparentMagnitude": 3.9,
+      "sizeArcMin": {
+        "major": 36,
+        "minor": 36
+      },
+      "distanceLy": 15800,
+      "visualRadiusLy": 82.72860654453122
+    },
+    {
+      "id": "m5",
+      "messierId": "M5",
+      "nameEn": "M5",
+      "nameZh": "M5 球状星团",
+      "type": "cluster-globular",
+      "coords": {
+        "galactic": {
+          "lDeg": 3.8689220317492388,
+          "bDeg": 46.786460584969966,
+          "distanceLy": 24500
+        },
+        "cartesian": {
+          "xLy": 16737.392775945773,
+          "yLy": 1131.9205330348095,
+          "zLy": 17855.76766679642
+        }
+      },
+      "apparentMagnitude": 5.6,
+      "sizeArcMin": {
+        "major": 23,
+        "minor": 23
+      },
+      "distanceLy": 24500,
+      "visualRadiusLy": 81.95775279156706
+    },
+    {
+      "id": "m42",
+      "messierId": "M42",
+      "nameEn": "Orion Nebula",
+      "nameZh": "猎户座大星云",
+      "type": "emission",
+      "coords": {
+        "galactic": {
+          "lDeg": 209.00502529435815,
+          "bDeg": -19.373578591956008,
+          "distanceLy": 1344
+        },
+        "cartesian": {
+          "xLy": -1108.8737697088359,
+          "yLy": -614.7859137258692,
+          "zLy": -445.83992994791726
+        }
+      },
+      "apparentMagnitude": 4,
+      "sizeArcMin": {
+        "major": 65,
+        "minor": 60
+      },
+      "distanceLy": 1344,
+      "visualRadiusLy": 12.705996954518717
+    },
+    {
+      "id": "m8",
+      "messierId": "M8",
+      "nameEn": "Lagoon Nebula",
+      "nameZh": "礁湖星云",
+      "type": "emission",
+      "coords": {
+        "galactic": {
+          "lDeg": 5.984127124077349,
+          "bDeg": -1.200029257957483,
+          "distanceLy": 4100
+        },
+        "cartesian": {
+          "xLy": 4076.7640005952376,
+          "yLy": 427.3433174476294,
+          "zLy": -85.86601471811007
+        }
+      },
+      "apparentMagnitude": 6,
+      "sizeArcMin": {
+        "major": 90,
+        "minor": 40
+      },
+      "distanceLy": 4100,
+      "visualRadiusLy": 53.66887449882564
+    },
+    {
+      "id": "m20",
+      "messierId": "M20",
+      "nameEn": "Trifid Nebula",
+      "nameZh": "三叶星云",
+      "type": "emission",
+      "coords": {
+        "galactic": {
+          "lDeg": 7.024088614289993,
+          "bDeg": -0.2963506410482286,
+          "distanceLy": 5200
+        },
+        "cartesian": {
+          "xLy": 5160.90406537369,
+          "yLy": 635.8819413655295,
+          "zLy": -26.8958110961216
+        }
+      },
+      "apparentMagnitude": 6.3,
+      "sizeArcMin": {
+        "major": 28,
+        "minor": 28
+      },
+      "distanceLy": 5200,
+      "visualRadiusLy": 21.176661590864533
+    },
+    {
+      "id": "m16",
+      "messierId": "M16",
+      "nameEn": "Eagle Nebula",
+      "nameZh": "鹰状星云",
+      "type": "emission",
+      "coords": {
+        "galactic": {
+          "lDeg": 16.977838713859978,
+          "bDeg": 0.8056401034878553,
+          "distanceLy": 7000
+        },
+        "cartesian": {
+          "xLy": 6694.262562423541,
+          "yLy": 2043.8105121845063,
+          "zLy": 98.4242633638377
+        }
+      },
+      "apparentMagnitude": 6.4,
+      "sizeArcMin": {
+        "major": 35,
+        "minor": 28
+      },
+      "distanceLy": 7000,
+      "visualRadiusLy": 35.6338055615509
+    },
+    {
+      "id": "m17",
+      "messierId": "M17",
+      "nameEn": "Omega Nebula",
+      "nameZh": "欧米茄星云",
+      "type": "emission",
+      "coords": {
+        "galactic": {
+          "lDeg": 15.09007171881746,
+          "bDeg": -0.7531451855862311,
+          "distanceLy": 5000
+        },
+        "cartesian": {
+          "xLy": 4827.171717261746,
+          "yLy": 1301.5735765304682,
+          "zLy": -65.7224234638621
+        }
+      },
+      "apparentMagnitude": 6,
+      "sizeArcMin": {
+        "major": 46,
+        "minor": 37
+      },
+      "distanceLy": 5000,
+      "visualRadiusLy": 33.452143996557986
+    },
+    {
+      "id": "ngc-7000",
+      "ngcId": "7000",
+      "nameEn": "North America Nebula",
+      "nameZh": "北美洲星云",
+      "type": "emission",
+      "coords": {
+        "galactic": {
+          "lDeg": 85.71308406061239,
+          "bDeg": -0.9237616891273774,
+          "distanceLy": 1800
+        },
+        "cartesian": {
+          "xLy": 134.53432654844352,
+          "yLy": 1794.7307261579851,
+          "zLy": -29.01957209519518
+        }
+      },
+      "apparentMagnitude": 7.5,
+      "sizeArcMin": {
+        "major": 120,
+        "minor": 100
+      },
+      "distanceLy": 1800,
+      "visualRadiusLy": 31.41592653589793
+    },
+    {
+      "id": "ngc-2237",
+      "ngcId": "2237",
+      "nameEn": "Rosette Nebula",
+      "nameZh": "玫瑰星云",
+      "type": "emission",
+      "coords": {
+        "galactic": {
+          "lDeg": 206.27179302124537,
+          "bDeg": -1.9461296390536138,
+          "distanceLy": 5000
+        },
+        "cartesian": {
+          "xLy": -4480.936135552674,
+          "yLy": -2211.8724155053715,
+          "zLy": -169.7991950060527
+        }
+      },
+      "apparentMagnitude": 8.5,
+      "sizeArcMin": {
+        "major": 80,
+        "minor": 60
+      },
+      "distanceLy": 5000,
+      "visualRadiusLy": 58.17764173314432
+    },
+    {
+      "id": "m27",
+      "messierId": "M27",
+      "nameEn": "Dumbbell Nebula",
+      "nameZh": "哑铃星云",
+      "type": "planetary",
+      "coords": {
+        "galactic": {
+          "lDeg": 60.83467778452833,
+          "bDeg": -3.6962009055026446,
+          "distanceLy": 1360
+        },
+        "cartesian": {
+          "xLy": 661.3918557369232,
+          "yLy": 1185.1050973135843,
+          "zLy": -87.67394987240458
+        }
+      },
+      "apparentMagnitude": 7.5,
+      "sizeArcMin": {
+        "major": 8,
+        "minor": 5.8
+      },
+      "distanceLy": 1360,
+      "visualRadiusLy": 1.5824318551415253
+    },
+    {
+      "id": "m57",
+      "messierId": "M57",
+      "nameEn": "Ring Nebula",
+      "nameZh": "环状星云",
+      "type": "planetary",
+      "coords": {
+        "galactic": {
+          "lDeg": 63.17249424429123,
+          "bDeg": 13.975052383095056,
+          "distanceLy": 2300
+        },
+        "cartesian": {
+          "xLy": 1007.2798709447263,
+          "yLy": 1991.698802972961,
+          "zLy": 555.4485933240361
+        }
+      },
+      "apparentMagnitude": 8.8,
+      "sizeArcMin": {
+        "major": 1.4,
+        "minor": 1
+      },
+      "distanceLy": 2300,
+      "visualRadiusLy": 0.4683300159518117
+    },
+    {
+      "id": "m97",
+      "messierId": "M97",
+      "nameEn": "Owl Nebula",
+      "nameZh": "猫头鹰星云",
+      "type": "planetary",
+      "coords": {
+        "galactic": {
+          "lDeg": 148.48692595372256,
+          "bDeg": 57.049646634135364,
+          "distanceLy": 2600
+        },
+        "cartesian": {
+          "xLy": -1205.6108033343826,
+          "yLy": 739.1777136961475,
+          "zLy": 2181.7696712665065
+        }
+      },
+      "apparentMagnitude": 9.9,
+      "sizeArcMin": {
+        "major": 3.4,
+        "minor": 3.3
+      },
+      "distanceLy": 2600,
+      "visualRadiusLy": 1.2857258823024893
+    },
+    {
+      "id": "m1",
+      "messierId": "M1",
+      "nameEn": "Crab Nebula",
+      "nameZh": "蟹状星云",
+      "type": "snr",
+      "coords": {
+        "galactic": {
+          "lDeg": 184.54909192429457,
+          "bDeg": -5.787487600384474,
+          "distanceLy": 6500
+        },
+        "cartesian": {
+          "xLy": -6446.495604217349,
+          "yLy": -512.9082540603927,
+          "zLy": -655.4536960938689
+        }
+      },
+      "apparentMagnitude": 8.4,
+      "sizeArcMin": {
+        "major": 6,
+        "minor": 4
+      },
+      "distanceLy": 6500,
+      "visualRadiusLy": 5.672320068981572
+    },
+    {
+      "id": "ngc-6960",
+      "ngcId": "6960",
+      "nameEn": "Veil Nebula",
+      "nameZh": "面纱星云",
+      "type": "snr",
+      "coords": {
+        "galactic": {
+          "lDeg": 73.31043784285006,
+          "bDeg": -7.638068324940609,
+          "distanceLy": 2400
+        },
+        "cartesian": {
+          "xLy": 683.131082640651,
+          "yLy": 2278.502482904948,
+          "zLy": -318.99586098599883
+        }
+      },
+      "apparentMagnitude": 7,
+      "sizeArcMin": {
+        "major": 120,
+        "minor": 120
+      },
+      "distanceLy": 2400,
+      "visualRadiusLy": 41.88790204786391
+    },
+    {
+      "id": "m78",
+      "messierId": "M78",
+      "nameEn": "M78",
+      "nameZh": "M78 反射星云",
+      "type": "reflection",
+      "coords": {
+        "galactic": {
+          "lDeg": 205.34795652951433,
+          "bDeg": -14.33924169785799,
+          "distanceLy": 1600
+        },
+        "cartesian": {
+          "xLy": -1400.9123258154816,
+          "yLy": -663.6433547055249,
+          "zLy": -396.2602088696957
+        }
+      },
+      "apparentMagnitude": 8.3,
+      "sizeArcMin": {
+        "major": 8,
+        "minor": 6
+      },
+      "distanceLy": 1600,
+      "visualRadiusLy": 1.8616845354606182
+    },
+    {
+      "id": "m31",
+      "messierId": "M31",
+      "nameEn": "Andromeda Galaxy",
+      "nameZh": "仙女座星系",
+      "type": "galaxy",
+      "coords": {
+        "galactic": {
+          "lDeg": 121.16699426796093,
+          "bDeg": -21.57205942922334,
+          "distanceLy": 2537000
+        },
+        "cartesian": {
+          "xLy": -1221017.41604415,
+          "yLy": 2018762.9870799617,
+          "zLy": -932781.577708768
+        }
+      },
+      "apparentMagnitude": 3.4,
+      "sizeArcMin": {
+        "major": 190,
+        "minor": 60
+      },
+      "distanceLy": 2537000,
+      "visualRadiusLy": 70108.42161156889
+    },
+    {
+      "id": "m33",
+      "messierId": "M33",
+      "nameEn": "Triangulum Galaxy",
+      "nameZh": "三角座星系",
+      "type": "galaxy",
+      "coords": {
+        "galactic": {
+          "lDeg": 133.62358980052713,
+          "bDeg": -31.32888624989129,
+          "distanceLy": 2700000
+        },
+        "cartesian": {
+          "xLy": -1591178.6927854014,
+          "yLy": 1669525.2973731202,
+          "zLy": -1403864.5408503404
+        }
+      },
+      "apparentMagnitude": 5.7,
+      "sizeArcMin": {
+        "major": 71,
+        "minor": 42
+      },
+      "distanceLy": 2700000,
+      "visualRadiusLy": 27881.634800609416
+    },
+    {
+      "id": "m51",
+      "messierId": "M51",
+      "nameEn": "Whirlpool Galaxy",
+      "nameZh": "涡状星系",
+      "type": "galaxy",
+      "coords": {
+        "galactic": {
+          "lDeg": 104.84710833254,
+          "bDeg": 68.55449909199739,
+          "distanceLy": 23000000
+        },
+        "cartesian": {
+          "xLy": -2154770.50893944,
+          "yLy": 8128412.706534777,
+          "zLy": 21407612.452724587
+        }
+      },
+      "apparentMagnitude": 8.4,
+      "sizeArcMin": {
+        "major": 11.2,
+        "minor": 6.9
+      },
+      "distanceLy": 23000000,
+      "visualRadiusLy": 37466.401276144934
+    },
+    {
+      "id": "m81",
+      "messierId": "M81",
+      "nameEn": "Bode's Galaxy",
+      "nameZh": "波德星系",
+      "type": "galaxy",
+      "coords": {
+        "galactic": {
+          "lDeg": 142.08339955068251,
+          "bDeg": 40.90068742593808,
+          "distanceLy": 11800000
+        },
+        "cartesian": {
+          "xLy": -7036236.102144637,
+          "yLy": 5480835.189653654,
+          "zLy": 7726048.610947941
+        }
+      },
+      "apparentMagnitude": 6.9,
+      "sizeArcMin": {
+        "major": 27,
+        "minor": 14
+      },
+      "distanceLy": 11800000,
+      "visualRadiusLy": 46338.49164044945
+    },
+    {
+      "id": "m82",
+      "messierId": "M82",
+      "nameEn": "Cigar Galaxy",
+      "nameZh": "雪茄星系",
+      "type": "galaxy",
+      "coords": {
+        "galactic": {
+          "lDeg": 141.41394872962888,
+          "bDeg": 40.561476865001836,
+          "distanceLy": 11400000
+        },
+        "cartesian": {
+          "xLy": -6769813.191738957,
+          "yLy": 5401572.984524313,
+          "zLy": 7413004.697274533
+        }
+      },
+      "apparentMagnitude": 8.4,
+      "sizeArcMin": {
+        "major": 11.2,
+        "minor": 4.3
+      },
+      "distanceLy": 11400000,
+      "visualRadiusLy": 18570.303241219663
+    },
+    {
+      "id": "m104",
+      "messierId": "M104",
+      "nameEn": "Sombrero Galaxy",
+      "nameZh": "草帽星系",
+      "type": "galaxy",
+      "coords": {
+        "galactic": {
+          "lDeg": 298.4647233856507,
+          "bDeg": 51.15277823769637,
+          "distanceLy": 29000000
+        },
+        "cartesian": {
+          "xLy": 8669736.54643772,
+          "yLy": -15991139.662279747,
+          "zLy": 22585816.799859725
+        }
+      },
+      "apparentMagnitude": 8,
+      "sizeArcMin": {
+        "major": 8.7,
+        "minor": 3.5
+      },
+      "distanceLy": 29000000,
+      "visualRadiusLy": 36695.54752318078
+    },
+    {
+      "id": "m87",
+      "messierId": "M87",
+      "nameEn": "Virgo A",
+      "nameZh": "室女座A星系",
+      "type": "galaxy",
+      "coords": {
+        "galactic": {
+          "lDeg": 283.7597827928932,
+          "bDeg": 74.48872808689173,
+          "distanceLy": 53000000
+        },
+        "cartesian": {
+          "xLy": 3371234.7115273615,
+          "yLy": -13766917.458130257,
+          "zLy": 51069626.59175042
+        }
+      },
+      "apparentMagnitude": 8.6,
+      "sizeArcMin": {
+        "major": 8.3,
+        "minor": 6.6
+      },
+      "distanceLy": 53000000,
+      "visualRadiusLy": 63980.86149602547
+    },
+    {
+      "id": "m101",
+      "messierId": "M101",
+      "nameEn": "Pinwheel Galaxy",
+      "nameZh": "风车星系",
+      "type": "galaxy",
+      "coords": {
+        "galactic": {
+          "lDeg": 102.04046824986206,
+          "bDeg": 59.77074789379363,
+          "distanceLy": 21000000
+        },
+        "cartesian": {
+          "xLy": -2205488.3612850304,
+          "yLy": 10340090.113310605,
+          "zLy": 18144375.369156487
+        }
+      },
+      "apparentMagnitude": 7.9,
+      "sizeArcMin": {
+        "major": 29,
+        "minor": 27
+      },
+      "distanceLy": 21000000,
+      "visualRadiusLy": 88575.45953871222
+    }
+  ]
+}

@@ -12,10 +12,12 @@ import { ZH_STAR_NAMES } from './star-names-zh.ts';
 
 const SOURCE_URL =
   'https://raw.githubusercontent.com/astronexus/HYG-Database/main/hyg/v3/hyg_v35.csv.gz';
-const SOURCE_VERSION = 'hyg-v35-r2';
+const SOURCE_VERSION = 'hyg-v35-r3';
 const PC_TO_LY = 3.2616;
-const MAX_DIST_LY = 50;
-const CHUNK_SIZE = 400;
+const MAX_DIST_LY = 500;
+const BRIGHT_TIER_MIN_DIST_LY = 50;
+const BRIGHT_TIER_MAX_MAG = 8;
+const CHUNK_SIZE = 1000;
 const OUT_DIR = 'public/data/stars';
 
 const IAU_SET = new Set<string>(CONSTELLATION_IAU_CODES);
@@ -113,6 +115,9 @@ function buildRows(csvText: string): ProtoStar[] {
     if (distPc == null || distPc <= 0 || distPc >= 100000) continue;
     const distLy = distPc * PC_TO_LY;
     if (distLy > MAX_DIST_LY + 0.001) continue;
+    const mag = num(get(cMag));
+    if (mag == null) continue;
+    if (distLy > BRIGHT_TIER_MIN_DIST_LY && mag > BRIGHT_TIER_MAX_MAG) continue;
 
     const hip = num(get(cHip));
     const gl = get(cGl);
@@ -132,9 +137,7 @@ function buildRows(csvText: string): ProtoStar[] {
     const properName = ZH_STAR_NAMES[id] ?? (proper != null && proper !== '' ? proper : undefined);
     const ci = num(get(cCi));
     const lum = num(get(cLum));
-    const mag = num(get(cMag));
     const absmag = num(get(cAbsmag));
-    if (mag == null) continue;
 
     const proto: ProtoStar = {
       id,
@@ -150,7 +153,7 @@ function buildRows(csvText: string): ProtoStar[] {
       spectral: get(cSpect) ?? '?',
       luminositySol: lum != null && lum !== 0 ? Math.pow(10, lum) : undefined,
       temperatureK: temperatureFromBv(ci),
-      tier: 'tier1-nearby-100ly',
+      tier: distLy <= BRIGHT_TIER_MIN_DIST_LY ? 'tier1-nearby-100ly' : 'tier2-bright-mag6',
     };
 
     const existing = byId.get(id);
@@ -227,7 +230,7 @@ function validate(stars: unknown[]): void {
     byId.set(id, s);
   }
   if (nanCount > 0) throw new Error(`笛卡尔坐标含 NaN: ${nanCount}`);
-  if (ids.size < 900) throw new Error(`星数过少: ${ids.size}（预期 >=900）`);
+  if (ids.size < 5000) throw new Error(`星数过少: ${ids.size}（预期 >=5000）`);
   if (!byId.has('hip-sol')) throw new Error('缺少 hip-sol');
   const check = (id: string, minLy: number, maxLy: number) => {
     const s = byId.get(id);
@@ -240,6 +243,8 @@ function validate(stars: unknown[]): void {
   check('hip-91262', 24.5, 25.6); // 织女星
   check('hip-32349', 8.2, 9.0); // 天狼星
   check('hip-87937', 5.6, 6.4); // 巴纳德星
+  check('hip-65474', 240, 265); // 角宿一 Spica ~250ly（500ly 亮星层抽样）
+  check('hip-30438', 300, 325); // 老人星 Canopus ~310ly（500ly 亮星层抽样）
   console.log(`自校验通过: ${ids.size} 颗，NaN=${nanCount}`);
 }
 

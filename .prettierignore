@@ -4,6 +4,7 @@ coverage
 playwright-report
 pnpm-lock.yaml
 public/data/stars
+public/data/nebulae
 *.min.js
 *.min.css
 .claude
