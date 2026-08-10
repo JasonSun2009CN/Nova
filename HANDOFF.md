@@ -31,7 +31,7 @@
 - **S33 个性化设置（分支 `feature/S33-settings` 自 S32 分出，未合并）**：**默认专注时长快捷预设**（SetupPanel 专注时长卡内 25/45/60/90 chips，点击设当前值 + 存 `defaultFocusMinutes`，高亮当前默认；S19 已有 `setDefaultFocusMinutes` 只缺 UI）+ **浏览器通知**（`browserNotificationsEnabled` 设置项默认 false；`src/utils/notifications.ts` 纯浏览器包装 `isNotificationSupported`/`getNotificationPermission`/`requestNotificationPermission`/`focusNotificationContent`/`sendFocusNotification`；`useFocusNotifications` hook 在 App 挂载，监听 `progress.status` running→completed/aborted 迁移触发，带目的星名；`NotificationSettingsPanel` 设置页开关 + 权限状态提示（已授权/被拒/不支持），抽取共享 `Toggle` 组件复用 SoundSettingsPanel）。**引擎外观暂缓**（用户决策）；**振动不做**（仅移动端浏览器生效）。e2e：预设 3 浏览器过；通知真实 OS 投递无头不可测（无头 permission 恒 denied + Playwright 注入 Notification 与 stub 冲突崩溃），改 jsdom 确定性单测覆盖 hook 触发（4 条）+ 面板 + 内容构建。验证：**379 单测 / 40 文件**、`pnpm check` 4/4、build exit 0、e2e 预设 3 浏览器过。
 - **Phase 3 重规划（本次讨论，三处文档已同步至 S38）**：S22~S38 重排——新增 **S22 统一飞行模型**（合并 `travelDistance`/`cruisePlan` 为 d=β·γ·τ + 引擎 γ_max 约束，退役 `RECOMMEND_MAX_GAMMA`，ADR-0012）；**S23 航行视图真实星表化**（修订：主视角 = 目的地单星放大 + 暗星点阵，ADR-0011 + ADR-0014，S25 仪表盘随 S23 提前）；**S24 前向蓝移 Doppler**（已交付）；**S27 引擎 γ 分级解锁** + 不可达阻止/升级路径；**砍掉瞬时跃迁**（跃迁 = 最高 γ 档）。
 - **macOS 打包**：Tauri 2 骨架已配好（`src-tauri/`），**Rust 未装**，`pnpm tauri build` 待用户装 Rust 后跑。
-- **当前分支**：`feature/S33-settings`（自 `feature/S32-achievements` 分出；S30/S31/S32 已 commit 未合并 main，S33 已开发未 commit）。上一级链：S22~S28 已全部合并 main。（基线：`pnpm check` 4/4、**379 单测**、40 test files，见下方 2.2。）
+- **当前分支**：`feature/S33-settings`（自 `feature/S32-achievements` 分出；S29~S33 已全部 commit 未合并 main）。上一级链：S22~S28 已全部合并 main。（基线：`pnpm check` 4/4、**379 单测**、40 test files，见下方 2.2。）**S34 好友雏形已移除**（用户决策 2026-08-10：无需分享/账户/好友功能），Phase 4 以 S33 收尾。
 - **文档已同步**：ROADMAP Phase 3 加状态行 + 3.1 主视角/仪表盘/蓝移更新、ADR 索引（15 份，含 ADR-0015）、**STAGES S22/S23/S24 已标 🚧 已提交 + S25 提前**、本文件均已刷新至 S24。
 - **注意**：用户在某时刻编辑了 ROADMAP，移除了 2.2 的「推荐目的地 / 多级跃迁」两个 checkbox（已按建议实施推荐目的地但保留 checkbox 移除，勿擅自加回）。
 
@@ -43,6 +43,7 @@
 2. **UI 方向 = 极简克制**（用户明确选择，Linear/Apple 风）：大留白、细字重、零装饰、平按钮、发丝线分隔。**不要**加星云光斑/辉光/shimmer 之类花哨背景元素——用户明确说"背景圆圈干扰视线，都去掉"。
 3. **单一暗色 Neutral 主题，无主题切换**（ADR-0009）：近黑灰阶 + 金色强调色；`data-theme` 恒为 `neutral`。用户因「暖色背景 + 黑色星图不搭」砍掉 4 套主题，别再加回主题切换。
 4. 用户不是大众用户，审美有要求，UI 改动做完要展示截图等确认。
+5. **无需分享/好友/多人功能**（用户决策 2026-08-10）：S34 好友雏形（账户/分享链接/好友状态）已从 ROADMAP/STAGES/HANDOFF 移除，别实现或加回；多人实时协作已同步从远期规划移除。
 
 ---
 
@@ -51,7 +52,7 @@
 ### 1.1 总览与路线图（业务 & 阶段验收标准）
 
 1. [README.md](file:///Users/fiona/Documents/trae_projects/Nova/README.md) — 项目定义、技术选型原因、用户故事、**用户使用指引**。
-2. [docs/ROADMAP.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/ROADMAP.md) — **唯一的阶段验收依据**。Phase 1/2/3 验收已全部勾选（v0.1/v0.2/v0.3 已关闭）。当前在 **Phase 4 成就系统 + 航行日志（v0.5）**：船长日志统计面板、成就系统、个性化设置、多人雏形。每次接事先看对应 Phase 的 Acceptance Criteria，别自己加 scope。
+2. [docs/ROADMAP.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/ROADMAP.md) — **唯一的阶段验收依据**。Phase 1/2/3 验收已全部勾选（v0.1/v0.2/v0.3 已关闭）。当前在 **Phase 4 成就系统 + 航行日志（v0.5）**：船长日志统计面板、成就系统、个性化设置（S34 好友雏形已移除，无需分享功能）。每次接事先看对应 Phase 的 Acceptance Criteria，别自己加 scope。
 3. [docs/adr/README.md](file:///Users/fiona/Documents/trae_projects/Nova/docs/adr/README.md) + 15 份 ADR — **所有「为什么这么做」全在这**。尤其是 **ADR-003 分层架构**（引擎 vs 渲染 vs UI vs 数据 vs 基础设施严格隔离，不允许跨层 import）。最新 ADR-0015（响应式布局：大屏横屏双栏 / 窄屏竖屏单栏）。
 
 ### 1.2 开发规范 & 工程化（写代码前必读，避免 CI 红）
@@ -192,7 +193,7 @@ pnpm test:e2e
 
 ### 2.3 下一步（Phase 3 航行系统，按 ROADMAP）
 
-Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型已交付**（ADR-0012）；**S23 航行视图真实星表化 + S25 仪表盘已交付**（ADR-0011 修订 + ADR-0014）；**S24 前向蓝移已交付**；**S26 跃迁过渡动画已交付**；**S27 引擎解锁已交付**；**S28 白噪音已交付**；**S29 Phase 3 收尾已交付（v0.3 关闭）**（见上方当前进度）。**S30 船长日志 + S31 旅行日志导出 + S32 成就系统 + S33 个性化设置均已开发**（未合并，见上方当前进度）。下一阶段为 **S34 好友雏形**（本地/云端账户 + 个人分享链接 + 好友状态，可推迟，STAGES 5.1），顺序见 STAGES 第五节。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
+Phase 2 目标是 **v0.2 星图导航**：真实星图 + 选目的地 + 专注。S16~S21 + 增量3 已全部交付（渲染 / 交互 / 双视角 / 真实星表 / 时长反推 / 搜索 / 推荐目的地 / 变动出发地 / 质量保障与验收走查），v0.2 已关闭。**S22 统一飞行模型已交付**（ADR-0012）；**S23 航行视图真实星表化 + S25 仪表盘已交付**（ADR-0011 修订 + ADR-0014）；**S24 前向蓝移已交付**；**S26 跃迁过渡动画已交付**；**S27 引擎解锁已交付**；**S28 白噪音已交付**；**S29 Phase 3 收尾已交付（v0.3 关闭）**（见上方当前进度）。**S30 船长日志 + S31 旅行日志导出 + S32 成就系统 + S33 个性化设置均已开发**（未合并，见上方当前进度）。**S34 好友雏形已按用户决策移除**（无需分享/账户/好友功能，2026-08-10），Phase 4 以 S33 收尾。下一步为 **Phase 5**（S35 星表扩展等，顺序见 STAGES 5.1）。以下为 Phase 2 期间的建议顺序回顾（已全部交付）：
 
 | 顺序 | 内容                                                                                                    | 说明                                                                                                                 |
 | ---- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
