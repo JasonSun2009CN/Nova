@@ -18,6 +18,7 @@ export {
   getNextUnlock,
   getTierForGamma,
   getUnlockedTier,
+  resolveEngineTier,
 } from './physics/engine-tiers';
 
 export type * from './contract/voyage-types';
@@ -46,3 +47,19 @@ export {
   dayStartMs,
   summarizeCaptainsLog,
 } from './stats/captains-log';
+
+export type * from './achievements/types';
+export {
+  ACHIEVEMENT_CATEGORIES,
+  ACHIEVEMENT_TOTAL_POINTS,
+  ACHIEVEMENTS,
+  getAchievementById,
+} from './achievements/catalog';
+export {
+  buildAchievementContext,
+  evaluateAchievements,
+  grantedEngineTiers,
+  newlyUnlockedAchievementIds,
+  unlockedAchievementIds,
+} from './achievements/evaluate';
+export { BUILTIN_STAR_FACTS, buildAchievementStarFacts } from './achievements/star-facts';

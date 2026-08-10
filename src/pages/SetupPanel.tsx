@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import { DurationScrubber } from '@/components/DurationScrubber';
+import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { SoundSettingsPanel } from '@/components/SoundSettingsPanel';
+import { useAchievements } from '@/components/useAchievements';
 import {
   DESTINATION_STARS,
   destinationOptionsFromStars,
@@ -17,9 +19,9 @@ import {
   cruisePlan,
   getNextUnlock,
   getTierForGamma,
-  getUnlockedTier,
   lorentzFactor,
   minFocusMinutes,
+  resolveEngineTier,
 } from '@/engine';
 import { useCatalogStore } from '@/store/useCatalogStore';
 import { useHistoryStore } from '@/store/useHistoryStore';
@@ -33,6 +35,8 @@ import {
   formatVOverC,
 } from '@/utils/format';
 
+const FOCUS_PRESETS: readonly number[] = [25, 45, 60, 90];
+
 export function SetupPanel() {
   const defaultMinutes = useSettingsStore((s) => s.settings.defaultFocusMinutes);
   const hydrated = useSettingsStore((s) => s.hydrated);
@@ -45,6 +49,7 @@ export function SetupPanel() {
   const catalogStars = useCatalogStore((s) => s.stars);
   const catalogStatus = useCatalogStore((s) => s.status);
   const totalFocusHours = useHistoryStore((s) => s.stats?.totalFocusHours ?? 0);
+  const { grantedEngineTiers } = useAchievements();
   const touchedRef = useRef(false);
 
   useEffect(() => {
@@ -99,7 +104,10 @@ export function SetupPanel() {
   );
   const gamma = plan?.gamma ?? lorentzFactor(vOverC * LIGHT_SPEED);
   const speed = plan?.vOverC ?? vOverC;
-  const currentEngine = useMemo(() => getUnlockedTier(totalFocusHours), [totalFocusHours]);
+  const currentEngine = useMemo(
+    () => resolveEngineTier(totalFocusHours, grantedEngineTiers),
+    [totalFocusHours, grantedEngineTiers],
+  );
   const nextUnlock = useMemo(() => getNextUnlock(totalFocusHours), [totalFocusHours]);
   const reachable = plan == null || plan.gamma <= currentEngine.gammaMax;
   const upgradeTier =
@@ -192,6 +200,33 @@ export function SetupPanel() {
             </div>
           </div>
           <DurationScrubber value={minutes} onChange={handleScrub} />
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-xs text-deep-500">快捷预设</span>
+            {FOCUS_PRESETS.map((preset) => {
+              const active = defaultMinutes === preset;
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => {
+                    touchedRef.current = true;
+                    setMinutes(preset);
+                    void useSettingsStore
+                      .getState()
+                      .updateSettings({ defaultFocusMinutes: preset });
+                  }}
+                  className={twMerge(
+                    'h-8 cursor-pointer rounded-lg border px-3 font-mono text-sm tabular-nums transition-colors duration-200',
+                    active
+                      ? 'border-star-gold text-star-gold'
+                      : 'border-[var(--color-glass-border)] text-deep-300 hover:border-star-gold/50 hover:text-foreground',
+                  )}
+                >
+                  {preset}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div>
@@ -288,6 +323,8 @@ export function SetupPanel() {
       </div>
 
       <SoundSettingsPanel />
+
+      <NotificationSettingsPanel />
 
       {plan != null && !reachable && destStar != null && (
         <div
