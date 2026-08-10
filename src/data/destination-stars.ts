@@ -26,6 +26,11 @@ export const DESTINATION_STARS: readonly DestinationStar[] = [
   { id: 'hip-57632', name: '五帝座一 (狮子座 β)', distanceLy: 36 },
   { id: 'hip-69673', name: '贯索增六 / 大角星 (牧夫座 α)', distanceLy: 36.7 },
   { id: 'hip-24608', name: '五车二 (御夫座 α)', distanceLy: 42.9 },
+  { id: 'hip-36850', name: '北河二 (双子座 α Castor)', distanceLy: 51.6 },
+  { id: 'hip-21421', name: '毕宿五 (金牛座 α Aldebaran)', distanceLy: 65.3 },
+  { id: 'hip-49669', name: '轩辕十四 (狮子座 α Regulus)', distanceLy: 79.3 },
+  { id: 'hip-65474', name: '角宿一 (室女座 α Spica)', distanceLy: 250 },
+  { id: 'hip-30438', name: '老人星 (船底座 α Canopus)', distanceLy: 310 },
 ];
 
 export function getDestinationName(id: string | null): string | null {

@@ -121,4 +121,45 @@ describe('StarCatalogRepository', () => {
       expect(await repo.getMeta()).toBeUndefined();
     });
   });
+
+  it('loadNebulae：拉取 nebulae.json 返回列表；请求失败回退空数组', async () => {
+    const fetchMock = stubFetch();
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith('nebulae.json')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              nebulae: [
+                {
+                  id: 'm42',
+                  type: 'emission',
+                  coords: {
+                    galactic: { lDeg: 0, bDeg: 0, distanceLy: 1344 },
+                    cartesian: { xLy: 1, yLy: 2, zLy: 3 },
+                  },
+                  apparentMagnitude: 4,
+                  distanceLy: 1344,
+                },
+              ],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      return Promise.resolve(new Response('', { status: 404 }));
+    });
+    await NovaDatabase.temp('nova-star-nebulae-1', async (db) => {
+      const repo = new StarCatalogRepository(db);
+      const result = await repo.loadNebulae();
+      expect(result).toHaveLength(1);
+      expect(result[0]!.id).toBe('m42');
+    });
+    await NovaDatabase.temp('nova-star-nebulae-2', async (db) => {
+      fetchMock.mockImplementation(() => Promise.resolve(new Response('', { status: 404 })));
+      const repo = new StarCatalogRepository(db);
+      const result = await repo.loadNebulae();
+      expect(result).toEqual([]);
+    });
+  });
 });

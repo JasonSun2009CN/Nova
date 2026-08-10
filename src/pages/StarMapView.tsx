@@ -8,6 +8,7 @@ import { starDisplayName, starDistanceLy } from '@/data/destination-stars';
 import { StarCatalog, type Star } from '@/engine';
 import { FollowStarBridge } from '@/engine/renderer/FollowStarBridge';
 import { CurrentPositionMarker, DestinationMarker } from '@/engine/renderer/MapMarkers';
+import { NebulaField } from '@/engine/renderer/NebulaField';
 import { PickController } from '@/engine/renderer/PickController';
 import { RadiusGuides } from '@/engine/renderer/RadiusGuides';
 import { StarMapCameraRig, type StarMapViewMode } from '@/engine/renderer/StarMapCameraRig';
@@ -75,6 +76,7 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
   const [mode, setMode] = useState<StarMapViewMode>('from-departure');
   const destStarId = useVoyageStore((s) => s.destStarId);
   const catalogStars = useCatalogStore((s) => s.stars);
+  const catalogNebulae = useCatalogStore((s) => s.nebulae);
   const catalogStatus = useCatalogStore((s) => s.status);
   const currentStarId = useSettingsStore((s) => s.settings.currentStarId) ?? 'hip-sol';
   const isLargeScreen = useMediaQuery('(min-width: 768px)');
@@ -89,13 +91,13 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
     if (catalogStars.length === 0) return;
     let active = true;
     const catalogInstance = new StarCatalog();
-    void catalogInstance.load(catalogStars).then(() => {
+    void catalogInstance.load(catalogStars, { nebulae: catalogNebulae }).then(() => {
       if (active) setCatalog(catalogInstance);
     });
     return () => {
       active = false;
     };
-  }, [catalogStars]);
+  }, [catalogStars, catalogNebulae]);
 
   const { navStars, bgStars } = useMemo(() => {
     if (catalog == null) {
@@ -179,6 +181,7 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
           <StarField stars={bgStars} scale={NAV_SCALE} />
           <StarField stars={sunRenderStars} scale={NAV_SCALE} sizeScale={SUN_SIZE_SCALE} />
           <StarField stars={navStars} scale={NAV_SCALE} />
+          <NebulaField nebulae={catalog?.nebulae() ?? []} />
           {mode === 'overview' && <RadiusGuides scale={NAV_SCALE} radiiLy={RADIUS_GUIDES_LY} />}
           {mode === 'overview' && departureWorld != null && (
             <CurrentPositionMarker

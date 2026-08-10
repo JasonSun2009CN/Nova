@@ -20,7 +20,7 @@ function loadAllStars(): Star[] {
 }
 
 describe('生成星表数据完整性 (public/data/stars)', () => {
-  it('manifest 与分块数量一致，总星数匹配且 >=900', () => {
+  it('manifest 与分块数量一致，总星数匹配且 >=5000', () => {
     const manifest = readJson<Manifest>('manifest.json');
     expect(manifest.chunks.length).toBeGreaterThanOrEqual(1);
     expect(manifest.sourceVersion.length).toBeGreaterThan(0);
@@ -31,12 +31,14 @@ describe('生成星表数据完整性 (public/data/stars)', () => {
       total += chunk.length;
     }
     expect(total).toBe(manifest.totalStars);
-    expect(manifest.totalStars).toBeGreaterThanOrEqual(900);
+    expect(manifest.totalStars).toBeGreaterThanOrEqual(5000);
   });
 
-  it('每颗星笛卡尔坐标有限、距离 <=50ly，太阳恰好一个', () => {
+  it('每颗星笛卡尔坐标有限、距离 <=500ly，太阳恰好一个，档位按距离分', () => {
     const stars = loadAllStars();
     let sun = 0;
+    let tier1 = 0;
+    let tier2 = 0;
     const ids = new Set<string>();
     for (const s of stars) {
       expect(ids.has(s.id), `重复 id ${s.id}`).toBe(false);
@@ -46,13 +48,24 @@ describe('生成星表数据完整性 (public/data/stars)', () => {
       expect(Number.isFinite(c.yLy)).toBe(true);
       expect(Number.isFinite(c.zLy)).toBe(true);
       const dist = Math.hypot(c.xLy, c.yLy, c.zLy);
-      expect(dist).toBeLessThanOrEqual(50.001);
+      expect(dist).toBeLessThanOrEqual(500.001);
       if (s.id === 'hip-sol') {
         sun++;
         expect(s.properName).toBe('太阳');
+        expect(s.catalogTier).toBe('tier0-solar');
+        continue;
+      }
+      if (dist <= 50.001) {
+        tier1++;
+        expect(s.catalogTier).toBe('tier1-nearby-100ly');
+      } else {
+        tier2++;
+        expect(s.catalogTier).toBe('tier2-bright-mag6');
       }
     }
     expect(sun).toBe(1);
+    expect(tier1).toBeGreaterThanOrEqual(900);
+    expect(tier2).toBeGreaterThanOrEqual(3000);
   });
 
   it('织女/天狼/巴纳德 真实距离在预期区间（单位换算守卫）', () => {
@@ -137,6 +150,8 @@ describe('生成星表数据完整性 (public/data/stars)', () => {
       { id: 'hip-91262', name: '织女星', ly: 25.04, tol: 0.3 },
       { id: 'hip-113368', name: '北落师门', ly: 25.13, tol: 0.3 },
       { id: 'hip-69673', name: '大角星', ly: 36.7, tol: 0.4 },
+      { id: 'hip-65474', name: '角宿一', ly: 250, tol: 15 },
+      { id: 'hip-30438', name: '老人星', ly: 310, tol: 15 },
     ] as const;
     for (const s of sample) {
       const actual = dist(s.id);

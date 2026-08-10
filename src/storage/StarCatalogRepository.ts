@@ -1,9 +1,11 @@
-import type { Star } from '@/engine';
+import type { Nebula, Star } from '@/engine';
 import type { StarCatalogMetaRecord, StarChunkRecord } from '@/contract/storage-types';
 import type { NovaDatabase } from '@/storage/NovaDatabase';
 
 const MANIFEST_URL = 'data/stars/manifest.json';
 const CHUNK_URL_PREFIX = 'data/stars/';
+const NEBULAE_URL = 'data/nebulae/nebulae.json';
+const CHUNK_FETCH_CONCURRENCY = 6;
 
 export type StarCatalogLoadResult = Readonly<{
   stars: readonly Star[];
@@ -40,22 +42,29 @@ export class StarCatalogRepository {
 
     const all: Star[] = [];
     let usedNetwork = false;
-    for (const id of meta.chunks) {
-      const cached = await this.db.starChunks.get(id);
-      if (cached != null && cached.sourceVersion === meta.sourceVersion) {
-        all.push(...cached.stars);
-        continue;
+    for (let i = 0; i < meta.chunks.length; i += CHUNK_FETCH_CONCURRENCY) {
+      const batch = meta.chunks.slice(i, i + CHUNK_FETCH_CONCURRENCY);
+      const results = await Promise.all(
+        batch.map(async (id) => {
+          const cached = await this.db.starChunks.get(id);
+          if (cached != null && cached.sourceVersion === meta.sourceVersion) {
+            return { stars: cached.stars, usedNetwork: false };
+          }
+          const stars = await this.fetchJson<Star[]>(`${CHUNK_URL_PREFIX}${id}.json`);
+          const record: StarChunkRecord = {
+            id,
+            sourceVersion: meta.sourceVersion,
+            stars,
+            loadedAt: Date.now(),
+          };
+          await this.db.starChunks.put(record);
+          return { stars, usedNetwork: true };
+        }),
+      );
+      for (const r of results) {
+        all.push(...r.stars);
+        usedNetwork = usedNetwork || r.usedNetwork;
       }
-      const stars = await this.fetchJson<Star[]>(`${CHUNK_URL_PREFIX}${id}.json`);
-      const record: StarChunkRecord = {
-        id,
-        sourceVersion: meta.sourceVersion,
-        stars,
-        loadedAt: Date.now(),
-      };
-      await this.db.starChunks.put(record);
-      all.push(...stars);
-      usedNetwork = true;
     }
 
     if (all.length === 0) throw new Error('星表为空');
@@ -64,6 +73,16 @@ export class StarCatalogRepository {
       await this.db.starCatalogMeta.put(meta);
     }
     return { stars: all, source: usedNetwork ? 'network' : 'cache' };
+  }
+
+  async loadNebulae(): Promise<readonly Nebula[]> {
+    await this.db.ensureOpen();
+    try {
+      const data = await this.fetchJson<{ nebulae: readonly Nebula[] }>(NEBULAE_URL);
+      return data.nebulae ?? [];
+    } catch {
+      return [];
+    }
   }
 
   async clear(): Promise<void> {
