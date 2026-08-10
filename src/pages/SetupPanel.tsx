@@ -330,10 +330,6 @@ export function SetupPanel() {
         </div>
       </div>
 
-      <SoundSettingsPanel />
-
-      <NotificationSettingsPanel />
-
       {plan != null && !reachable && destStar != null && (
         <div
           data-testid="unreachable-warning"
@@ -388,6 +384,10 @@ export function SetupPanel() {
       >
         {t('setup.start')}
       </button>
+
+      <SoundSettingsPanel />
+
+      <NotificationSettingsPanel />
     </section>
   );
 }
