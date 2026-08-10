@@ -6,6 +6,7 @@ import { GlossaryDialog } from '@/components/GlossaryDialog';
 import { HistoryPanel } from '@/components/HistoryPanel';
 import { OnboardingDialog } from '@/components/OnboardingDialog';
 import { SpaceBackdrop } from '@/components/SpaceBackdrop';
+import { useI18n } from '@/i18n';
 import { useAudioEngine } from '@/components/useAudioEngine';
 import { useFocusNotifications } from '@/components/useFocusNotifications';
 import { ResultView } from '@/pages/ResultView';
@@ -26,6 +27,7 @@ function App() {
   const theme = useSettingsStore((s) => s.settings.theme);
   const settingsHydrated = useSettingsStore((s) => s.hydrated);
   const hasCompletedOnboarding = useSettingsStore((s) => s.settings.hasCompletedOnboarding);
+  const { t, lang, setLang } = useI18n();
   const [starMapOpen, setStarMapOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [captainLogOpen, setCaptainLogOpen] = useState(false);
@@ -88,27 +90,48 @@ function App() {
                 onClick={() => setAchievementOpen(true)}
                 className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
               >
-                成就
+                {t('app.achievements')}
               </button>
               <button
                 type="button"
                 onClick={() => setCaptainLogOpen(true)}
                 className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
               >
-                日志
+                {t('app.log')}
               </button>
               <button
                 type="button"
                 onClick={() => setStarMapOpen(true)}
                 className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
               >
-                星图
+                {t('app.starmap')}
               </button>
             </>
           )}
+          <div
+            role="group"
+            aria-label={t('settings.language')}
+            className="flex items-center gap-0.5 rounded-xl border border-[var(--color-glass-border)] p-0.5"
+          >
+            {(['zh', 'en'] as const).map((code) => (
+              <button
+                key={code}
+                type="button"
+                aria-pressed={lang === code}
+                onClick={() => setLang(code)}
+                className={`h-8 cursor-pointer rounded-lg px-2 font-display text-xs transition-colors duration-200 ${
+                  lang === code
+                    ? 'bg-white/10 text-foreground'
+                    : 'text-deep-400 hover:text-foreground'
+                }`}
+              >
+                {code === 'zh' ? '中' : 'EN'}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
-            aria-label="星际航行术语"
+            aria-label={t('app.glossaryAria')}
             onClick={() => setGlossaryOpen(true)}
             className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-deep-400 transition-colors duration-200 hover:text-foreground"
           >

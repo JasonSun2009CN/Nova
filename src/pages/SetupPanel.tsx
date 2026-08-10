@@ -34,10 +34,12 @@ import {
   formatMinuteLabel,
   formatVOverC,
 } from '@/utils/format';
+import { useI18n } from '@/i18n';
 
 const FOCUS_PRESETS: readonly number[] = [25, 45, 60, 90];
 
 export function SetupPanel() {
+  const { t } = useI18n();
   const defaultMinutes = useSettingsStore((s) => s.settings.defaultFocusMinutes);
   const hydrated = useSettingsStore((s) => s.hydrated);
   const defaultVOverC = useSettingsStore((s) => s.settings.defaultVOverC);
@@ -76,10 +78,10 @@ export function SetupPanel() {
     [catalogStars, originStarId],
   );
   const originName = useMemo(() => {
-    if (originStarId === 'hip-sol') return '太阳系';
+    if (originStarId === 'hip-sol') return t('common.originSolar');
     if (originStar != null) return starDisplayName(originStar);
-    return findDestinationOption(originStarId, catalogStars)?.name ?? '太阳系';
-  }, [originStarId, originStar, catalogStars]);
+    return findDestinationOption(originStarId, catalogStars)?.name ?? t('common.originSolar');
+  }, [originStarId, originStar, catalogStars, t]);
   const destStarObj = useMemo(
     () => catalogStars.find((s) => s.id === destStarId) ?? null,
     [catalogStars, destStarId],
@@ -163,17 +165,18 @@ export function SetupPanel() {
       className="mx-auto flex w-full max-w-md animate-fade-up flex-1 flex-col gap-6 px-6 pb-12 pt-10 lg:mx-0 lg:max-w-none lg:px-0"
     >
       <div>
-        <h2 className="font-display text-xl font-medium tracking-wide">规划一次星际航行</h2>
+        <h2 className="font-display text-xl font-medium tracking-wide">{t('setup.title')}</h2>
         <div className="mt-1.5 space-y-1">
           <p className="text-sm text-deep-400">
             {destStar != null
               ? `${originName} → ${destStar.name}`
-              : `设定专注时长，飞船将从 ${originName} 出发`}
+              : t('setup.fromOrigin', { origin: originName })}
           </p>
           {destStar != null && (
             <p className="font-mono text-xs text-deep-400 tabular-nums">
-              出发地距太阳 {formatLy(originSolarLy)} · 目的地距太阳 {formatLy(destSolarLy)} ·
-              航行距离 {formatLy(legLy)}
+              {t('setup.originDist', { ly: formatLy(originSolarLy) })} ·{' '}
+              {t('setup.destDist', { ly: formatLy(destSolarLy) })} ·{' '}
+              {t('setup.travelDist', { ly: formatLy(legLy) })}
             </p>
           )}
         </div>
@@ -183,7 +186,7 @@ export function SetupPanel() {
         <div>
           <div className="mb-4 flex items-center justify-between">
             <label htmlFor="duration-scrubber" className="text-sm text-deep-300">
-              专注时长
+              {t('setup.focusLabel')}
             </label>
             <div className="flex items-baseline gap-1.5">
               <input
@@ -196,12 +199,12 @@ export function SetupPanel() {
                 onChange={(e) => handleCustomChange(e.target.value)}
                 className="w-16 appearance-none bg-transparent text-right font-mono text-2xl tabular-nums text-foreground focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               />
-              <span className="text-xs text-deep-400">分钟</span>
+              <span className="text-xs text-deep-400">{t('setup.minutesUnit')}</span>
             </div>
           </div>
           <DurationScrubber value={minutes} onChange={handleScrub} />
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-deep-400">快捷预设</span>
+            <span className="text-xs text-deep-400">{t('setup.presets')}</span>
             {FOCUS_PRESETS.map((preset) => {
               const active = defaultMinutes === preset;
               return (
@@ -231,7 +234,7 @@ export function SetupPanel() {
 
         <div>
           <label htmlFor="dest-star" className="mb-3 block text-sm text-deep-300">
-            目的地
+            {t('setup.destLabel')}
           </label>
           <select
             id="dest-star"
@@ -239,7 +242,7 @@ export function SetupPanel() {
             onChange={(e) => handleDestChange(e.target.value)}
             className="h-12 w-full cursor-pointer rounded-xl border border-[var(--color-glass-border)] bg-[var(--color-glass)] px-3 text-base text-foreground focus:border-star-blue focus:outline-none"
           >
-            <option value="">（无目的地 · 自由漂流）</option>
+            <option value="">{t('setup.noDest')}</option>
             {destinationOptions.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name} · {formatLy(s.distanceLy)}
@@ -252,7 +255,9 @@ export function SetupPanel() {
               className="mt-3 flex items-center justify-between gap-2"
             >
               <p className="text-xs text-deep-400">
-                {destStar != null && !reachable ? '当前目的地不可达，可改选：' : '推荐目的地：'}
+                {destStar != null && !reachable
+                  ? t('setup.unreachablePick')
+                  : t('setup.recommendLabel')}
                 <span className="text-deep-200">{recommendation.name}</span> ·{' '}
                 {formatLy(recommendation.distanceLy)}
               </p>
@@ -261,7 +266,7 @@ export function SetupPanel() {
                 onClick={() => useVoyageStore.getState().selectDestination(recommendation.id)}
                 className="h-8 shrink-0 cursor-pointer rounded-lg border border-[var(--color-glass-border)] px-3 text-xs text-deep-200 transition-colors duration-200 hover:border-star-gold hover:text-star-gold"
               >
-                选用
+                {t('setup.useIt')}
               </button>
             </div>
           )}
@@ -270,7 +275,7 @@ export function SetupPanel() {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <span className="text-sm text-deep-300">
-              {plan != null ? '航行速度（推算）' : '航行速度'}
+              {plan != null ? t('setup.speedCalc') : t('setup.speedLabel')}
             </span>
             <span className="font-mono text-sm text-deep-200 tabular-nums">
               {formatVOverC(speed)} · γ {formatGamma(gamma)}
@@ -278,8 +283,11 @@ export function SetupPanel() {
           </div>
           {plan != null && destStar != null ? (
             <p className="text-xs leading-relaxed text-deep-400">
-              飞抵 {destStar.name} 时，船上 {formatMinuteLabel(minutes)} ≈ 地球上{' '}
-              {plan.earthYears.toFixed(1)} 年。
+              {t('setup.arrivalEstimate', {
+                dest: destStar.name,
+                shipTime: formatMinuteLabel(minutes),
+                earthYears: plan.earthYears.toFixed(1),
+              })}
             </p>
           ) : (
             <>
@@ -294,9 +302,7 @@ export function SetupPanel() {
                 onChange={(e) => setVOverC(Number(e.target.value))}
                 className="h-12 w-full cursor-pointer accent-[var(--color-star-gold)]"
               />
-              <p className="mt-1 text-xs text-deep-400">
-                速度越接近光速，时间膨胀越明显，航行距离越远。
-              </p>
+              <p className="mt-1 text-xs text-deep-400">{t('setup.speedHint')}</p>
             </>
           )}
         </div>
@@ -306,18 +312,20 @@ export function SetupPanel() {
           className="flex items-center justify-between border-t border-[var(--color-glass-border)] pt-5"
         >
           <div className="flex items-center gap-2">
-            <span className="text-sm text-deep-300">当前引擎</span>
+            <span className="text-sm text-deep-300">{t('setup.engineLabel')}</span>
             <span className="rounded-md border border-star-gold/40 px-1.5 py-0.5 text-xs text-star-gold">
               {currentEngine.name}
             </span>
           </div>
           {nextUnlock != null ? (
             <span className="text-xs text-deep-400">
-              下一级 {nextUnlock.tier.name} · 再{' '}
-              {formatFocusEstimate(nextUnlock.hoursRemaining * 60)}
+              {t('setup.nextTier', {
+                name: nextUnlock.tier.name,
+                hours: formatFocusEstimate(nextUnlock.hoursRemaining * 60),
+              })}
             </span>
           ) : (
-            <span className="text-xs text-deep-400">已解锁全部曲速引擎</span>
+            <span className="text-xs text-deep-400">{t('setup.allUnlocked')}</span>
           )}
         </div>
       </div>
@@ -332,31 +340,36 @@ export function SetupPanel() {
           className="rounded-xl border border-star-red/40 bg-star-red/5 px-4 py-3"
         >
           <p className="text-xs leading-relaxed text-deep-300">
-            {currentEngine.name}（γ 上限{' '}
-            <span className="font-mono text-star-red">{formatGamma(currentEngine.gammaMax)}</span>
-            ）无法在 {formatMinuteLabel(minutes)} 内抵达 {destStar.name}
+            {t('setup.unreachableTitle', {
+              engine: currentEngine.name,
+              gamma: formatGamma(currentEngine.gammaMax),
+              time: formatMinuteLabel(minutes),
+              dest: destStar.name,
+            })}
           </p>
           <p className="mt-1 text-xs leading-relaxed text-deep-400">
-            需 γ <span className="font-mono text-star-red">{formatGamma(plan.gamma)}</span>
+            {t('setup.needGamma')}{' '}
+            <span className="font-mono text-star-red">{formatGamma(plan.gamma)}</span>
             {upgradeTier != null && (
               <>
-                {' · '}解锁 <span className="text-deep-200">{upgradeTier.name}</span>
+                {' · '}
+                {t('setup.unlock')} <span className="text-deep-200">{upgradeTier.name}</span>
               </>
             )}
             {minFocusWithEngine != null && (
               <>
-                {' · '}当前引擎最短专注{' '}
+                {' · '}
+                {t('setup.minFocus')}{' '}
                 <span className="text-deep-200">{formatFocusEstimate(minFocusWithEngine)}</span>
               </>
             )}
           </p>
           {nextUnlock != null && (
             <p className="mt-1 text-xs leading-relaxed text-deep-400">
-              升级路径：再累计专注{' '}
-              <span className="text-deep-200">
-                {formatFocusEstimate(nextUnlock.hoursRemaining * 60)}
-              </span>{' '}
-              解锁 <span className="text-star-gold">{nextUnlock.tier.name}</span>
+              {t('setup.upgradePath', {
+                hours: formatFocusEstimate(nextUnlock.hoursRemaining * 60),
+                tier: nextUnlock.tier.name,
+              })}
             </p>
           )}
         </div>
@@ -373,7 +386,7 @@ export function SetupPanel() {
             : 'cursor-not-allowed border border-[var(--color-glass-border)] text-deep-400',
         )}
       >
-        启动航行
+        {t('setup.start')}
       </button>
     </section>
   );

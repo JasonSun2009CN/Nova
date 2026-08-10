@@ -16,6 +16,7 @@ export const DEFAULT_SETTINGS: Readonly<SettingsValueMap> = {
   currentStarId: 'hip-sol',
   browserNotificationsEnabled: false,
   hasCompletedOnboarding: false,
+  language: 'zh',
 };
 
 export class SettingsRepository {

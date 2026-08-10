@@ -2,10 +2,12 @@ import { useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import { getDestinationName } from '@/data/destination-stars';
+import { useI18n } from '@/i18n';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { formatDateTime, formatDurationMs, formatLy } from '@/utils/format';
 
 export function HistoryPanel() {
+  const { t } = useI18n();
   const records = useHistoryStore((s) => s.records);
   const stats = useHistoryStore((s) => s.stats);
   const loading = useHistoryStore((s) => s.loading);
@@ -23,23 +25,23 @@ export function HistoryPanel() {
       className="mx-auto w-full max-w-md px-6 pb-12 lg:mx-0 lg:max-w-none lg:px-0 lg:pt-10"
     >
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-display text-lg font-medium tracking-wide">航行日志</h2>
+        <h2 className="font-display text-lg font-medium tracking-wide">{t('history.title')}</h2>
         {records.length > 0 && (
           <button
             type="button"
             onClick={() => void clearAll()}
             className="h-11 cursor-pointer px-2 text-sm text-deep-400 transition-colors hover:text-star-red"
           >
-            清空
+            {t('history.clear')}
           </button>
         )}
       </div>
 
       {loading && records.length === 0 ? (
-        <p className="py-10 text-center text-sm text-deep-400">加载中…</p>
+        <p className="py-10 text-center text-sm text-deep-400">{t('history.loading')}</p>
       ) : records.length === 0 ? (
         <p className="glass-card rounded-2xl py-10 text-center text-sm text-deep-400">
-          还没有航行记录，开启第一次专注吧。
+          {t('history.empty')}
         </p>
       ) : (
         <ul className="glass-card overflow-hidden rounded-2xl">
@@ -61,19 +63,21 @@ export function HistoryPanel() {
                         r.status === 'completed' ? 'text-star-gold' : 'text-star-red',
                       )}
                     >
-                      {r.status === 'completed' ? '完成' : '中止'}
+                      {r.status === 'completed' ? t('history.completed') : t('history.aborted')}
                     </span>
                   </div>
                   <div className="mt-0.5 truncate text-xs text-deep-400">
                     {formatDateTime(r.createdAt)}
-                    {destName != null ? ` · 前往 ${destName}` : ' · 自由漂流'}
+                    {destName != null
+                      ? ` · ${t('history.goTo', { dest: destName })}`
+                      : ` · ${t('history.freeDrift')}`}
                     {' · '}
                     {formatLy(r.traveledLy)}
                   </div>
                 </div>
                 <button
                   type="button"
-                  aria-label="删除这条记录"
+                  aria-label={t('history.deleteRecord')}
                   onClick={() => void deleteRecord(r.id)}
                   className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl text-deep-400 transition-colors hover:text-star-red"
                 >
@@ -98,9 +102,9 @@ export function HistoryPanel() {
 
       {stats != null && records.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 px-1 text-xs text-deep-400">
-          <span>累计专注 {stats.totalFocusHours.toFixed(1)} 小时</span>
-          <span>累计航行 {formatLy(stats.totalTraveledLy)}</span>
-          <span>完成 {stats.completedVoyages} 次</span>
+          <span>{t('history.totalFocus', { hours: stats.totalFocusHours.toFixed(1) })}</span>
+          <span>{t('history.totalDistance', { ly: formatLy(stats.totalTraveledLy) })}</span>
+          <span>{t('history.completedCount', { count: stats.completedVoyages })}</span>
         </div>
       )}
     </section>

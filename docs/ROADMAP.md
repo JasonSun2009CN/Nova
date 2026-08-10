@@ -266,14 +266,14 @@ v0.1 ────────── v0.2 ────────── v0.3 ─
 
 **版本**：v1.0.0 (Release Candidate → Stable)
 **目标**：打磨体验，修复缺陷，生产可用
-**状态**：**S35 星表数据扩展已交付**（500ly 亮星 **17,789 颗**（HYG v35 r3，tier1 981 / tier2 16,807）+ 星云/星团 **34 个**（背景天空投影渲染，保持极简）+ 分块加载并行化；银河结构叠加**暂缓**（审美冲突），`feature/S35-star-catalog-expansion` 未合并）。
+**状态**：**S35 星表数据扩展已交付**（500ly 亮星 **17,789 颗**（HYG v35 r3，tier1 981 / tier2 16,807）+ 星云/星团 **34 个**（背景天空投影渲染，保持极简）+ 分块加载并行化；银河结构叠加**暂缓**（审美冲突），`feature/S35-star-catalog-expansion` 未合并）。**S37 体验打磨进行中**（无障碍 / 首次引导 / i18n 中英 / 首屏验证已完成，`feature/S37-polish` 未合并）；**Tauri 5 平台发布 workflow**（`release.yml`，tag 触发）。
 
 ### 5.1 体验优化
 
-- [ ] 首次启动引导教程优化
-- [ ] 无障碍适配（对比度、reduced-motion、字体缩放）
-- [ ] 多语言支持（i18n）：中文、英文
-- [ ] 性能极致优化：首屏加载 < 2s（常规网络）
+- [x] 首次启动引导教程（S37：4 张滑动卡片，settings `hasCompletedOnboarding` 持久化）
+- [x] 无障碍适配（S37：对比度 WCAG AA / reduced-motion / 字体缩放 rem）
+- [x] 多语言支持（S37：i18n 中英，settings `language` + header 切换）
+- [x] 性能极致优化：首屏加载 < 2s（S37 验证：主包+state+db ≈ 70KB gzip，three 与星表懒加载，已达标）
 
 ### 5.2 扩展星图数据
 
