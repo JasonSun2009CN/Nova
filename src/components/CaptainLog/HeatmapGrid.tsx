@@ -28,7 +28,7 @@ export function HeatmapGrid({ cells }: { cells: readonly HeatmapCell[] }) {
           const showLabel = colIdx === 0 || columnMonths[colIdx]! !== columnMonths[colIdx - 1]!;
           return (
             <div key={colIdx} className="flex flex-col gap-[3px]">
-              <div className="h-3 text-[9px] leading-3 text-deep-400">
+              <div className="h-3 text-[0.5625rem] leading-3 text-deep-400">
                 {showLabel ? `${columnMonths[colIdx]! + 1}月` : ''}
               </div>
               {col.map((cell) => (
@@ -43,7 +43,7 @@ export function HeatmapGrid({ cells }: { cells: readonly HeatmapCell[] }) {
           );
         })}
       </div>
-      <div className="mt-3 flex items-center gap-1 text-[10px] text-deep-400">
+      <div className="mt-3 flex items-center gap-1 text-[0.625rem] text-deep-400">
         <span>少</span>
         {HEAT_COLORS.map((color) => (
           <div key={color} className="h-2.5 w-2.5 rounded-[2px]" style={{ background: color }} />

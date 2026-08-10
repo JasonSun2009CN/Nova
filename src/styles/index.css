@@ -17,7 +17,7 @@
     --color-deep-100: #ececec;
     --color-deep-200: #d4d4d4;
     --color-deep-300: #a3a3a3;
-    --color-deep-400: #7d7d7d;
+    --color-deep-400: #858585;
     --color-deep-500: #525252;
     --color-deep-600: #3d3d3d;
     --color-deep-700: #2a2a2a;
@@ -98,12 +98,12 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--color-deep-500);
+    background: var(--color-deep-400);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-deep-400);
+    background: var(--color-deep-300);
   }
 }
 

@@ -1,7 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { dismissOnboarding } from './onboarding';
+
 async function completeVoyageToProxima(page: Page): Promise<void> {
   await page.goto('/');
+  await dismissOnboarding(page);
   await expect(page.getByTestId('setup-panel')).toBeVisible();
 
   await page.getByLabel('自定义专注时长（分钟）').fill('25');
@@ -57,6 +60,7 @@ test.describe('成就系统 (S32)', () => {
 
   test('顶栏空闲态可直接打开成就墙，锁定项齐全', async ({ page }) => {
     await page.goto('/');
+    await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByRole('button', { name: '成就', exact: true }).click();

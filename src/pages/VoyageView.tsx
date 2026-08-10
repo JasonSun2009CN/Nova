@@ -24,7 +24,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="glass-card rounded-xl px-2 py-2.5 text-center">
       <div className="font-mono text-base text-foreground tabular-nums">{value}</div>
-      <div className="mt-0.5 text-[10px] text-deep-400">{label}</div>
+      <div className="mt-0.5 text-[0.625rem] text-deep-400">{label}</div>
     </div>
   );
 }
@@ -191,7 +191,7 @@ export function VoyageView({ phase = null }: { phase?: VoyagePhase }) {
               已恢复上次航行
             </div>
           )}
-          <div className="font-display text-[76px] font-medium leading-none tracking-tight text-foreground tabular-nums">
+          <div className="font-display text-[4.75rem] font-medium leading-none tracking-tight text-foreground tabular-nums">
             {formatDurationMs(remaining)}
           </div>
           <div className="mt-4 text-sm text-deep-300">剩余专注时间</div>

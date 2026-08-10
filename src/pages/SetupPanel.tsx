@@ -171,7 +171,7 @@ export function SetupPanel() {
               : `设定专注时长，飞船将从 ${originName} 出发`}
           </p>
           {destStar != null && (
-            <p className="font-mono text-xs text-deep-500 tabular-nums">
+            <p className="font-mono text-xs text-deep-400 tabular-nums">
               出发地距太阳 {formatLy(originSolarLy)} · 目的地距太阳 {formatLy(destSolarLy)} ·
               航行距离 {formatLy(legLy)}
             </p>
@@ -201,7 +201,7 @@ export function SetupPanel() {
           </div>
           <DurationScrubber value={minutes} onChange={handleScrub} />
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-deep-500">快捷预设</span>
+            <span className="text-xs text-deep-400">快捷预设</span>
             {FOCUS_PRESETS.map((preset) => {
               const active = defaultMinutes === preset;
               return (
@@ -277,7 +277,7 @@ export function SetupPanel() {
             </span>
           </div>
           {plan != null && destStar != null ? (
-            <p className="text-xs leading-relaxed text-deep-500">
+            <p className="text-xs leading-relaxed text-deep-400">
               飞抵 {destStar.name} 时，船上 {formatMinuteLabel(minutes)} ≈ 地球上{' '}
               {plan.earthYears.toFixed(1)} 年。
             </p>
@@ -294,7 +294,7 @@ export function SetupPanel() {
                 onChange={(e) => setVOverC(Number(e.target.value))}
                 className="h-12 w-full cursor-pointer accent-[var(--color-star-gold)]"
               />
-              <p className="mt-1 text-xs text-deep-500">
+              <p className="mt-1 text-xs text-deep-400">
                 速度越接近光速，时间膨胀越明显，航行距离越远。
               </p>
             </>
@@ -312,12 +312,12 @@ export function SetupPanel() {
             </span>
           </div>
           {nextUnlock != null ? (
-            <span className="text-xs text-deep-500">
+            <span className="text-xs text-deep-400">
               下一级 {nextUnlock.tier.name} · 再{' '}
               {formatFocusEstimate(nextUnlock.hoursRemaining * 60)}
             </span>
           ) : (
-            <span className="text-xs text-deep-500">已解锁全部曲速引擎</span>
+            <span className="text-xs text-deep-400">已解锁全部曲速引擎</span>
           )}
         </div>
       </div>
@@ -370,7 +370,7 @@ export function SetupPanel() {
           'h-14 w-full rounded-xl font-display text-base font-medium tracking-wider transition-colors duration-200',
           valid && reachable
             ? 'bg-star-gold text-[#0a1032] hover:opacity-85'
-            : 'cursor-not-allowed border border-[var(--color-glass-border)] text-deep-500',
+            : 'cursor-not-allowed border border-[var(--color-glass-border)] text-deep-400',
         )}
       >
         启动航行

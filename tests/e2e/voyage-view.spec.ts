@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+import { dismissOnboarding } from './onboarding';
+
 test.describe('航行视图真实星表化 (S23 R3F)', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'WebGL 无头渲染仅 chromium 可用');
 
@@ -11,6 +13,7 @@ test.describe('航行视图真实星表化 (S23 R3F)', () => {
     page.on('pageerror', (error: Error) => errors.push(error.message));
 
     await page.goto('/');
+    await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByLabel('目的地').selectOption('hip-70890');
@@ -43,6 +46,7 @@ test.describe('航行视图真实星表化 (S23 R3F)', () => {
     page.on('pageerror', (error: Error) => errors.push(error.message));
 
     await page.goto('/');
+    await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByRole('button', { name: '启动航行' }).click();
@@ -55,6 +59,7 @@ test.describe('航行视图真实星表化 (S23 R3F)', () => {
 
   test('启动过渡：点火标签显示后 3s 消失进入巡航（S26）', async ({ page }) => {
     await page.goto('/');
+    await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByLabel('目的地').selectOption('hip-70890');
@@ -70,6 +75,7 @@ test.describe('航行视图真实星表化 (S23 R3F)', () => {
 
   test('到达过渡：计时归零 → 入轨标签 3s → 切结果视图（S26）', async ({ page }) => {
     await page.goto('/');
+    await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByLabel('目的地').selectOption('hip-70890');
@@ -89,6 +95,7 @@ test.describe('航行视图真实星表化 (S23 R3F)', () => {
 
   test('中断过渡：结束 → 紧急刹车标签 3s → 切中止结果（S26）', async ({ page }) => {
     await page.goto('/');
+    await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByLabel('目的地').selectOption('hip-70890');
@@ -115,6 +122,7 @@ test.describe('航行视图真实星表化 (S23 R3F)', () => {
     page.on('pageerror', (error: Error) => errors.push(error.message));
 
     await page.goto('/');
+    await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByLabel('目的地').selectOption('hip-70890');

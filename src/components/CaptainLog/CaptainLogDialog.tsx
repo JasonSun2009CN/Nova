@@ -63,7 +63,7 @@ export function CaptainLogDialog({ onClose }: CaptainLogDialogProps) {
               type="button"
               onClick={handleExport}
               disabled={!hasRecords}
-              className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg px-3 text-sm text-deep-200 transition-colors duration-200 hover:text-foreground disabled:cursor-not-allowed disabled:text-deep-500"
+              className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg px-3 text-sm text-deep-200 transition-colors duration-200 hover:text-foreground disabled:cursor-not-allowed disabled:text-deep-400"
             >
               <svg
                 viewBox="0 0 24 24"

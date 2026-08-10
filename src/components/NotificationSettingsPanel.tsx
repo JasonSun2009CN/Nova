@@ -33,7 +33,7 @@ export function NotificationSettingsPanel() {
     <section data-testid="notification-settings" className="glass-card space-y-5 rounded-2xl p-8">
       <div className="flex items-center justify-between">
         <h3 className="font-display text-base font-medium tracking-wide">通知</h3>
-        <span className="text-xs text-deep-500">专注结束提醒</span>
+        <span className="text-xs text-deep-400">专注结束提醒</span>
       </div>
 
       <div className="flex items-center justify-between gap-4">
@@ -46,7 +46,7 @@ export function NotificationSettingsPanel() {
         />
       </div>
 
-      <p data-testid="notification-permission-status" className="text-xs text-deep-500">
+      <p data-testid="notification-permission-status" className="text-xs text-deep-400">
         {statusText}
       </p>
     </section>

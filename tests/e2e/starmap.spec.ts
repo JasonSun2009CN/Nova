@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+import { dismissOnboarding } from './onboarding';
+
 test.describe('星图视图 (S16 R3F)', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'WebGL 无头渲染仅 chromium 可用');
 
@@ -11,6 +13,7 @@ test.describe('星图视图 (S16 R3F)', () => {
     page.on('pageerror', (error: Error) => errors.push(error.message));
 
     await page.goto('/');
+    await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByRole('button', { name: '星图' }).click();
@@ -36,6 +39,7 @@ test.describe('星图视图 (S16 R3F)', () => {
 
   test('弹窗点星 → 确认 → 设为目的地 → 完成关闭 → 设置页预选', async ({ page }) => {
     await page.goto('/');
+    await dismissOnboarding(page);
     await page.getByRole('button', { name: '星图' }).click();
     await expect(page.getByTestId('starmap-dialog')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('starmap-view')).toBeVisible();
@@ -81,6 +85,7 @@ test.describe('星图视图 (S16 R3F)', () => {
 
   test('星图搜索：输入中文名 → 下拉 → 点结果弹出信息卡', async ({ page }) => {
     await page.goto('/');
+    await dismissOnboarding(page);
     await page.getByRole('button', { name: '星图' }).click();
     await expect(page.getByTestId('starmap-view')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('star-search')).toBeVisible();
@@ -104,6 +109,7 @@ test.describe('星图视图 (S16 R3F)', () => {
     page.on('pageerror', (error: Error) => errors.push(error.message));
 
     await page.goto('/');
+    await dismissOnboarding(page);
     await page.getByRole('button', { name: '星图' }).click();
     await expect(page.getByTestId('starmap-view')).toBeVisible({ timeout: 20_000 });
     await page.waitForFunction(() => window.__TEST_ONLY__?.getViewMode() != null, undefined, {
@@ -160,6 +166,7 @@ test.describe('星图视图 (S16 R3F)', () => {
     page,
   }) => {
     await page.goto('/');
+    await dismissOnboarding(page);
     await page.getByRole('button', { name: '星图' }).click();
     await expect(page.getByTestId('starmap-view')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('star-search')).toBeVisible();

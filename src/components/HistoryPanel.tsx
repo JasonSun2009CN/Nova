@@ -57,7 +57,7 @@ export function HistoryPanel() {
                     </span>
                     <span
                       className={twMerge(
-                        'text-[11px]',
+                        'text-[0.6875rem]',
                         r.status === 'completed' ? 'text-star-gold' : 'text-star-red',
                       )}
                     >

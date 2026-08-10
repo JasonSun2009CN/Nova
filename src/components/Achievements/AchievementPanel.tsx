@@ -17,17 +17,17 @@ export function AchievementPanel() {
     <div className="px-5 py-5">
       <div className="grid grid-cols-2 gap-3">
         <div data-testid="achievement-points" className="glass-card rounded-2xl px-4 py-3">
-          <p className="text-[11px] text-deep-400">成就点数</p>
+          <p className="text-[0.6875rem] text-deep-400">成就点数</p>
           <p className="mt-1 font-display text-xl tabular-nums text-star-gold">
             {points}
-            <span className="text-sm text-deep-500"> / {ACHIEVEMENT_TOTAL_POINTS}</span>
+            <span className="text-sm text-deep-400"> / {ACHIEVEMENT_TOTAL_POINTS}</span>
           </p>
         </div>
         <div data-testid="achievement-unlocked-count" className="glass-card rounded-2xl px-4 py-3">
-          <p className="text-[11px] text-deep-400">已解锁</p>
+          <p className="text-[0.6875rem] text-deep-400">已解锁</p>
           <p className="mt-1 font-display text-xl tabular-nums text-foreground">
             {unlockedCount}
-            <span className="text-sm text-deep-500"> / {states.length}</span>
+            <span className="text-sm text-deep-400"> / {states.length}</span>
           </p>
         </div>
       </div>
@@ -69,13 +69,13 @@ export function AchievementPanel() {
                     <span
                       className={twMerge(
                         'font-mono text-xs tabular-nums',
-                        unlocked ? 'text-star-gold' : 'text-deep-500',
+                        unlocked ? 'text-star-gold' : 'text-deep-400',
                       )}
                     >
                       {achievement.points} 点
                     </span>
                   </div>
-                  <p className="mt-1 text-xs leading-relaxed text-deep-500">
+                  <p className="mt-1 text-xs leading-relaxed text-deep-400">
                     {achievement.description}
                   </p>
                 </li>
