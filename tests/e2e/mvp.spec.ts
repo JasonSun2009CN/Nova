@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test';
 
+import { dismissOnboarding } from './onboarding';
+
 test.describe('MVP 关键旅程', () => {
   test('pomodoro 1min 跑通：启动 → 完成 → 结果页', async ({ page }) => {
     await page.goto('/');
+    await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByLabel('自定义专注时长（分钟）').fill('1');
@@ -24,6 +27,7 @@ test.describe('MVP 关键旅程', () => {
 
   test('刷新后 history 仍在', async ({ page }) => {
     await page.goto('/');
+    await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByLabel('自定义专注时长（分钟）').fill('1');

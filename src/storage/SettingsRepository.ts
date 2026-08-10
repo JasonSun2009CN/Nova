@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS: Readonly<SettingsValueMap> = {
   acceptedTermsVersion: null,
   currentStarId: 'hip-sol',
   browserNotificationsEnabled: false,
+  hasCompletedOnboarding: false,
 };
 
 export class SettingsRepository {

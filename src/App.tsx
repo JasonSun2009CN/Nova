@@ -4,6 +4,7 @@ import { AchievementDialog } from '@/components/Achievements/AchievementDialog';
 import { CaptainLogDialog } from '@/components/CaptainLog/CaptainLogDialog';
 import { GlossaryDialog } from '@/components/GlossaryDialog';
 import { HistoryPanel } from '@/components/HistoryPanel';
+import { OnboardingDialog } from '@/components/OnboardingDialog';
 import { SpaceBackdrop } from '@/components/SpaceBackdrop';
 import { useAudioEngine } from '@/components/useAudioEngine';
 import { useFocusNotifications } from '@/components/useFocusNotifications';
@@ -23,10 +24,13 @@ function App() {
   const progress = useVoyageStore((s) => s.progress);
   const voyagePhase = useVoyageStore((s) => s.voyagePhase);
   const theme = useSettingsStore((s) => s.settings.theme);
+  const settingsHydrated = useSettingsStore((s) => s.hydrated);
+  const hasCompletedOnboarding = useSettingsStore((s) => s.settings.hasCompletedOnboarding);
   const [starMapOpen, setStarMapOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const [captainLogOpen, setCaptainLogOpen] = useState(false);
   const [achievementOpen, setAchievementOpen] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
 
   useAudioEngine();
   useFocusNotifications();
@@ -51,6 +55,17 @@ function App() {
   }, [voyagePhase]);
 
   const status = progress?.status ?? 'idle';
+
+  useEffect(() => {
+    if (settingsHydrated && status === 'idle' && !hasCompletedOnboarding) {
+      setOnboardingOpen(true);
+    }
+  }, [settingsHydrated, status, hasCompletedOnboarding]);
+
+  const handleOnboardingComplete = () => {
+    setOnboardingOpen(false);
+    void useSettingsStore.getState().updateSettings({ hasCompletedOnboarding: true });
+  };
   const voyaging =
     status === 'running' ||
     status === 'paused' ||
@@ -146,6 +161,8 @@ function App() {
       {captainLogOpen && <CaptainLogDialog onClose={() => setCaptainLogOpen(false)} />}
 
       {achievementOpen && <AchievementDialog onClose={() => setAchievementOpen(false)} />}
+
+      {onboardingOpen && <OnboardingDialog onComplete={handleOnboardingComplete} />}
 
       <GlossaryDialog open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
     </div>

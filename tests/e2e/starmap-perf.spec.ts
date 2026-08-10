@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { dismissOnboarding } from './onboarding';
+
 type FrameStats = {
   avgFps: number;
   p95FrameMs: number;
@@ -13,6 +15,7 @@ const MAX_FRAME_MS = 500;
 
 async function openStarmap(page: Page): Promise<void> {
   await page.goto('/');
+  await dismissOnboarding(page);
   await page.getByRole('button', { name: '星图' }).click();
   await expect(page.getByTestId('starmap-view')).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId('star-count')).toContainText(/颗恒星/, { timeout: 20_000 });

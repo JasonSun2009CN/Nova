@@ -36,7 +36,8 @@ export type SettingsKey =
   | 'lastViewedStarId'
   | 'acceptedTermsVersion'
   | 'currentStarId'
-  | 'browserNotificationsEnabled';
+  | 'browserNotificationsEnabled'
+  | 'hasCompletedOnboarding';
 
 export type AmbientSoundTypeKey = 'none' | 'cmb' | 'pulsar';
 
@@ -54,6 +55,7 @@ export type SettingsValueMap = {
   acceptedTermsVersion: string | null;
   currentStarId: string | null;
   browserNotificationsEnabled: boolean;
+  hasCompletedOnboarding: boolean;
 };
 
 export type SettingsEntry<K extends SettingsKey = SettingsKey> = Readonly<{
