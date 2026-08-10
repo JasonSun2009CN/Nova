@@ -23,8 +23,8 @@ export function Toggle({
       } ${disabled ? 'cursor-not-allowed opacity-40' : ''}`}
     >
       <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-[#0a1032] transition-transform duration-200 ${
-          checked ? 'translate-x-5' : 'translate-x-0.5'
+        className={`absolute left-0 top-0.5 h-5 w-5 rounded-full bg-[#0a1032] transition-transform duration-200 ${
+          checked ? 'translate-x-[22px]' : 'translate-x-0.5'
         }`}
       />
     </button>
