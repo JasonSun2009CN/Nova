@@ -25,6 +25,7 @@ test.describe('Nova S12 UI 验证', () => {
     await page.goto('/');
     await dismissOnboarding(page);
 
+    await page.getByLabel('目的地').selectOption('hip-70890');
     await page.getByRole('button', { name: '启动航行' }).click();
     await expect(page.getByTestId('voyage-view')).toBeVisible();
     await expect(page.getByText('剩余专注时间')).toBeVisible();

@@ -1,16 +1,15 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 
 import { AchievementDialog } from '@/components/Achievements/AchievementDialog';
-import { CaptainLogDialog } from '@/components/CaptainLog/CaptainLogDialog';
 import { GlossaryDialog } from '@/components/GlossaryDialog';
-import { HistoryPanel } from '@/components/HistoryPanel';
 import { OnboardingDialog } from '@/components/OnboardingDialog';
 import { SpaceBackdrop } from '@/components/SpaceBackdrop';
 import { useAudioEngine } from '@/components/useAudioEngine';
 import { useFocusNotifications } from '@/components/useFocusNotifications';
-import { ResultView } from '@/pages/ResultView';
-import { SetupPanel } from '@/pages/SetupPanel';
-import { VoyageView } from '@/pages/VoyageView';
+import { useI18n } from '@/i18n';
+import { CockpitView } from '@/pages/CockpitView';
+import { LogView } from '@/pages/LogView';
+import { SettingsView } from '@/pages/SettingsView';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
@@ -20,15 +19,18 @@ const StarMapDialog = lazy(() =>
   import('@/pages/StarMapDialog').then((m) => ({ default: m.StarMapDialog })),
 );
 
+type MainView = 'cockpit' | 'log' | 'settings';
+
 function App() {
   const progress = useVoyageStore((s) => s.progress);
   const voyagePhase = useVoyageStore((s) => s.voyagePhase);
   const theme = useSettingsStore((s) => s.settings.theme);
   const settingsHydrated = useSettingsStore((s) => s.hydrated);
   const hasCompletedOnboarding = useSettingsStore((s) => s.settings.hasCompletedOnboarding);
+  const { t, lang, setLang } = useI18n();
+  const [view, setView] = useState<MainView>('cockpit');
   const [starMapOpen, setStarMapOpen] = useState(false);
   const [glossaryOpen, setGlossaryOpen] = useState(false);
-  const [captainLogOpen, setCaptainLogOpen] = useState(false);
   const [achievementOpen, setAchievementOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
 
@@ -66,14 +68,9 @@ function App() {
     setOnboardingOpen(false);
     void useSettingsStore.getState().updateSettings({ hasCompletedOnboarding: true });
   };
-  const voyaging =
-    status === 'running' ||
-    status === 'paused' ||
-    voyagePhase === 'arriving' ||
-    voyagePhase === 'braking';
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col text-foreground transition-colors duration-500">
+    <div className="relative flex h-dvh w-full flex-col overflow-hidden text-foreground transition-colors duration-500">
       <SpaceBackdrop />
 
       <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--color-glass-border)] bg-[var(--color-glass)] px-6 py-4 backdrop-blur-sm">
@@ -81,34 +78,62 @@ function App() {
           <span className="text-gradient-gold">NOVA</span>
         </h1>
         <div className="flex items-center gap-2">
-          {status === 'idle' && (
+          {view === 'cockpit' && status === 'idle' && (
             <>
               <button
                 type="button"
                 onClick={() => setAchievementOpen(true)}
                 className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
               >
-                成就
+                {t('app.achievements')}
               </button>
               <button
                 type="button"
-                onClick={() => setCaptainLogOpen(true)}
+                onClick={() => setView('log')}
                 className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
               >
-                日志
+                {t('app.log')}
               </button>
               <button
                 type="button"
                 onClick={() => setStarMapOpen(true)}
                 className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
               >
-                星图
+                {t('app.starmap')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('settings')}
+                className="h-11 cursor-pointer rounded-xl px-3 font-display text-sm transition-colors duration-200 hover:text-foreground"
+              >
+                {t('app.settings')}
               </button>
             </>
           )}
+          <div
+            role="group"
+            aria-label={t('settings.language')}
+            className="flex items-center gap-0.5 rounded-xl border border-[var(--color-glass-border)] p-0.5"
+          >
+            {(['zh', 'en'] as const).map((code) => (
+              <button
+                key={code}
+                type="button"
+                aria-pressed={lang === code}
+                onClick={() => setLang(code)}
+                className={`h-8 cursor-pointer rounded-lg px-2 font-display text-xs transition-colors duration-200 ${
+                  lang === code
+                    ? 'bg-white/10 text-foreground'
+                    : 'text-deep-400 hover:text-foreground'
+                }`}
+              >
+                {code === 'zh' ? '中' : 'EN'}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
-            aria-label="星际航行术语"
+            aria-label={t('app.glossaryAria')}
             onClick={() => setGlossaryOpen(true)}
             className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-deep-400 transition-colors duration-200 hover:text-foreground"
           >
@@ -130,19 +155,12 @@ function App() {
       </header>
 
       <main className="relative z-10 flex min-h-0 flex-1 flex-col">
-        {voyaging ? (
-          <VoyageView phase={voyagePhase} />
-        ) : status === 'idle' ? (
-          <div className="flex-1 overflow-y-auto">
-            <div className="mx-auto grid w-full max-w-6xl lg:grid-cols-2 lg:gap-10 lg:px-8">
-              <SetupPanel />
-              <HistoryPanel />
-            </div>
-          </div>
+        {view === 'cockpit' ? (
+          <CockpitView />
+        ) : view === 'log' ? (
+          <LogView onBack={() => setView('cockpit')} />
         ) : (
-          <div className="flex-1 overflow-y-auto">
-            <ResultView />
-          </div>
+          <SettingsView onBack={() => setView('cockpit')} />
         )}
       </main>
 
@@ -150,15 +168,13 @@ function App() {
         <Suspense
           fallback={
             <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 text-sm text-deep-400">
-              加载星图…
+              {t('starmap.loadingMap')}
             </div>
           }
         >
           <StarMapDialog onClose={() => setStarMapOpen(false)} />
         </Suspense>
       )}
-
-      {captainLogOpen && <CaptainLogDialog onClose={() => setCaptainLogOpen(false)} />}
 
       {achievementOpen && <AchievementDialog onClose={() => setAchievementOpen(false)} />}
 

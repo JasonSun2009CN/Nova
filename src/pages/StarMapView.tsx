@@ -6,6 +6,7 @@ import { StarInfoCard } from '@/components/StarMap/StarInfoCard';
 import { StarSearch } from '@/components/StarMap/StarSearch';
 import { starDisplayName, starDistanceLy } from '@/data/destination-stars';
 import { StarCatalog, type Star } from '@/engine';
+import { useI18n } from '@/i18n';
 import { FollowStarBridge } from '@/engine/renderer/FollowStarBridge';
 import { CurrentPositionMarker, DestinationMarker } from '@/engine/renderer/MapMarkers';
 import { NebulaField } from '@/engine/renderer/NebulaField';
@@ -71,6 +72,7 @@ function StarMapHookBridge({
 }
 
 export function StarMapView({ onClose }: { onClose?: () => void }) {
+  const { t, lang } = useI18n();
   const [catalog, setCatalog] = useState<StarCatalog | null>(null);
   const [selected, setSelected] = useState<Star | null>(null);
   const [mode, setMode] = useState<StarMapViewMode>('from-departure');
@@ -160,7 +162,8 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
     onClose?.();
   };
 
-  const departureName = departureStar != null ? starDisplayName(departureStar) : '太阳';
+  const departureName =
+    departureStar != null ? starDisplayName(departureStar) : lang === 'en' ? 'Sun' : '太阳';
 
   return (
     <section data-testid="starmap-view" className="relative h-full w-full flex-1 animate-fade-up">
@@ -241,7 +244,7 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
               <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
               <circle cx="12" cy="12" r="2.6" />
             </svg>
-            <span className="text-[0.625rem]">出发地</span>
+            <span className="text-[0.625rem]">{t('starmap.viewFromDeparture')}</span>
           </button>
           <button
             type="button"
@@ -266,7 +269,7 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
               <circle cx="12" cy="12" r="8" />
               <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
             </svg>
-            <span className="text-[0.625rem]">全览</span>
+            <span className="text-[0.625rem]">{t('starmap.viewOverview')}</span>
           </button>
         </div>
       </div>
@@ -285,27 +288,29 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
       {mode === 'overview' && (
         <div className="pointer-events-none absolute left-1/2 top-16 z-10 -translate-x-1/2">
           <p className="glass-card rounded-full px-4 py-1.5 text-xs text-deep-400">
-            以太阳为中心 · 半径圈 {RADIUS_GUIDES_LY.join(' / ')} 光年
+            {t('starmap.radiusGuides', { radii: RADIUS_GUIDES_LY.join(' / ') })}
           </p>
         </div>
       )}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center">
         <p className="glass-card rounded-full px-4 py-1.5 text-xs text-deep-400">
-          {mode === 'overview' ? '拖拽旋转 · 滚轮缩放' : '拖拽环视 · 滚轮缩放'} · 点击恒星查看信息 ·{' '}
+          {mode === 'overview' ? t('starmap.hintRotate') : t('starmap.hintLook')} ·{' '}
+          {t('starmap.hintClick')} ·{' '}
           <span data-testid="star-count">
             {catalogStatus === 'loading'
-              ? '加载星表…'
+              ? t('starmap.loadingCatalog')
               : catalogStatus === 'error'
-                ? '星表加载失败'
-                : `${catalog?.size ?? 0} 颗恒星`}
+                ? t('starmap.catalogError')
+                : t('starmap.starCount', { count: catalog?.size ?? 0 })}
           </span>
         </p>
       </div>
 
       <div className="pointer-events-none absolute right-6 top-6 z-10">
         <p className="glass-card rounded-full px-4 py-1.5 text-xs text-deep-400">
-          {mode === 'overview' ? '当前位置' : '所在星'}：{departureName}
+          {t(mode === 'overview' ? 'starmap.currentPosition' : 'starmap.originStar')}：
+          {departureName}
         </p>
       </div>
     </section>

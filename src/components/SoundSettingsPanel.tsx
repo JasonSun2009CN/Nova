@@ -2,12 +2,13 @@ import { useMemo } from 'react';
 
 import { Toggle } from '@/components/Toggle';
 import type { AmbientSoundTypeKey } from '@/contract/storage-types';
+import { useI18n, type I18nKey } from '@/i18n';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
-const AMBIENT_OPTIONS: { value: AmbientSoundTypeKey; label: string }[] = [
-  { value: 'none', label: '关闭' },
-  { value: 'cmb', label: '宇宙微波背景' },
-  { value: 'pulsar', label: '脉冲星节奏' },
+const AMBIENT_OPTIONS: { value: AmbientSoundTypeKey; labelKey: I18nKey }[] = [
+  { value: 'none', labelKey: 'sound.ambientNone' },
+  { value: 'cmb', labelKey: 'sound.ambientCmb' },
+  { value: 'pulsar', labelKey: 'sound.ambientPulsar' },
 ];
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -45,6 +46,7 @@ function Slider({
 export function SoundSettingsPanel() {
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
+  const { t } = useI18n();
 
   const ambientOption = useMemo(
     () => AMBIENT_OPTIONS.find((o) => o.value === settings.ambientSoundType) ?? AMBIENT_OPTIONS[0]!,
@@ -54,29 +56,29 @@ export function SoundSettingsPanel() {
   return (
     <section data-testid="sound-settings" className="glass-card space-y-6 rounded-2xl p-8">
       <div className="flex items-center justify-between">
-        <h3 className="font-display text-base font-medium tracking-wide">音效</h3>
-        <span className="text-xs text-deep-400">航行背景与事件提示</span>
+        <h3 className="font-display text-base font-medium tracking-wide">{t('sound.title')}</h3>
+        <span className="text-xs text-deep-400">{t('sound.subtitle')}</span>
       </div>
 
       <div className="space-y-5">
-        <Row label="引擎嗡鸣">
+        <Row label={t('sound.engineHum')}>
           <div className="flex items-center gap-3">
             <Slider
-              label="引擎嗡鸣音量"
+              label={t('sound.engineHumVolume')}
               value={settings.musicVolume}
               onChange={(v) => void updateSettings({ musicVolume: v })}
             />
             <Toggle
-              label="引擎嗡鸣"
+              label={t('sound.engineHum')}
               checked={settings.engineSoundEnabled}
               onChange={(v) => void updateSettings({ engineSoundEnabled: v })}
             />
           </div>
         </Row>
 
-        <Row label="环境音">
+        <Row label={t('sound.ambient')}>
           <select
-            aria-label="环境音"
+            aria-label={t('sound.ambient')}
             value={settings.ambientSoundType}
             onChange={(e) =>
               void updateSettings({ ambientSoundType: e.target.value as AmbientSoundTypeKey })
@@ -85,32 +87,34 @@ export function SoundSettingsPanel() {
           >
             {AMBIENT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.label}
+                {t(o.labelKey)}
               </option>
             ))}
           </select>
         </Row>
 
         {settings.ambientSoundType !== 'none' && (
-          <Row label="环境音音量">
+          <Row label={t('sound.ambientVolume')}>
             <Slider
-              label="环境音音量"
+              label={t('sound.ambientVolume')}
               value={settings.musicVolume}
               onChange={(v) => void updateSettings({ musicVolume: v })}
             />
           </Row>
         )}
 
-        <Row label="事件音效（启动 / 到达 / 中断）">
+        <Row label={t('sound.eventSounds')}>
           <Toggle
-            label="事件音效"
+            label={t('sound.eventSounds')}
             checked={settings.eventSoundsEnabled}
             onChange={(v) => void updateSettings({ eventSoundsEnabled: v })}
           />
         </Row>
 
         {ambientOption.value !== 'none' && (
-          <p className="text-xs text-deep-400">{ambientOption.label}将随航行播放</p>
+          <p className="text-xs text-deep-400">
+            {t('sound.ambientPlayNote', { label: t(ambientOption.labelKey) })}
+          </p>
         )}
       </div>
     </section>

@@ -3,6 +3,7 @@ import { useMemo, useRef, useState } from 'react';
 import { starDisplayName, starDistanceLy } from '@/data/destination-stars';
 import { searchStars } from '@/data/star-search';
 import type { Star } from '@/engine';
+import { useI18n } from '@/i18n';
 import type { CatalogStatus } from '@/store/useCatalogStore';
 import { formatLy } from '@/utils/format';
 
@@ -15,6 +16,7 @@ type StarSearchProps = {
 const MAX_RESULTS = 7;
 
 export function StarSearch({ stars, status, onSelect }: StarSearchProps) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -33,14 +35,14 @@ export function StarSearch({ stars, status, onSelect }: StarSearchProps) {
   return (
     <div data-testid="star-search" className="relative w-64 max-w-[calc(100vw-32px)]">
       <label htmlFor="star-search-input" className="sr-only">
-        搜索恒星
+        {t('starmap.searchLabel')}
       </label>
       <input
         id="star-search-input"
         ref={inputRef}
         type="search"
         inputMode="search"
-        placeholder="搜索恒星（名称 / HIP 编号）"
+        placeholder={t('starmap.searchPlaceholder')}
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -56,9 +58,9 @@ export function StarSearch({ stars, status, onSelect }: StarSearchProps) {
           className="glass-card absolute left-0 right-0 top-11 z-20 max-h-64 overflow-auto rounded-xl border border-[var(--color-glass-border)] bg-[var(--color-glass)] py-1"
         >
           {loading ? (
-            <li className="px-3.5 py-2.5 text-xs text-deep-400">星表加载中…</li>
+            <li className="px-3.5 py-2.5 text-xs text-deep-400">{t('starmap.searchLoading')}</li>
           ) : results.length === 0 ? (
-            <li className="px-3.5 py-2.5 text-xs text-deep-400">未找到匹配恒星</li>
+            <li className="px-3.5 py-2.5 text-xs text-deep-400">{t('starmap.searchNoResults')}</li>
           ) : (
             results.map(({ star }) => (
               <li key={star.id}>

@@ -1,15 +1,10 @@
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
+import { useI18n } from '@/i18n';
 import type { PeriodBucket } from '@/engine/stats/captains-log';
 
 type BarMode = 'week' | 'month';
-
-function bucketLabel(bucket: PeriodBucket, mode: BarMode): string {
-  const d = new Date(bucket.startMs);
-  if (mode === 'month') return `${d.getMonth() + 1}月`;
-  return `${d.getMonth() + 1}/${d.getDate()}`;
-}
 
 export function WeeklyBarChart({
   weekly,
@@ -18,15 +13,22 @@ export function WeeklyBarChart({
   weekly: readonly PeriodBucket[];
   monthly: readonly PeriodBucket[];
 }) {
+  const { t } = useI18n();
   const [mode, setMode] = useState<BarMode>('week');
   const buckets = mode === 'week' ? weekly : monthly;
   const maxMinutes = Math.max(1, ...buckets.map((b) => b.minutes));
   const peakIndex = buckets.reduce((acc, b, i) => (b.minutes > buckets[acc]!.minutes ? i : acc), 0);
 
+  const labelOf = (bucket: PeriodBucket): string => {
+    const d = new Date(bucket.startMs);
+    if (mode === 'month') return t('log.monthLabel', { month: d.getMonth() + 1 });
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  };
+
   return (
     <div className="glass-card rounded-2xl px-4 py-4">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-[0.6875rem] text-deep-400">专注柱状图</p>
+        <p className="text-[0.6875rem] text-deep-400">{t('log.barChartTitle')}</p>
         <div className="flex rounded-lg border border-[var(--color-glass-border)] p-0.5 text-xs">
           <button
             type="button"
@@ -36,7 +38,7 @@ export function WeeklyBarChart({
               mode === 'week' ? 'bg-[var(--color-glass)] text-foreground' : 'text-deep-400',
             )}
           >
-            周
+            {t('log.week')}
           </button>
           <button
             type="button"
@@ -46,7 +48,7 @@ export function WeeklyBarChart({
               mode === 'month' ? 'bg-[var(--color-glass)] text-foreground' : 'text-deep-400',
             )}
           >
-            月
+            {t('log.month')}
           </button>
         </div>
       </div>
@@ -54,7 +56,7 @@ export function WeeklyBarChart({
         {buckets.map((bucket, i) => (
           <div
             key={bucket.startMs}
-            title={`${Math.round(bucket.minutes)} 分钟`}
+            title={t('log.minutesTooltip', { minutes: Math.round(bucket.minutes) })}
             className="h-full flex-1 rounded-t"
             style={{
               height: `${Math.max(4, (bucket.minutes / maxMinutes) * 100)}%`,
@@ -69,7 +71,7 @@ export function WeeklyBarChart({
             key={bucket.startMs}
             className="flex-1 truncate text-center text-[0.5625rem] text-deep-400"
           >
-            {bucketLabel(bucket, mode)}
+            {labelOf(bucket)}
           </span>
         ))}
       </div>

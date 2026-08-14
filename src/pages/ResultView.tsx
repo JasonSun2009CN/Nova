@@ -3,10 +3,15 @@ import { twMerge } from 'tailwind-merge';
 
 import { getDestinationName } from '@/data/destination-stars';
 import { ACHIEVEMENTS, buildAchievementStarFacts, newlyUnlockedAchievementIds } from '@/engine';
+import { useI18n, type I18nKey } from '@/i18n';
 import { useCatalogStore } from '@/store/useCatalogStore';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
 import { formatDurationMs, formatGamma, formatLy, formatVOverC } from '@/utils/format';
+
+function achievementTitleKey(id: string): I18nKey {
+  return `ach.${id}.title` as I18nKey;
+}
 
 function StatRow({ label, value }: { label: string; value: string }) {
   return (
@@ -18,6 +23,7 @@ function StatRow({ label, value }: { label: string; value: string }) {
 }
 
 export function ResultView() {
+  const { t } = useI18n();
   const progress = useVoyageStore((s) => s.progress);
   const originStarId = useVoyageStore((s) => s.originStarId);
   const destStarId = useVoyageStore((s) => s.destStarId);
@@ -46,7 +52,9 @@ export function ResultView() {
   const completed = progress.status === 'completed';
   const destName = getDestinationName(destStarId);
   const originName =
-    originStarId === 'hip-sol' ? '太阳系' : (getDestinationName(originStarId) ?? '太阳系');
+    originStarId === 'hip-sol'
+      ? t('common.originSolar')
+      : (getDestinationName(originStarId) ?? t('common.originSolar'));
   const coordinateHours = (progress.elapsedFocusMs * progress.gamma) / (60 * 60 * 1000);
 
   const handleRestart = () => {
@@ -69,7 +77,7 @@ export function ResultView() {
   return (
     <section
       data-testid="result-view"
-      className="mx-auto flex w-full max-w-md animate-fade-up flex-1 flex-col items-stretch justify-center gap-8 px-6 pb-12 pt-6"
+      className="mx-auto flex w-full max-w-md animate-fade-up flex-col items-stretch gap-5"
     >
       <div className="text-center">
         <div
@@ -107,23 +115,27 @@ export function ResultView() {
           )}
         </div>
         <h2 className="font-display text-2xl font-medium tracking-wide">
-          {completed ? '本次航行完成' : '航行已中止'}
+          {completed ? t('result.completed') : t('result.aborted')}
         </h2>
         <p className="mt-2 text-sm text-deep-400">
-          {destName != null ? `从 ${originName} 出发，目标 ${destName}` : '本次为自由漂流航行'}
+          {destName != null
+            ? t('result.fromTo', { origin: originName, dest: destName })
+            : t('result.freeDrift')}
         </p>
         {newlyUnlockedDefinitions.length > 0 && (
           <div
             data-testid="new-achievements"
             className="mt-4 rounded-xl border border-star-gold/40 bg-star-gold/5 px-4 py-3 text-left"
           >
-            <p className="text-xs tracking-wide text-star-gold">新成就解锁</p>
+            <p className="text-xs tracking-wide text-star-gold">{t('result.newAchievements')}</p>
             <ul className="mt-2 space-y-1">
               {newlyUnlockedDefinitions.map((achievement) => (
                 <li key={achievement.id} className="flex items-baseline justify-between gap-2">
-                  <span className="font-display text-sm text-foreground">{achievement.title}</span>
+                  <span className="font-display text-sm text-foreground">
+                    {t(achievementTitleKey(achievement.id))}
+                  </span>
                   <span className="font-mono text-xs text-star-gold tabular-nums">
-                    {achievement.points} 点
+                    {achievement.points} {t('result.pointsUnit')}
                   </span>
                 </li>
               ))}
@@ -133,11 +145,17 @@ export function ResultView() {
       </div>
 
       <div className="glass-card rounded-2xl px-6 py-2">
-        <StatRow label="主观专注时长" value={formatDurationMs(progress.elapsedFocusMs)} />
-        <StatRow label="时间膨胀 γ" value={formatGamma(progress.gamma)} />
-        <StatRow label="航行速度" value={formatVOverC(progress.vOverC)} />
-        <StatRow label="实际航行距离" value={formatLy(progress.traveledLy)} />
-        <StatRow label="宇宙时间（客观）" value={`${coordinateHours.toFixed(1)} 小时`} />
+        <StatRow
+          label={t('result.subjectiveTime')}
+          value={formatDurationMs(progress.elapsedFocusMs)}
+        />
+        <StatRow label={t('result.gamma')} value={formatGamma(progress.gamma)} />
+        <StatRow label={t('result.speed')} value={formatVOverC(progress.vOverC)} />
+        <StatRow label={t('result.travelDistance')} value={formatLy(progress.traveledLy)} />
+        <StatRow
+          label={t('result.universeTime')}
+          value={`${coordinateHours.toFixed(1)} ${t('result.hoursUnit')}`}
+        />
       </div>
 
       <div className="flex gap-3">
@@ -146,14 +164,14 @@ export function ResultView() {
           onClick={handleRestart}
           className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-xl bg-star-gold font-display text-base font-medium tracking-wider text-[#0a1032] transition-colors duration-200 hover:opacity-85"
         >
-          再来一次
+          {t('result.restart')}
         </button>
         <button
           type="button"
           onClick={handleHome}
           className="glass-card flex h-14 w-28 cursor-pointer items-center justify-center rounded-xl text-base text-deep-200 transition-colors duration-200 hover:text-foreground"
         >
-          回到首页
+          {t('result.backHome')}
         </button>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import { AchievementPanel } from '@/components/Achievements/AchievementPanel';
+import { useI18n } from '@/i18n';
 import { useCatalogStore } from '@/store/useCatalogStore';
 
 type AchievementDialogProps = {
@@ -8,6 +9,8 @@ type AchievementDialogProps = {
 };
 
 export function AchievementDialog({ onClose }: AchievementDialogProps) {
+  const { t } = useI18n();
+
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -23,7 +26,7 @@ export function AchievementDialog({ onClose }: AchievementDialogProps) {
   }, [onClose]);
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="成就墙" className="fixed inset-0 z-30">
+    <div role="dialog" aria-modal="true" aria-label={t('ach.title')} className="fixed inset-0 z-30">
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -35,12 +38,12 @@ export function AchievementDialog({ onClose }: AchievementDialogProps) {
       >
         <div className="flex items-center justify-between border-b border-[var(--color-glass-border)] px-5 py-3">
           <div>
-            <h2 className="font-display text-base font-medium tracking-wide">成就墙</h2>
-            <p className="mt-0.5 text-xs text-deep-400">每一次专注，都是一段里程</p>
+            <h2 className="font-display text-base font-medium tracking-wide">{t('ach.title')}</h2>
+            <p className="mt-0.5 text-xs text-deep-400">{t('ach.subtitle')}</p>
           </div>
           <button
             type="button"
-            aria-label="关闭成就墙"
+            aria-label={t('ach.closeAria')}
             onClick={onClose}
             className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-deep-400 transition-colors hover:text-foreground"
           >

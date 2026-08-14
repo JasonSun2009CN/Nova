@@ -1,3 +1,5 @@
+import { useI18n } from '@/i18n';
+
 const SCRUBBER_MIN = 1;
 const SCRUBBER_MAX = 240;
 const SCRUBBER_STEP = 1;
@@ -25,6 +27,7 @@ type DurationScrubberProps = {
 };
 
 export function DurationScrubber({ value, onChange }: DurationScrubberProps) {
+  const { t } = useI18n();
   const clamped = Math.min(SCRUBBER_MAX, Math.max(SCRUBBER_MIN, Math.round(value)));
   const pct = ((clamped - SCRUBBER_MIN) / (SCRUBBER_MAX - SCRUBBER_MIN)) * 100;
   const ticks = buildTicks();
@@ -64,7 +67,7 @@ export function DurationScrubber({ value, onChange }: DurationScrubberProps) {
         <input
           type="range"
           id="duration-scrubber"
-          aria-label="专注时长滑动条"
+          aria-label={t('setup.focusScrubAria')}
           min={SCRUBBER_MIN}
           max={SCRUBBER_MAX}
           step={SCRUBBER_STEP}

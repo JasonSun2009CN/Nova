@@ -37,7 +37,7 @@ test.describe('成就系统 (S32)', () => {
     await expect(reveal.getByText('半人马座征服者')).toBeVisible();
 
     await page.getByRole('button', { name: '回到首页' }).click();
-    await expect(page.getByTestId('history-panel')).toBeVisible();
+    await expect(page.getByTestId('setup-panel')).toBeVisible();
 
     await page.getByRole('button', { name: '成就', exact: true }).click();
     const dialog = page.getByTestId('achievement-dialog');

@@ -1,10 +1,11 @@
-import { lazy, Suspense, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 import { getDestinationName, starDisplayName } from '@/data/destination-stars';
 import { resolveEngineTier } from '@/engine';
 import type { VoyagePhase } from '@/engine/renderer/warp-flow';
 import { useAchievements } from '@/components/useAchievements';
+import { useI18n } from '@/i18n';
 import { useCatalogStore } from '@/store/useCatalogStore';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
@@ -15,10 +16,6 @@ import {
   formatLy,
   formatVOverC,
 } from '@/utils/format';
-
-const VoyageStarField = lazy(() =>
-  import('@/engine/renderer/VoyageStarField').then((m) => ({ default: m.VoyageStarField })),
-);
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
@@ -40,12 +37,13 @@ function VoyageProgressGauge({
   fraction: number | null;
   traveledLy: number;
 }) {
+  const { t } = useI18n();
   if (destName == null) {
     return (
       <div className="flex w-full items-center justify-between text-sm text-deep-200">
-        <span>自由漂流</span>
+        <span>{t('common.freeDrift')}</span>
         <span className="font-mono text-xs text-deep-400 tabular-nums">
-          已航行 {formatLy(traveledLy)}
+          {t('voyage.traveledLy', { ly: formatLy(traveledLy) })}
         </span>
       </div>
     );
@@ -72,7 +70,8 @@ function VoyageProgressGauge({
   );
 }
 
-export function VoyageView({ phase = null }: { phase?: VoyagePhase }) {
+export function VoyageInstruments({ phase = null }: { phase?: VoyagePhase }) {
+  const { t, lang } = useI18n();
   const progress = useVoyageStore((s) => s.progress);
   const destStarId = useVoyageStore((s) => s.destStarId);
   const originStarId = useVoyageStore((s) => s.originStarId);
@@ -84,10 +83,6 @@ export function VoyageView({ phase = null }: { phase?: VoyagePhase }) {
   const totalFocusHours = useHistoryStore((s) => s.stats?.totalFocusHours ?? 0);
   const { grantedEngineTiers } = useAchievements();
 
-  useEffect(() => {
-    void useCatalogStore.getState().load();
-  }, []);
-
   const originStar = useMemo(
     () => catalogStars.find((s) => s.id === originStarId) ?? null,
     [catalogStars, originStarId],
@@ -96,10 +91,6 @@ export function VoyageView({ phase = null }: { phase?: VoyagePhase }) {
     () => catalogStars.find((s) => s.id === destStarId) ?? null,
     [catalogStars, destStarId],
   );
-  const fieldStars = useMemo(
-    () => catalogStars.filter((s) => s.id !== originStarId),
-    [catalogStars, originStarId],
-  );
   const legLy = useMemo(() => {
     if (originStar == null || destStar == null) return null;
     const A = originStar.coords.cartesian;
@@ -107,10 +98,10 @@ export function VoyageView({ phase = null }: { phase?: VoyagePhase }) {
     return Math.hypot(A.xLy - B.xLy, A.yLy - B.yLy, A.zLy - B.zLy);
   }, [originStar, destStar]);
   const originName = useMemo(() => {
-    if (originStarId === 'hip-sol') return '太阳系';
+    if (originStarId === 'hip-sol') return t('common.originSolar');
     if (originStar != null) return starDisplayName(originStar);
-    return getDestinationName(originStarId) ?? '太阳系';
-  }, [originStarId, originStar]);
+    return getDestinationName(originStarId) ?? t('common.originSolar');
+  }, [originStarId, originStar, t]);
   const destName = useMemo(() => {
     if (destStar != null) return starDisplayName(destStar);
     return getDestinationName(destStarId);
@@ -136,46 +127,41 @@ export function VoyageView({ phase = null }: { phase?: VoyagePhase }) {
   );
 
   return (
-    <section
-      data-testid="voyage-view"
-      className="relative flex h-full w-full flex-1 animate-fade-up flex-col overflow-hidden"
-    >
-      <div className="absolute inset-0">
-        <Suspense
-          fallback={
-            <div
-              className="h-full w-full"
-              style={{
-                background:
-                  'radial-gradient(120% 120% at 50% 0%, var(--color-deep-900) 0%, var(--color-deep-950) 58%)',
-              }}
-            />
-          }
-        >
-          <VoyageStarField
-            stars={fieldStars}
-            originStar={originStar}
-            destStar={destStar}
-            gamma={progress.gamma}
-            vOverC={progress.vOverC}
-            traveledLy={progress.traveledLy}
-            legLy={legLy}
-            phase={phase}
+    <div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
+      <div className="px-4 pt-4 sm:px-6">
+        <div className="mx-auto w-full max-w-3xl">
+          <VoyageProgressGauge
+            originName={originName}
+            destName={destName}
+            fraction={fraction}
+            traveledLy={traveledLy}
           />
-        </Suspense>
+        </div>
       </div>
 
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-between px-6 pb-8 pt-5">
-        <VoyageProgressGauge
-          originName={originName}
-          destName={destName}
-          fraction={fraction}
-          traveledLy={traveledLy}
-        />
+      <div className="flex flex-1 items-center justify-between gap-4 px-4 sm:px-8">
+        <div className="flex w-28 flex-col gap-2 sm:w-36">
+          <Metric label={t('voyage.speed')} value={formatVOverC(vOverC)} />
+          <Metric label={t('voyage.gamma')} value={formatGamma(gamma)} />
+          <Metric label={t('voyage.enginePower')} value={`${powerPct.toFixed(0)}%`} />
+        </div>
+        <div className="flex w-28 flex-col gap-2 sm:w-36">
+          <Metric label={t('voyage.traveled')} value={formatLy(traveledLy)} />
+          <Metric
+            label={t('voyage.remaining')}
+            value={remainingLy != null ? formatLy(remainingLy) : '—'}
+          />
+          <Metric
+            label={t('voyage.eta')}
+            value={destStar != null ? formatFocusEstimate(earthRemaining, lang) : '—'}
+          />
+        </div>
+      </div>
 
+      <div className="flex flex-col items-center gap-3 px-4 pb-4 sm:px-6">
         <div className="text-center">
           {resumedFromSnapshot && (
-            <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-star-blue/40 px-3 py-1 text-xs text-star-blue">
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-star-blue/40 px-3 py-1 text-xs text-star-blue">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -188,85 +174,73 @@ export function VoyageView({ phase = null }: { phase?: VoyagePhase }) {
               >
                 <path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6" />
               </svg>
-              已恢复上次航行
+              {t('voyage.resumed')}
             </div>
           )}
-          <div className="font-display text-[4.75rem] font-medium leading-none tracking-tight text-foreground tabular-nums">
+          <div className="font-display text-3xl font-medium leading-none tracking-tight text-foreground tabular-nums sm:text-4xl">
             {formatDurationMs(remaining)}
           </div>
-          <div className="mt-4 text-sm text-deep-300">剩余专注时间</div>
+          <div className="mt-2 text-sm text-deep-300">{t('voyage.remainingTime')}</div>
           {status === 'paused' && (
-            <div className="mt-3 inline-flex items-center gap-2 text-sm text-star-gold">
+            <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-gold">
               <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
-              已暂停
+              {t('voyage.paused')}
             </div>
           )}
           {phase === 'launching' && (
-            <div className="mt-3 inline-flex items-center gap-2 text-sm text-star-gold">
+            <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-gold">
               <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
-              引擎点火·星光加速…
+              {t('voyage.launchingText')}
             </div>
           )}
           {phase === 'arriving' && (
-            <div className="mt-3 inline-flex items-center gap-2 text-sm text-star-gold">
+            <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-gold">
               <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
-              正在减速入轨…
+              {t('voyage.arrivingText')}
             </div>
           )}
           {phase === 'braking' && (
-            <div className="mt-3 inline-flex items-center gap-2 text-sm text-star-red">
+            <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-red">
               <span className="h-1 w-1 rounded-full bg-star-red" aria-hidden="true" />
-              紧急刹车…
+              {t('voyage.brakingText')}
             </div>
           )}
-          <div className="mt-3 text-xs text-deep-400">
-            船上已过 {formatDurationMs(elapsedFocusMs)} · 地球已过{' '}
-            {formatFocusEstimate(earthElapsed)}
+          <div className="mt-2 text-xs text-deep-400">
+            {t('voyage.timeBoth', {
+              ship: formatDurationMs(elapsedFocusMs),
+              earth: formatFocusEstimate(earthElapsed, lang),
+            })}
           </div>
         </div>
 
-        <div className="w-full space-y-5">
-          <div className="grid grid-cols-3 gap-2">
-            <Metric label="航行速度" value={formatVOverC(vOverC)} />
-            <Metric label="时间膨胀 γ" value={formatGamma(gamma)} />
-            <Metric label="已航行距离" value={formatLy(traveledLy)} />
-            <Metric label="剩余距离" value={remainingLy != null ? formatLy(remainingLy) : '—'} />
-            <Metric
-              label="预计到达"
-              value={destStar != null ? formatFocusEstimate(earthRemaining) : '—'}
-            />
-            <Metric label="引擎功率" value={`${powerPct.toFixed(0)}%`} />
-          </div>
-
-          <div className="flex items-stretch gap-3">
-            <button
-              type="button"
-              disabled={transitioning}
-              onClick={() => (active ? pause() : resume())}
-              className={twMerge(
-                'h-14 flex-1 rounded-xl font-display text-base font-medium tracking-wider transition-colors duration-200',
-                active
-                  ? 'glass-card text-deep-200 hover:text-foreground'
-                  : 'bg-star-gold text-[#0a1032] hover:opacity-85',
-                transitioning && 'cursor-not-allowed opacity-50',
-              )}
-            >
-              {active ? '暂停' : '继续'}
-            </button>
-            <button
-              type="button"
-              disabled={transitioning}
-              onClick={() => abort()}
-              className={twMerge(
-                'glass-card h-14 w-28 rounded-xl text-base text-star-red transition-colors duration-200 hover:bg-star-red/10',
-                transitioning && 'cursor-not-allowed opacity-50',
-              )}
-            >
-              结束
-            </button>
-          </div>
+        <div className="pointer-events-auto flex items-stretch gap-3">
+          <button
+            type="button"
+            disabled={transitioning}
+            onClick={() => (active ? pause() : resume())}
+            className={twMerge(
+              'h-14 w-44 rounded-xl font-display text-base font-medium tracking-wider transition-colors duration-200',
+              active
+                ? 'glass-card text-deep-200 hover:text-foreground'
+                : 'bg-star-gold text-[#0a1032] hover:opacity-85',
+              transitioning && 'cursor-not-allowed opacity-50',
+            )}
+          >
+            {active ? t('voyage.pause') : t('voyage.resume')}
+          </button>
+          <button
+            type="button"
+            disabled={transitioning}
+            onClick={() => abort()}
+            className={twMerge(
+              'glass-card h-14 w-28 rounded-xl text-base text-star-red transition-colors duration-200 hover:bg-star-red/10',
+              transitioning && 'cursor-not-allowed opacity-50',
+            )}
+          >
+            {t('voyage.end')}
+          </button>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

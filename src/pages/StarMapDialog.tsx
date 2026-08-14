@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 
+import { useI18n } from '@/i18n';
 import { StarMapView } from '@/pages/StarMapView';
 
 type StarMapDialogProps = {
@@ -7,6 +8,8 @@ type StarMapDialogProps = {
 };
 
 export function StarMapDialog({ onClose }: StarMapDialogProps) {
+  const { t } = useI18n();
+
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -21,7 +24,12 @@ export function StarMapDialog({ onClose }: StarMapDialogProps) {
   }, [onClose]);
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="星图" className="fixed inset-0 z-30">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('app.starmap')}
+      className="fixed inset-0 z-30"
+    >
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -33,13 +41,13 @@ export function StarMapDialog({ onClose }: StarMapDialogProps) {
       >
         <div className="flex items-center justify-between border-b border-[var(--color-glass-border)] px-5 py-3">
           <div>
-            <h2 className="font-display text-base font-medium tracking-wide">星图</h2>
-            <p className="mt-0.5 text-xs text-deep-400">点击恒星设为目的地</p>
+            <h2 className="font-display text-base font-medium tracking-wide">{t('app.starmap')}</h2>
+            <p className="mt-0.5 text-xs text-deep-400">{t('starmap.hintSetDest')}</p>
           </div>
           <div className="flex items-center gap-3">
             <button
               type="button"
-              aria-label="关闭星图"
+              aria-label={t('starmap.closeAria')}
               onClick={onClose}
               className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-deep-400 transition-colors hover:text-foreground"
             >

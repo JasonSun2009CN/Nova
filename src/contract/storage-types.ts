@@ -37,9 +37,12 @@ export type SettingsKey =
   | 'acceptedTermsVersion'
   | 'currentStarId'
   | 'browserNotificationsEnabled'
-  | 'hasCompletedOnboarding';
+  | 'hasCompletedOnboarding'
+  | 'language';
 
 export type AmbientSoundTypeKey = 'none' | 'cmb' | 'pulsar';
+
+export type AppLanguage = 'zh' | 'en';
 
 export type SettingsValueMap = {
   theme: ThemeKey;
@@ -56,6 +59,7 @@ export type SettingsValueMap = {
   currentStarId: string | null;
   browserNotificationsEnabled: boolean;
   hasCompletedOnboarding: boolean;
+  language: AppLanguage;
 };
 
 export type SettingsEntry<K extends SettingsKey = SettingsKey> = Readonly<{
