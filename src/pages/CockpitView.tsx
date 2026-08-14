@@ -21,18 +21,26 @@ export function CockpitView() {
     voyagePhase === 'braking';
   const result = status === 'completed' || status === 'aborted';
 
-  if (voyaging || result) {
-    const rows = result ? 'grid-rows-[7fr_4fr]' : 'grid-rows-[8fr_3fr]';
+  if (voyaging) {
+    return (
+      <section data-testid="voyage-view" className="relative h-full min-h-0 w-full overflow-hidden">
+        <CockpitGlass />
+        <VoyageInstruments phase={voyagePhase} />
+      </section>
+    );
+  }
+
+  if (result) {
     return (
       <section
         data-testid="voyage-view"
-        className={`grid h-full min-h-0 w-full ${rows} overflow-hidden`}
+        className="grid h-full min-h-0 w-full grid-rows-[7fr_4fr] overflow-hidden"
       >
         <div className="relative min-h-0 overflow-hidden">
           <CockpitGlass />
         </div>
         <div className="relative min-h-0 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
-          {voyaging ? <VoyageInstruments phase={voyagePhase} /> : <ResultView />}
+          <ResultView />
         </div>
       </section>
     );

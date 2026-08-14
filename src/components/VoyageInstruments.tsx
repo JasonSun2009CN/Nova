@@ -127,109 +127,119 @@ export function VoyageInstruments({ phase = null }: { phase?: VoyagePhase }) {
   );
 
   return (
-    <div className="w-full space-y-5">
-      <VoyageProgressGauge
-        originName={originName}
-        destName={destName}
-        fraction={fraction}
-        traveledLy={traveledLy}
-      />
-
-      <div className="text-center">
-        {resumedFromSnapshot && (
-          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-star-blue/40 px-3 py-1 text-xs text-star-blue">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-3.5 w-3.5"
-              aria-hidden="true"
-            >
-              <path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6" />
-            </svg>
-            {t('voyage.resumed')}
-          </div>
-        )}
-        <div className="font-display text-4xl font-medium leading-none tracking-tight text-foreground tabular-nums sm:text-[4.5rem]">
-          {formatDurationMs(remaining)}
-        </div>
-        <div className="mt-2 text-sm text-deep-300">{t('voyage.remainingTime')}</div>
-        {status === 'paused' && (
-          <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-gold">
-            <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
-            {t('voyage.paused')}
-          </div>
-        )}
-        {phase === 'launching' && (
-          <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-gold">
-            <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
-            {t('voyage.launchingText')}
-          </div>
-        )}
-        {phase === 'arriving' && (
-          <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-gold">
-            <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
-            {t('voyage.arrivingText')}
-          </div>
-        )}
-        {phase === 'braking' && (
-          <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-red">
-            <span className="h-1 w-1 rounded-full bg-star-red" aria-hidden="true" />
-            {t('voyage.brakingText')}
-          </div>
-        )}
-        <div className="mt-2 text-xs text-deep-400">
-          {t('voyage.timeBoth', {
-            ship: formatDurationMs(elapsedFocusMs),
-            earth: formatFocusEstimate(earthElapsed, lang),
-          })}
+    <div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
+      <div className="px-4 pt-4 sm:px-6">
+        <div className="mx-auto w-full max-w-3xl">
+          <VoyageProgressGauge
+            originName={originName}
+            destName={destName}
+            fraction={fraction}
+            traveledLy={traveledLy}
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        <Metric label={t('voyage.speed')} value={formatVOverC(vOverC)} />
-        <Metric label={t('voyage.gamma')} value={formatGamma(gamma)} />
-        <Metric label={t('voyage.traveled')} value={formatLy(traveledLy)} />
-        <Metric
-          label={t('voyage.remaining')}
-          value={remainingLy != null ? formatLy(remainingLy) : '—'}
-        />
-        <Metric
-          label={t('voyage.eta')}
-          value={destStar != null ? formatFocusEstimate(earthRemaining, lang) : '—'}
-        />
-        <Metric label={t('voyage.enginePower')} value={`${powerPct.toFixed(0)}%`} />
+      <div className="flex flex-1 items-center justify-between gap-4 px-4 sm:px-8">
+        <div className="flex w-28 flex-col gap-2 sm:w-36">
+          <Metric label={t('voyage.speed')} value={formatVOverC(vOverC)} />
+          <Metric label={t('voyage.gamma')} value={formatGamma(gamma)} />
+          <Metric label={t('voyage.enginePower')} value={`${powerPct.toFixed(0)}%`} />
+        </div>
+        <div className="flex w-28 flex-col gap-2 sm:w-36">
+          <Metric label={t('voyage.traveled')} value={formatLy(traveledLy)} />
+          <Metric
+            label={t('voyage.remaining')}
+            value={remainingLy != null ? formatLy(remainingLy) : '—'}
+          />
+          <Metric
+            label={t('voyage.eta')}
+            value={destStar != null ? formatFocusEstimate(earthRemaining, lang) : '—'}
+          />
+        </div>
       </div>
 
-      <div className="flex items-stretch gap-3">
-        <button
-          type="button"
-          disabled={transitioning}
-          onClick={() => (active ? pause() : resume())}
-          className={twMerge(
-            'h-14 flex-1 rounded-xl font-display text-base font-medium tracking-wider transition-colors duration-200',
-            active
-              ? 'glass-card text-deep-200 hover:text-foreground'
-              : 'bg-star-gold text-[#0a1032] hover:opacity-85',
-            transitioning && 'cursor-not-allowed opacity-50',
+      <div className="flex flex-col items-center gap-3 px-4 pb-4 sm:px-6">
+        <div className="text-center">
+          {resumedFromSnapshot && (
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-star-blue/40 px-3 py-1 text-xs text-star-blue">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-3.5 w-3.5"
+                aria-hidden="true"
+              >
+                <path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6" />
+              </svg>
+              {t('voyage.resumed')}
+            </div>
           )}
-        >
-          {active ? t('voyage.pause') : t('voyage.resume')}
-        </button>
-        <button
-          type="button"
-          disabled={transitioning}
-          onClick={() => abort()}
-          className={twMerge(
-            'glass-card h-14 w-28 rounded-xl text-base text-star-red transition-colors duration-200 hover:bg-star-red/10',
-            transitioning && 'cursor-not-allowed opacity-50',
+          <div className="font-display text-3xl font-medium leading-none tracking-tight text-foreground tabular-nums sm:text-4xl">
+            {formatDurationMs(remaining)}
+          </div>
+          <div className="mt-2 text-sm text-deep-300">{t('voyage.remainingTime')}</div>
+          {status === 'paused' && (
+            <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-gold">
+              <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
+              {t('voyage.paused')}
+            </div>
           )}
-        >
-          {t('voyage.end')}
-        </button>
+          {phase === 'launching' && (
+            <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-gold">
+              <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
+              {t('voyage.launchingText')}
+            </div>
+          )}
+          {phase === 'arriving' && (
+            <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-gold">
+              <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
+              {t('voyage.arrivingText')}
+            </div>
+          )}
+          {phase === 'braking' && (
+            <div className="mt-2 inline-flex items-center gap-2 text-sm text-star-red">
+              <span className="h-1 w-1 rounded-full bg-star-red" aria-hidden="true" />
+              {t('voyage.brakingText')}
+            </div>
+          )}
+          <div className="mt-2 text-xs text-deep-400">
+            {t('voyage.timeBoth', {
+              ship: formatDurationMs(elapsedFocusMs),
+              earth: formatFocusEstimate(earthElapsed, lang),
+            })}
+          </div>
+        </div>
+
+        <div className="pointer-events-auto flex items-stretch gap-3">
+          <button
+            type="button"
+            disabled={transitioning}
+            onClick={() => (active ? pause() : resume())}
+            className={twMerge(
+              'h-14 w-44 rounded-xl font-display text-base font-medium tracking-wider transition-colors duration-200',
+              active
+                ? 'glass-card text-deep-200 hover:text-foreground'
+                : 'bg-star-gold text-[#0a1032] hover:opacity-85',
+              transitioning && 'cursor-not-allowed opacity-50',
+            )}
+          >
+            {active ? t('voyage.pause') : t('voyage.resume')}
+          </button>
+          <button
+            type="button"
+            disabled={transitioning}
+            onClick={() => abort()}
+            className={twMerge(
+              'glass-card h-14 w-28 rounded-xl text-base text-star-red transition-colors duration-200 hover:bg-star-red/10',
+              transitioning && 'cursor-not-allowed opacity-50',
+            )}
+          >
+            {t('voyage.end')}
+          </button>
+        </div>
       </div>
     </div>
   );

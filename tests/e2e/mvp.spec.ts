@@ -3,12 +3,13 @@ import { expect, test } from '@playwright/test';
 import { dismissOnboarding } from './onboarding';
 
 test.describe('MVP 关键旅程', () => {
-  test('pomodoro 1min 跑通：启动 → 完成 → 结果页', async ({ page }) => {
+  test('航行 30min 跑通：启动 → 完成 → 结果页', async ({ page }) => {
     await page.goto('/');
     await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
-    await page.getByLabel('自定义专注时长（分钟）').fill('1');
+    await page.getByLabel('自定义专注时长（分钟）').fill('30');
+    await page.getByLabel('目的地').selectOption('hip-70890');
     await page.getByRole('button', { name: '启动航行' }).click();
     await expect(page.getByTestId('voyage-view')).toBeVisible();
     await expect(page.getByText('剩余专注时间')).toBeVisible();
@@ -18,7 +19,7 @@ test.describe('MVP 关键旅程', () => {
       if (hooks == null) {
         throw new Error('__TEST_ONLY__ hooks 未安装');
       }
-      hooks.fastForward(60_000 + 5_000);
+      hooks.fastForward(30 * 60_000 + 5_000);
     });
 
     await expect(page.getByTestId('result-view')).toBeVisible();
@@ -30,7 +31,8 @@ test.describe('MVP 关键旅程', () => {
     await dismissOnboarding(page);
     await expect(page.getByTestId('setup-panel')).toBeVisible();
 
-    await page.getByLabel('自定义专注时长（分钟）').fill('1');
+    await page.getByLabel('自定义专注时长（分钟）').fill('30');
+    await page.getByLabel('目的地').selectOption('hip-70890');
     await page.getByRole('button', { name: '启动航行' }).click();
     await expect(page.getByTestId('voyage-view')).toBeVisible();
 
@@ -39,7 +41,7 @@ test.describe('MVP 关键旅程', () => {
       if (hooks == null) {
         throw new Error('__TEST_ONLY__ hooks 未安装');
       }
-      hooks.fastForward(60_000 + 5_000);
+      hooks.fastForward(30 * 60_000 + 5_000);
     });
     await expect(page.getByText('本次航行完成')).toBeVisible();
 

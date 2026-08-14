@@ -159,7 +159,7 @@ export function SetupPanel() {
   };
 
   const handleStart = () => {
-    if (!valid || !reachable) return;
+    if (!valid || !reachable || destStarId == null) return;
     useVoyageStore.getState().prepare({
       focusMinutes: minutes,
       vOverC: speed,
@@ -298,7 +298,9 @@ export function SetupPanel() {
                 onChange={(e) => handleDestChange(e.target.value)}
                 className="h-11 w-full cursor-pointer rounded-xl border border-[var(--color-glass-border)] bg-[var(--color-glass)] px-3 text-base text-foreground focus:border-star-blue focus:outline-none"
               >
-                <option value="">{t('setup.noDest')}</option>
+                <option value="" disabled>
+                  {t('setup.destPlaceholder')}
+                </option>
                 {destinationOptions.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name} · {formatLy(s.distanceLy)}
@@ -383,10 +385,10 @@ export function SetupPanel() {
             <button
               type="button"
               onClick={handleStart}
-              disabled={!valid || !reachable}
+              disabled={!valid || !reachable || destStarId == null}
               className={twMerge(
                 'h-12 w-full flex-none self-end rounded-xl font-display text-base font-medium tracking-wider transition-colors duration-200 sm:w-40',
-                valid && reachable
+                valid && reachable && destStarId != null
                   ? 'bg-star-gold text-[#0a1032] hover:opacity-85'
                   : 'cursor-not-allowed border border-[var(--color-glass-border)] text-deep-400',
               )}

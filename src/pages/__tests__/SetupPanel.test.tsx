@@ -97,6 +97,7 @@ describe('SetupPanel', () => {
 
   it('点击启动航行 → progress=running 且从太阳系出发', () => {
     render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-70890' } });
     fireEvent.click(screen.getByRole('button', { name: '启动航行' }));
     expect(useVoyageStore.getState().progress?.status).toBe('running');
     expect(useVoyageStore.getState().originStarId).toBe('hip-sol');
@@ -108,13 +109,14 @@ describe('SetupPanel', () => {
     expect(useVoyageStore.getState().destStarId).toBe('hip-70890');
   });
 
-  it('输入 15 分钟并启动 → focusTotalMs=15 分钟', () => {
+  it('输入 30 分钟并启动 → focusTotalMs=30 分钟', () => {
     render(<SetupPanel />);
     fireEvent.change(screen.getByLabelText('自定义专注时长（分钟）'), {
-      target: { value: '15' },
+      target: { value: '30' },
     });
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-70890' } });
     fireEvent.click(screen.getByRole('button', { name: '启动航行' }));
-    expect(useVoyageStore.getState().progress?.focusTotalMs).toBe(15 * 60_000);
+    expect(useVoyageStore.getState().progress?.focusTotalMs).toBe(30 * 60_000);
   });
 
   it('目录星（不在 DESTINATION_STARS）设为目的地后正确显示（修复 bug）', () => {
@@ -177,6 +179,7 @@ describe('SetupPanel', () => {
     });
     render(<SetupPanel />);
     expect(screen.getByText(/飞船将从 比邻星/)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-71683' } });
     fireEvent.click(screen.getByRole('button', { name: '启动航行' }));
     expect(useVoyageStore.getState().originStarId).toBe('hip-70890');
   });

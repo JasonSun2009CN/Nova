@@ -17,10 +17,8 @@ const NAV_SCALE = 45 / NAV_MAX_DISTANCE_LY;
 const SUN_RENDER_MAGNITUDE = 1.5;
 const SUN_SIZE_SCALE = 2.4;
 const ROTATE_SPEED = 2.2;
-const MIN_PHI = 0.15;
-const MAX_PHI = Math.PI - 0.15;
-const CAMERA_OFFSET_LEN = Math.hypot(0, 0.5, 1.1);
-const CAMERA_OFFSET_PHI = Math.acos(0.5 / CAMERA_OFFSET_LEN);
+const MIN_PITCH = -1.35;
+const MAX_PITCH = 1.35;
 
 type WorldPosition = Readonly<{ x: number; y: number; z: number }>;
 
@@ -31,34 +29,45 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function BackgroundCameraRig({
-  focusPosition,
+  shipPosition,
+  lookTarget,
   joystickRef,
 }: {
-  focusPosition: WorldPosition | null;
+  shipPosition: WorldPosition | null;
+  lookTarget: WorldPosition | null;
   joystickRef: { current: JoystickVector };
 }) {
   const camera = useThree((s) => s.camera);
-  const stateRef = useRef({ theta: 0, phi: CAMERA_OFFSET_PHI, radius: CAMERA_OFFSET_LEN });
+  const stateRef = useRef({ yaw: 0, pitch: 0 });
 
   useLayoutEffect(() => {
-    stateRef.current = { theta: 0, phi: CAMERA_OFFSET_PHI, radius: CAMERA_OFFSET_LEN };
-  }, [focusPosition]);
+    if (shipPosition != null && lookTarget != null) {
+      const dx = lookTarget.x - shipPosition.x;
+      const dy = lookTarget.y - shipPosition.y;
+      const dz = lookTarget.z - shipPosition.z;
+      const len = Math.hypot(dx, dy, dz);
+      if (len > 1e-6) {
+        stateRef.current = { yaw: Math.atan2(dx, dz), pitch: Math.asin(dy / len) };
+        return;
+      }
+    }
+    stateRef.current = { yaw: 0, pitch: 0 };
+  }, [shipPosition, lookTarget]);
 
   useFrame((_, delta) => {
-    const target = focusPosition ?? ORIGIN;
+    const ship = shipPosition ?? ORIGIN;
     const state = stateRef.current;
     const joystick = joystickRef.current;
     if (joystick.x !== 0 || joystick.y !== 0) {
-      state.theta -= ROTATE_SPEED * joystick.x * delta;
-      state.phi = clamp(state.phi + ROTATE_SPEED * joystick.y * delta, MIN_PHI, MAX_PHI);
+      state.yaw -= ROTATE_SPEED * joystick.x * delta;
+      state.pitch = clamp(state.pitch - ROTATE_SPEED * joystick.y * delta, MIN_PITCH, MAX_PITCH);
     }
-    const sinPhi = Math.sin(state.phi);
-    camera.position.set(
-      target.x + state.radius * sinPhi * Math.sin(state.theta),
-      target.y + state.radius * Math.cos(state.phi),
-      target.z + state.radius * sinPhi * Math.cos(state.theta),
-    );
-    camera.lookAt(target.x, target.y, target.z);
+    const cosP = Math.cos(state.pitch);
+    const fx = cosP * Math.sin(state.yaw);
+    const fy = Math.sin(state.pitch);
+    const fz = cosP * Math.cos(state.yaw);
+    camera.position.set(ship.x, ship.y, ship.z);
+    camera.lookAt(ship.x + fx, ship.y + fy, ship.z + fz);
   });
 
   return null;
@@ -89,6 +98,19 @@ export function StarMapBackground() {
     };
   }, [catalogStars, catalogNebulae]);
 
+  const departureStar = useMemo(
+    () => catalog?.findById(currentStarId) ?? catalog?.findById('hip-sol') ?? null,
+    [catalog, currentStarId],
+  );
+  const destStar = useMemo(
+    () => (destStarId != null ? (catalog?.findById(destStarId) ?? null) : null),
+    [catalog, destStarId],
+  );
+  const sunStar = useMemo(
+    () => catalog?.allStars.find((s) => s.id === 'hip-sol') ?? null,
+    [catalog],
+  );
+
   const { navStars, bgStars } = useMemo(() => {
     if (catalog == null) {
       return { navStars: [] as Star[], bgStars: [] as Star[] };
@@ -96,7 +118,7 @@ export function StarMapBackground() {
     const nav: Star[] = [];
     const bg: Star[] = [];
     for (const s of catalog.allStars) {
-      if (s.id === 'hip-sol') continue;
+      if (s.id === 'hip-sol' || s.id === departureStar?.id) continue;
       if (s.properName != null && starDistanceLy(s) <= NAV_MAX_DISTANCE_LY) {
         nav.push(s);
       } else {
@@ -104,22 +126,7 @@ export function StarMapBackground() {
       }
     }
     return { navStars: nav, bgStars: bg };
-  }, [catalog]);
-
-  const destStar = useMemo(
-    () => navStars.find((s) => s.id === destStarId) ?? null,
-    [navStars, destStarId],
-  );
-
-  const sunStar = useMemo(
-    () => catalog?.allStars.find((s) => s.id === 'hip-sol') ?? null,
-    [catalog],
-  );
-
-  const departureStar = useMemo(
-    () => catalog?.findById(currentStarId) ?? catalog?.findById('hip-sol') ?? null,
-    [catalog, currentStarId],
-  );
+  }, [catalog, departureStar]);
 
   const departureWorld = useMemo(() => {
     if (departureStar == null) return null;
@@ -127,10 +134,16 @@ export function StarMapBackground() {
     return { x: c.xLy * NAV_SCALE, y: c.yLy * NAV_SCALE, z: c.zLy * NAV_SCALE };
   }, [departureStar]);
 
-  const sunRenderStars = useMemo(
-    () => (sunStar == null ? [] : [{ ...sunStar, apparentMagnitude: SUN_RENDER_MAGNITUDE }]),
-    [sunStar],
-  );
+  const destWorld = useMemo(() => {
+    if (destStar == null) return null;
+    const c = destStar.coords.cartesian;
+    return { x: c.xLy * NAV_SCALE, y: c.yLy * NAV_SCALE, z: c.zLy * NAV_SCALE };
+  }, [destStar]);
+
+  const sunRenderStars = useMemo(() => {
+    if (sunStar == null || departureStar?.id === 'hip-sol') return [];
+    return [{ ...sunStar, apparentMagnitude: SUN_RENDER_MAGNITUDE }];
+  }, [sunStar, departureStar]);
 
   return (
     <div data-testid="starmap-background" className="absolute inset-0">
@@ -144,8 +157,14 @@ export function StarMapBackground() {
           <StarField stars={sunRenderStars} scale={NAV_SCALE} sizeScale={SUN_SIZE_SCALE} />
           <StarField stars={navStars} scale={NAV_SCALE} />
           <NebulaField nebulae={catalog?.nebulae() ?? []} />
-          {destStar != null && <DestinationMarker star={destStar} scale={NAV_SCALE} />}
-          <BackgroundCameraRig focusPosition={departureWorld} joystickRef={joystickRef} />
+          {destStar != null && destStar.id !== departureStar?.id && (
+            <DestinationMarker star={destStar} scale={NAV_SCALE} />
+          )}
+          <BackgroundCameraRig
+            shipPosition={departureWorld}
+            lookTarget={destWorld}
+            joystickRef={joystickRef}
+          />
         </Canvas>
       </div>
       <div className="absolute right-4 top-1/2 z-20 -translate-y-1/2">

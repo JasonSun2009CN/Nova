@@ -38,25 +38,6 @@ test.describe('航行视图真实星表化 (S23 R3F)', () => {
     expect(errors).toHaveLength(0);
   });
 
-  test('自由漂流（无目的地）→ 星场渲染且无报错', async ({ page }) => {
-    const errors: string[] = [];
-    page.on('console', (m) => {
-      if (m.type() === 'error') errors.push(m.text());
-    });
-    page.on('pageerror', (error: Error) => errors.push(error.message));
-
-    await page.goto('/');
-    await dismissOnboarding(page);
-    await expect(page.getByTestId('setup-panel')).toBeVisible();
-
-    await page.getByRole('button', { name: '启动航行' }).click();
-    await expect(page.getByTestId('voyage-view')).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByTestId('voyage-star-field')).toBeVisible({ timeout: 20_000 });
-
-    await page.waitForTimeout(1200);
-    expect(errors).toHaveLength(0);
-  });
-
   test('启动过渡：点火标签显示后 3s 消失进入巡航（S26）', async ({ page }) => {
     await page.goto('/');
     await dismissOnboarding(page);
