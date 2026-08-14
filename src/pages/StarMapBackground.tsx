@@ -60,7 +60,7 @@ function BackgroundCameraRig({
     const joystick = joystickRef.current;
     if (joystick.x !== 0 || joystick.y !== 0) {
       state.yaw -= ROTATE_SPEED * joystick.x * delta;
-      state.pitch = clamp(state.pitch - ROTATE_SPEED * joystick.y * delta, MIN_PITCH, MAX_PITCH);
+      state.pitch = clamp(state.pitch + ROTATE_SPEED * joystick.y * delta, MIN_PITCH, MAX_PITCH);
     }
     const cosP = Math.cos(state.pitch);
     const fx = cosP * Math.sin(state.yaw);
