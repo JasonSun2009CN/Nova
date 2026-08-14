@@ -198,8 +198,11 @@ describe('SetupPanel', () => {
       error: null,
     });
     render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('专注时长（小时）'), {
+      target: { value: '5' },
+    });
     fireEvent.change(screen.getByLabelText('自定义专注时长（分钟）'), {
-      target: { value: '300' },
+      target: { value: '0' },
     });
     fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
     expect(screen.getByText(/比邻星 → 织女星/)).toBeInTheDocument();
@@ -275,8 +278,11 @@ describe('SetupPanel', () => {
 
   it('拉长专注时长至可达 → 不可达提示消失、可启动', () => {
     render(<SetupPanel />);
+    fireEvent.change(screen.getByLabelText('专注时长（小时）'), {
+      target: { value: '2' },
+    });
     fireEvent.change(screen.getByLabelText('自定义专注时长（分钟）'), {
-      target: { value: '150' },
+      target: { value: '30' },
     });
     fireEvent.change(screen.getByLabelText('目的地'), { target: { value: 'hip-91262' } });
     expect(screen.queryByTestId('unreachable-warning')).not.toBeInTheDocument();

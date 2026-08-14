@@ -141,11 +141,24 @@ export function SetupPanel() {
     [destStar, originOptions, minutes, currentEngine, reachable],
   );
 
-  const handleCustomChange = (raw: string) => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  const handleHoursChange = (raw: string) => {
     touchedRef.current = true;
-    const n = Number(raw);
-    if (Number.isFinite(n) && n > 0) {
-      setMinutes(Math.round(n));
+    const h = Math.max(0, Math.round(Number(raw) || 0));
+    const next = h * 60 + mins;
+    if (Number.isFinite(next) && next > 0) {
+      setMinutes(Math.min(600, next));
+    }
+  };
+
+  const handleMinutesChange = (raw: string) => {
+    touchedRef.current = true;
+    const m = Math.min(59, Math.max(0, Math.round(Number(raw) || 0)));
+    const next = hours * 60 + m;
+    if (Number.isFinite(next) && next > 0) {
+      setMinutes(Math.min(600, next));
     }
   };
 
@@ -248,12 +261,23 @@ export function SetupPanel() {
                   <input
                     type="number"
                     inputMode="numeric"
-                    min={1}
-                    max={600}
-                    value={minutes}
+                    min={0}
+                    max={10}
+                    value={hours}
+                    aria-label={t('setup.hoursInputAria')}
+                    onChange={(e) => handleHoursChange(e.target.value)}
+                    className="w-10 appearance-none bg-transparent text-right font-mono text-xl tabular-nums text-foreground focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
+                  <span className="text-[0.6875rem] text-deep-400">{t('setup.hoursUnit')}</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={59}
+                    value={mins}
                     aria-label={t('setup.focusInputAria')}
-                    onChange={(e) => handleCustomChange(e.target.value)}
-                    className="w-14 appearance-none bg-transparent text-right font-mono text-xl tabular-nums text-foreground focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    onChange={(e) => handleMinutesChange(e.target.value)}
+                    className="w-10 appearance-none bg-transparent text-right font-mono text-xl tabular-nums text-foreground focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                   <span className="text-[0.6875rem] text-deep-400">{t('setup.minutesUnit')}</span>
                 </div>
