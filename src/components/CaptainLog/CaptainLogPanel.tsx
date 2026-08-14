@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { HeatmapGrid } from '@/components/CaptainLog/HeatmapGrid';
 import { WeeklyBarChart } from '@/components/CaptainLog/WeeklyBarChart';
+import type { AppLanguage } from '@/contract/storage-types';
 import { getDestinationName } from '@/data/destination-stars';
 import { aggregateMonthly, aggregateWeekly, buildHeatmap, summarizeCaptainsLog } from '@/engine';
 import { useI18n, type I18nKey } from '@/i18n';
@@ -11,10 +12,10 @@ import { formatDateTime, formatDurationMs, formatFocusEstimate, formatLy } from 
 
 const MS_PER_MINUTE = 60_000;
 
-function originLabel(starId: string | null, t: (k: I18nKey) => string): string {
+function originLabel(starId: string | null, t: (k: I18nKey) => string, lang: AppLanguage): string {
   if (starId == null) return t('log.deepSpaceOrigin');
   if (starId === 'hip-sol') return t('common.originSolar');
-  return getDestinationName(starId) ?? t('common.originSolar');
+  return getDestinationName(starId, lang) ?? t('common.originSolar');
 }
 
 export function CaptainLogPanel({ hideRecent = false }: { hideRecent?: boolean }) {
@@ -106,11 +107,11 @@ export function CaptainLogPanel({ hideRecent = false }: { hideRecent?: boolean }
           <h3 className="mb-2 text-xs text-deep-400">{t('log.recentTitle')}</h3>
           <ul className="glass-card overflow-hidden rounded-2xl">
             {recent.map((record) => {
-              const destName = getDestinationName(record.destStarId);
+              const destName = getDestinationName(record.destStarId, lang);
               const route =
                 destName != null
-                  ? `${originLabel(record.originStarId, t)} → ${destName}`
-                  : `${originLabel(record.originStarId, t)} · ${t('history.freeDrift')}`;
+                  ? `${originLabel(record.originStarId, t, lang)} → ${destName}`
+                  : `${originLabel(record.originStarId, t, lang)} · ${t('history.freeDrift')}`;
               return (
                 <li
                   key={record.id}

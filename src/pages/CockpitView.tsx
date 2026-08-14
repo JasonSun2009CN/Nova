@@ -32,14 +32,9 @@ export function CockpitView() {
 
   if (result) {
     return (
-      <section
-        data-testid="voyage-view"
-        className="grid h-full min-h-0 w-full grid-rows-[7fr_4fr] overflow-hidden"
-      >
-        <div className="relative min-h-0 overflow-hidden">
-          <CockpitGlass />
-        </div>
-        <div className="relative min-h-0 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
+      <section data-testid="voyage-view" className="relative h-full min-h-0 w-full overflow-hidden">
+        <CockpitGlass />
+        <div className="absolute inset-0 z-10 flex items-center justify-center px-4 py-6 sm:px-6">
           <ResultView />
         </div>
       </section>

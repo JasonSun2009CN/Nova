@@ -16,7 +16,7 @@ type StarSearchProps = {
 const MAX_RESULTS = 7;
 
 export function StarSearch({ stars, status, onSelect }: StarSearchProps) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -71,7 +71,7 @@ export function StarSearch({ stars, status, onSelect }: StarSearchProps) {
                   onClick={() => handlePick(star)}
                   className="flex w-full cursor-pointer items-center justify-between gap-2 px-3.5 py-2 text-left text-sm transition-colors hover:bg-white/5"
                 >
-                  <span className="truncate text-foreground">{starDisplayName(star)}</span>
+                  <span className="truncate text-foreground">{starDisplayName(star, lang)}</span>
                   <span className="shrink-0 font-mono text-xs text-deep-400 tabular-nums">
                     {formatLy(starDistanceLy(star))}
                   </span>

@@ -136,7 +136,11 @@ describe('recommendDestination 基于剩余专注时长 + 引擎 γ_max 的目�
   it('空候选或全部无距离 → 返回 null', () => {
     expect(recommendDestination([], 60, 100_000)).toBeNull();
     expect(
-      recommendDestination([{ id: 'hip-sol', name: '太阳', distanceLy: 0 }], 60, 100_000),
+      recommendDestination(
+        [{ id: 'hip-sol', name: '太阳', nameEn: 'Sun', distanceLy: 0 }],
+        60,
+        100_000,
+      ),
     ).toBeNull();
   });
 });

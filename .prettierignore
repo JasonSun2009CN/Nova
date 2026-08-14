@@ -5,6 +5,8 @@ playwright-report
 pnpm-lock.yaml
 public/data/stars
 public/data/nebulae
+src-tauri/target
+src-tauri/gen
 *.min.js
 *.min.css
 .claude
