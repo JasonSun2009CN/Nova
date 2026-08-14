@@ -17,6 +17,7 @@ export type VoyageRecord = Readonly<{
   originCoords: Cartesian3 | null;
   destStarId: string | null;
   destCoords: Cartesian3 | null;
+  category?: string | null;
   snapshot: VoyageSnapshot;
   starsVisitedIds: readonly string[];
   createdAt: number;

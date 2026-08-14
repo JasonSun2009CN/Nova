@@ -18,6 +18,16 @@ function originLabel(starId: string | null, t: (k: I18nKey) => string, lang: App
   return getDestinationName(starId, lang) ?? t('common.originSolar');
 }
 
+function categoryLabel(
+  category: string | null | undefined,
+  t: (k: I18nKey) => string,
+): string | null {
+  if (category == null || category === '') return null;
+  if (category === 'work') return t('category.work');
+  if (category === 'study') return t('category.study');
+  return category;
+}
+
 export function CaptainLogPanel({ hideRecent = false }: { hideRecent?: boolean }) {
   const { t, lang } = useI18n();
   const records = useHistoryStore((s) => s.records);
@@ -132,6 +142,11 @@ export function CaptainLogPanel({ hideRecent = false }: { hideRecent?: boolean }
                           ? t('history.completed')
                           : t('history.aborted')}
                       </span>
+                      {categoryLabel(record.category, t) != null && (
+                        <span className="rounded-md border border-[var(--color-glass-border)] px-1.5 py-0.5 text-[0.625rem] text-deep-300">
+                          {categoryLabel(record.category, t)}
+                        </span>
+                      )}
                     </div>
                     <div className="mt-0.5 truncate text-xs text-deep-400">
                       {formatDateTime(record.createdAt)} · {route} · {formatLy(record.traveledLy)}
