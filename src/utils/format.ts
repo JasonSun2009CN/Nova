@@ -1,4 +1,5 @@
 import type { SpectralClass } from '@/engine/contract/catalog-types';
+import type { AppLanguage } from '@/contract/storage-types';
 
 export function formatDurationMs(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -44,34 +45,39 @@ export function formatDateTime(ts: number): string {
   return `${month}-${day} ${hh}:${mm}`;
 }
 
-export function formatMinuteLabel(totalMinutes: number): string {
+export function formatMinuteLabel(totalMinutes: number, lang: AppLanguage = 'zh'): string {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   if (hours > 0 && minutes > 0) {
-    return `${hours}小时${minutes}分`;
+    return lang === 'en' ? `${hours}h ${minutes}m` : `${hours}小时${minutes}分`;
   }
   if (hours > 0) {
-    return `${hours}小时`;
+    return lang === 'en' ? `${hours}h` : `${hours}小时`;
   }
-  return `${minutes}分钟`;
+  return lang === 'en' ? `${minutes}m` : `${minutes}分钟`;
 }
 
 const MINUTES_PER_DAY = 60 * 24;
 const MINUTES_PER_YEAR = 60 * 24 * 365;
 
-export function formatFocusEstimate(totalMinutes: number): string {
+export function formatFocusEstimate(totalMinutes: number, lang: AppLanguage = 'zh'): string {
   if (!Number.isFinite(totalMinutes) || totalMinutes <= 0) return '—';
-  if (totalMinutes < 1) return '不足 1 分钟';
-  if (totalMinutes < 60) return `${Math.round(totalMinutes)} 分钟`;
+  if (totalMinutes < 1) return lang === 'en' ? '< 1 min' : '不足 1 分钟';
+  if (totalMinutes < 60) return `${Math.round(totalMinutes)} ${lang === 'en' ? 'min' : '分钟'}`;
   if (totalMinutes < MINUTES_PER_DAY) {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = Math.round(totalMinutes % 60);
+    if (lang === 'en') {
+      return minutes > 0 ? `${hours} hr ${minutes} min` : `${hours} hr`;
+    }
     return minutes > 0 ? `${hours} 小时 ${minutes} 分` : `${hours} 小时`;
   }
   if (totalMinutes < MINUTES_PER_YEAR) {
-    return `${Math.round(totalMinutes / MINUTES_PER_DAY)} 天`;
+    const days = Math.round(totalMinutes / MINUTES_PER_DAY);
+    return lang === 'en' ? `${days} days` : `${days} 天`;
   }
-  return `约 ${(totalMinutes / MINUTES_PER_YEAR).toFixed(1)} 年`;
+  const years = (totalMinutes / MINUTES_PER_YEAR).toFixed(1);
+  return lang === 'en' ? `~${years} years` : `约 ${years} 年`;
 }
 
 export function formatSpectral(spectral: SpectralClass): string {

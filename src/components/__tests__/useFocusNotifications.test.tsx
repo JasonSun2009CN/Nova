@@ -63,7 +63,7 @@ describe('useFocusNotifications（S33 浏览器通知触发）', () => {
     });
 
     expect(sendFocusNotification).toHaveBeenCalledTimes(1);
-    expect(sendFocusNotification).toHaveBeenCalledWith('complete', '比邻星 Proxima Centauri');
+    expect(sendFocusNotification).toHaveBeenCalledWith('complete', '比邻星 Proxima Centauri', 'zh');
   });
 
   it('开启通知：running → aborted 触发「中止」通知', () => {
@@ -76,7 +76,7 @@ describe('useFocusNotifications（S33 浏览器通知触发）', () => {
     });
 
     expect(sendFocusNotification).toHaveBeenCalledTimes(1);
-    expect(sendFocusNotification).toHaveBeenCalledWith('aborted', '织女一 (天琴座 α Vega)');
+    expect(sendFocusNotification).toHaveBeenCalledWith('aborted', '织女一 (天琴座 α Vega)', 'zh');
   });
 
   it('关闭通知：running → completed 不触发', () => {

@@ -1,3 +1,4 @@
+import type { AppLanguage } from '@/contract/storage-types';
 import type { VoyageRecord } from '@/contract/storage-types';
 import { getDestinationName } from '@/data/destination-stars';
 import { summarizeCaptainsLog } from '@/engine';
@@ -5,15 +6,15 @@ import { formatFocusEstimate, formatLy } from '@/utils/format';
 
 const MS_PER_MINUTE = 60_000;
 
-function originLabel(starId: string | null): string {
-  if (starId == null) return '深空出发';
-  if (starId === 'hip-sol') return '太阳系';
-  return getDestinationName(starId) ?? '太阳系';
+function originLabel(starId: string | null, lang: AppLanguage): string {
+  if (starId == null) return lang === 'en' ? 'Deep space' : '深空出发';
+  if (starId === 'hip-sol') return lang === 'en' ? 'Solar System' : '太阳系';
+  return getDestinationName(starId) ?? (lang === 'en' ? 'Solar System' : '太阳系');
 }
 
-function destinationLabel(starId: string | null): string {
-  if (starId == null) return '自由漂流';
-  return getDestinationName(starId) ?? '未知星';
+function destinationLabel(starId: string | null, lang: AppLanguage): string {
+  if (starId == null) return lang === 'en' ? 'Free drift' : '自由漂流';
+  return getDestinationName(starId) ?? (lang === 'en' ? 'Unknown star' : '未知星');
 }
 
 function formatFullDateTime(ts: number): string {
@@ -22,40 +23,56 @@ function formatFullDateTime(ts: number): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function formatLyInChinese(ly: number): string {
+function formatLyInLanguage(ly: number, lang: AppLanguage): string {
+  if (lang === 'en') return formatLy(ly);
   return formatLy(ly).replace(/ ly$/, ' 光年');
 }
 
 export function buildVoyageLogMarkdown(
   records: readonly VoyageRecord[],
   endTime = Date.now(),
+  lang: AppLanguage = 'zh',
 ): string {
   const summary = summarizeCaptainsLog(records, endTime);
   const lines: string[] = [];
-  lines.push('# NOVA 星际旅行经过');
+  lines.push(lang === 'en' ? '# NOVA Interstellar Travel Log' : '# NOVA 星际旅行经过');
   lines.push('');
   lines.push(
     [
-      `> 共 ${records.length} 次航行`,
-      `累计专注 ${formatFocusEstimate(summary.totalFocusMs / MS_PER_MINUTE)}`,
-      `累计航行 ${formatLyInChinese(summary.totalTraveledLy)}`,
-      `已探索 ${summary.exploredStarCount} 颗恒星`,
-      `连续专注 ${summary.streakDays} 天`,
+      lang === 'en' ? `${records.length} voyages` : `共 ${records.length} 次航行`,
+      `${lang === 'en' ? 'Total focus' : '累计专注'} ${formatFocusEstimate(
+        summary.totalFocusMs / MS_PER_MINUTE,
+        lang,
+      )}`,
+      `${lang === 'en' ? 'Total distance' : '累计航行'} ${formatLyInLanguage(summary.totalTraveledLy, lang)}`,
+      `${lang === 'en' ? 'Explored' : '已探索'} ${summary.exploredStarCount} ${lang === 'en' ? 'stars' : '颗恒星'}`,
+      `${lang === 'en' ? 'Streak' : '连续专注'} ${summary.streakDays}${lang === 'en' ? 'd' : ' 天'}`,
     ].join(' · '),
   );
   lines.push('');
-  lines.push('| # | 日期 | 起点 | 终点 | 专注时长 | 距离 | 状态 |');
+  lines.push(
+    lang === 'en'
+      ? '| # | Date | Origin | Destination | Focus | Distance | Status |'
+      : '| # | 日期 | 起点 | 终点 | 专注时长 | 距离 | 状态 |',
+  );
   lines.push('|---|------|------|------|----------|------|------|');
   records.forEach((record, index) => {
-    const status = record.status === 'completed' ? '完成' : '中止';
+    const status =
+      record.status === 'completed'
+        ? lang === 'en'
+          ? 'Completed'
+          : '完成'
+        : lang === 'en'
+          ? 'Aborted'
+          : '中止';
     lines.push(
       [
         `| ${index + 1}`,
         formatFullDateTime(record.createdAt),
-        originLabel(record.originStarId),
-        destinationLabel(record.destStarId),
-        formatFocusEstimate(record.elapsedFocusMs / MS_PER_MINUTE),
-        formatLyInChinese(record.traveledLy),
+        originLabel(record.originStarId, lang),
+        destinationLabel(record.destStarId, lang),
+        formatFocusEstimate(record.elapsedFocusMs / MS_PER_MINUTE, lang),
+        formatLyInLanguage(record.traveledLy, lang),
         `${status} |`,
       ].join(' | '),
     );

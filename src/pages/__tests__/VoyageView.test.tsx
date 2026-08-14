@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { VoyageView } from '@/pages/VoyageView';
+import { CockpitView } from '@/pages/CockpitView';
 import {
   resetStoreDepsForTest,
   resetVoyageControllerForTest,
@@ -43,7 +43,7 @@ function resetStores() {
   resetStoreDepsForTest();
 }
 
-describe('VoyageView', () => {
+describe('驾驶舱视图（CockpitView）', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] });
   });
@@ -59,7 +59,7 @@ describe('VoyageView', () => {
   it('渲染倒计时与目的地', async () => {
     startVoyage();
     await act(async () => {
-      render(<VoyageView />);
+      render(<CockpitView />);
     });
     expect(screen.getByTestId('voyage-view')).toBeInTheDocument();
     expect(screen.getByText('25:00')).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe('VoyageView', () => {
   it('暂停 → paused 显示已暂停，继续 → running', async () => {
     startVoyage();
     await act(async () => {
-      render(<VoyageView />);
+      render(<CockpitView />);
     });
 
     fireEvent.click(screen.getByRole('button', { name: '暂停' }));
@@ -83,7 +83,7 @@ describe('VoyageView', () => {
   it('点击结束 → progress.status=aborted', async () => {
     startVoyage();
     await act(async () => {
-      render(<VoyageView />);
+      render(<CockpitView />);
     });
 
     fireEvent.click(screen.getByRole('button', { name: '结束' }));
@@ -93,7 +93,7 @@ describe('VoyageView', () => {
   it('S25 仪表盘：航行进度显示出发地→目的地星名 + 引擎功率/双时间轴', async () => {
     startVoyage();
     await act(async () => {
-      render(<VoyageView />);
+      render(<CockpitView />);
     });
     const gauge = screen.getByTestId('voyage-progress-gauge');
     expect(gauge).toHaveTextContent('太阳系');

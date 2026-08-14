@@ -1,6 +1,7 @@
 import { minFocusMinutes, resolveEngineTier, type Star } from '@/engine';
 import { useAchievements } from '@/components/useAchievements';
 import { isSettableDestination, starDisplayName } from '@/data/destination-stars';
+import { useI18n } from '@/i18n';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
 import {
@@ -27,6 +28,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 export function StarInfoCard({ star, onClose, onComplete }: StarInfoCardProps) {
+  const { t, lang } = useI18n();
   const destStarId = useVoyageStore((s) => s.destStarId);
   const totalFocusHours = useHistoryStore((s) => s.stats?.totalFocusHours ?? 0);
   const { grantedEngineTiers } = useAchievements();
@@ -50,7 +52,7 @@ export function StarInfoCard({ star, onClose, onComplete }: StarInfoCardProps) {
         </h3>
         <button
           type="button"
-          aria-label="关闭信息卡"
+          aria-label={t('starinfo.closeAria')}
           onClick={onClose}
           className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-deep-400 transition-colors hover:text-foreground"
         >
@@ -70,18 +72,21 @@ export function StarInfoCard({ star, onClose, onComplete }: StarInfoCardProps) {
       <p className="mt-1 text-sm text-deep-300">{formatLy(distanceLy)}</p>
       {settable && estimateMinutes != null && (
         <p className="mt-1 text-xs text-deep-400">
-          最短专注 {formatFocusEstimate(estimateMinutes)}
+          {t('starinfo.minFocus', { time: formatFocusEstimate(estimateMinutes, lang) })}
         </p>
       )}
 
       <div className="mt-3">
-        <Stat label="光谱" value={formatSpectral(star.spectral)} />
-        <Stat label="视星等" value={`m ${formatMagnitude(star.apparentMagnitude)}`} />
+        <Stat label={t('starinfo.spectral')} value={formatSpectral(star.spectral)} />
+        <Stat
+          label={t('starinfo.magnitude')}
+          value={`m ${formatMagnitude(star.apparentMagnitude)}`}
+        />
         {star.temperatureKelvin != null && (
-          <Stat label="温度" value={formatKelvin(star.temperatureKelvin)} />
+          <Stat label={t('starinfo.temperature')} value={formatKelvin(star.temperatureKelvin)} />
         )}
         {star.luminositySol != null && (
-          <Stat label="光度" value={`${star.luminositySol.toFixed(2)} L☉`} />
+          <Stat label={t('starinfo.luminosity')} value={`${star.luminositySol.toFixed(2)} L☉`} />
         )}
       </div>
 
@@ -91,14 +96,14 @@ export function StarInfoCard({ star, onClose, onComplete }: StarInfoCardProps) {
             <div className="flex flex-col gap-2">
               <p className="flex items-center justify-center gap-1.5 text-xs text-star-gold">
                 <span className="h-1 w-1 rounded-full bg-star-gold" aria-hidden="true" />
-                已设为目的地
+                {t('starinfo.isDest')}
               </p>
               <button
                 type="button"
                 onClick={onComplete}
                 className="h-11 w-full cursor-pointer rounded-xl bg-star-gold font-display text-sm font-medium tracking-wider text-[#0a1032] transition-colors duration-200 hover:opacity-85"
               >
-                完成
+                {t('starinfo.done')}
               </button>
             </div>
           ) : (
@@ -108,14 +113,14 @@ export function StarInfoCard({ star, onClose, onComplete }: StarInfoCardProps) {
                 onClick={() => useVoyageStore.getState().selectDestination(star.id)}
                 className="h-11 w-full cursor-pointer rounded-xl bg-star-gold font-display text-sm font-medium tracking-wider text-[#0a1032] transition-colors duration-200 hover:opacity-85"
               >
-                设为目的地
+                {t('starinfo.setDest')}
               </button>
               <button
                 type="button"
                 onClick={onClose}
                 className="glass-card h-10 w-full cursor-pointer rounded-xl text-sm text-deep-300 transition-colors duration-200 hover:text-foreground"
               >
-                取消
+                {t('starinfo.cancel')}
               </button>
             </div>
           )}

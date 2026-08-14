@@ -3,11 +3,15 @@ import { twMerge } from 'tailwind-merge';
 
 import { getDestinationName } from '@/data/destination-stars';
 import { ACHIEVEMENTS, buildAchievementStarFacts, newlyUnlockedAchievementIds } from '@/engine';
-import { useI18n } from '@/i18n';
+import { useI18n, type I18nKey } from '@/i18n';
 import { useCatalogStore } from '@/store/useCatalogStore';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useVoyageStore } from '@/store/useVoyageStore';
 import { formatDurationMs, formatGamma, formatLy, formatVOverC } from '@/utils/format';
+
+function achievementTitleKey(id: string): I18nKey {
+  return `ach.${id}.title` as I18nKey;
+}
 
 function StatRow({ label, value }: { label: string; value: string }) {
   return (
@@ -73,7 +77,7 @@ export function ResultView() {
   return (
     <section
       data-testid="result-view"
-      className="mx-auto flex w-full max-w-md animate-fade-up flex-1 flex-col items-stretch justify-center gap-8 px-6 pb-12 pt-6"
+      className="mx-auto flex w-full max-w-md animate-fade-up flex-col items-stretch gap-5"
     >
       <div className="text-center">
         <div
@@ -127,7 +131,9 @@ export function ResultView() {
             <ul className="mt-2 space-y-1">
               {newlyUnlockedDefinitions.map((achievement) => (
                 <li key={achievement.id} className="flex items-baseline justify-between gap-2">
-                  <span className="font-display text-sm text-foreground">{achievement.title}</span>
+                  <span className="font-display text-sm text-foreground">
+                    {t(achievementTitleKey(achievement.id))}
+                  </span>
                   <span className="font-mono text-xs text-star-gold tabular-nums">
                     {achievement.points} {t('result.pointsUnit')}
                   </span>

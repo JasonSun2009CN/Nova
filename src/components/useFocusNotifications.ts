@@ -9,6 +9,7 @@ export function useFocusNotifications(): void {
   const status = useVoyageStore((s) => s.progress?.status ?? 'idle');
   const destStarId = useVoyageStore((s) => s.destStarId);
   const enabled = useSettingsStore((s) => s.settings.browserNotificationsEnabled);
+  const lang = useSettingsStore((s) => s.settings.language);
   const prevStatusRef = useRef(status);
 
   useEffect(() => {
@@ -19,7 +20,8 @@ export function useFocusNotifications(): void {
       sendFocusNotification(
         status === 'completed' ? 'complete' : 'aborted',
         getDestinationName(destStarId),
+        lang,
       );
     }
-  }, [status, destStarId, enabled]);
+  }, [status, destStarId, enabled, lang]);
 }

@@ -44,6 +44,8 @@ test.describe('MVP 关键旅程', () => {
     await expect(page.getByText('本次航行完成')).toBeVisible();
 
     await page.getByRole('button', { name: '回到首页' }).click();
+    await page.getByRole('button', { name: '日志' }).click();
+    await expect(page.getByTestId('log-view')).toBeVisible();
     await expect(page.getByTestId('history-panel')).toBeVisible();
     await expect(
       page.getByTestId('history-panel').getByText('完成', { exact: true }),
@@ -51,6 +53,8 @@ test.describe('MVP 关键旅程', () => {
 
     await page.reload();
     await expect(page.getByTestId('setup-panel')).toBeVisible();
+    await page.getByRole('button', { name: '日志' }).click();
+    await expect(page.getByTestId('log-view')).toBeVisible();
     await expect(page.getByTestId('history-panel')).toBeVisible();
     await expect(
       page.getByTestId('history-panel').getByText('完成', { exact: true }),

@@ -1,10 +1,10 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { CaptainLogDialog } from '@/components/CaptainLog/CaptainLogDialog';
 import { CaptainLogPanel } from '@/components/CaptainLog/CaptainLogPanel';
 import type { VoyageRecord } from '@/contract/storage-types';
 import type { VoyageSnapshot, VoyageStatus } from '@/engine/contract/voyage-types';
+import { LogView } from '@/pages/LogView';
 import { useHistoryStore } from '@/store/useHistoryStore';
 
 const MS_PER_MINUTE = 60_000;
@@ -124,29 +124,25 @@ describe('CaptainLogPanel', () => {
   });
 });
 
-describe('CaptainLogDialog', () => {
-  it('渲染 dialog 与标题', () => {
-    seedRecords([]);
-    render(<CaptainLogDialog onClose={() => {}} />);
-    expect(screen.getByRole('dialog', { name: '船长日志' })).toBeInTheDocument();
-    expect(screen.getByText('船长日志')).toBeInTheDocument();
+describe('LogView（航行日志全屏视图）', () => {
+  it('渲染标题、统计面板与航行列表', async () => {
+    seedRecords([makeRecord({ startWallTime: localToday(9) })]);
+    await act(async () => {
+      render(<LogView onBack={() => {}} />);
+    });
+    expect(screen.getByTestId('log-view')).toBeInTheDocument();
+    expect(screen.getByText('航行日志')).toBeInTheDocument();
+    expect(screen.getByText('总专注时长')).toBeInTheDocument();
+    expect(screen.getByTestId('history-panel')).toBeInTheDocument();
   });
 
-  it('按 Escape 触发 onClose', () => {
+  it('点击返回按钮触发 onBack', async () => {
     seedRecords([]);
-    const onClose = vi.fn();
-    render(<CaptainLogDialog onClose={onClose} />);
-    fireEvent.keyDown(window, { key: 'Escape' });
-    expect(onClose).toHaveBeenCalled();
-  });
-
-  it('点击背景触发 onClose', () => {
-    seedRecords([]);
-    const onClose = vi.fn();
-    const { container } = render(<CaptainLogDialog onClose={onClose} />);
-    const backdrop = container.querySelector('[aria-hidden="true"]');
-    expect(backdrop).not.toBeNull();
-    fireEvent.click(backdrop!);
-    expect(onClose).toHaveBeenCalled();
+    const onBack = vi.fn();
+    await act(async () => {
+      render(<LogView onBack={onBack} />);
+    });
+    fireEvent.click(screen.getByRole('button', { name: '关闭船长日志' }));
+    expect(onBack).toHaveBeenCalled();
   });
 });
