@@ -163,7 +163,7 @@ export function StarMapView({ onClose }: { onClose?: () => void }) {
   };
 
   const departureName =
-    departureStar != null ? starDisplayName(departureStar) : lang === 'en' ? 'Sun' : '太阳';
+    departureStar != null ? starDisplayName(departureStar, lang) : lang === 'en' ? 'Sun' : '太阳';
 
   return (
     <section data-testid="starmap-view" className="relative h-full w-full flex-1 animate-fade-up">

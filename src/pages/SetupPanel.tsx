@@ -5,6 +5,7 @@ import { DurationScrubber } from '@/components/DurationScrubber';
 import { useAchievements } from '@/components/useAchievements';
 import {
   DESTINATION_STARS,
+  destinationName,
   destinationOptionsFromStars,
   distanceBetweenStars,
   findDestinationOption,
@@ -89,9 +90,10 @@ export function SetupPanel() {
   );
   const originName = useMemo(() => {
     if (originStarId === 'hip-sol') return t('common.originSolar');
-    if (originStar != null) return starDisplayName(originStar);
-    return findDestinationOption(originStarId, catalogStars)?.name ?? t('common.originSolar');
-  }, [originStarId, originStar, catalogStars, t]);
+    if (originStar != null) return starDisplayName(originStar, lang);
+    const opt = findDestinationOption(originStarId, catalogStars);
+    return opt != null ? destinationName(opt, lang) : t('common.originSolar');
+  }, [originStarId, originStar, catalogStars, t, lang]);
   const destStarObj = useMemo(
     () => catalogStars.find((s) => s.id === destStarId) ?? null,
     [catalogStars, destStarId],
@@ -192,7 +194,7 @@ export function SetupPanel() {
           <h2 className="font-display text-sm font-medium tracking-wide">{t('setup.title')}</h2>
           <p className="mt-1 text-xs text-deep-300">
             {destStar != null
-              ? `${originName} → ${destStar.name}`
+              ? `${originName} → ${destinationName(destStar, lang)}`
               : t('setup.fromOrigin', { origin: originName })}
           </p>
           {destStar != null && (
@@ -216,7 +218,7 @@ export function SetupPanel() {
                 engine: t(engineNameKey(currentEngine.id)),
                 gamma: formatGamma(currentEngine.gammaMax),
                 time: formatMinuteLabel(minutes, lang),
-                dest: destStar.name,
+                dest: destinationName(destStar, lang),
               })}
             </p>
             <p className="mt-1 text-xs leading-relaxed text-deep-400">
@@ -327,7 +329,7 @@ export function SetupPanel() {
                 </option>
                 {destinationOptions.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name} · {formatLy(s.distanceLy)}
+                    {destinationName(s, lang)} · {formatLy(s.distanceLy)}
                   </option>
                 ))}
               </select>
@@ -340,7 +342,7 @@ export function SetupPanel() {
                     {destStar != null && !reachable
                       ? t('setup.unreachablePick')
                       : t('setup.recommendLabel')}
-                    <span className="text-deep-200">{recommendation.name}</span> ·{' '}
+                    <span className="text-deep-200">{destinationName(recommendation, lang)}</span> ·{' '}
                     {formatLy(recommendation.distanceLy)}
                   </p>
                   <button
@@ -366,7 +368,7 @@ export function SetupPanel() {
               {plan != null && destStar != null ? (
                 <p className="text-xs leading-relaxed text-deep-400">
                   {t('setup.arrivalEstimate', {
-                    dest: destStar.name,
+                    dest: destinationName(destStar, lang),
                     shipTime: formatMinuteLabel(minutes, lang),
                     earthYears: plan.earthYears.toFixed(1),
                   })}

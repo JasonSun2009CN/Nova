@@ -48,7 +48,7 @@ export function StarInfoCard({ star, onClose, onComplete }: StarInfoCardProps) {
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-display text-base font-medium leading-snug text-foreground">
-          {starDisplayName(star)}
+          {starDisplayName(star, lang)}
         </h3>
         <button
           type="button"

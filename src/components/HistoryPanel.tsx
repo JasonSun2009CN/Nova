@@ -7,7 +7,7 @@ import { useHistoryStore } from '@/store/useHistoryStore';
 import { formatDateTime, formatDurationMs, formatLy } from '@/utils/format';
 
 export function HistoryPanel({ variant = 'standalone' }: { variant?: 'standalone' | 'embedded' }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const records = useHistoryStore((s) => s.records);
   const stats = useHistoryStore((s) => s.stats);
   const loading = useHistoryStore((s) => s.loading);
@@ -60,7 +60,7 @@ export function HistoryPanel({ variant = 'standalone' }: { variant?: 'standalone
           )}
           <ul className="glass-card overflow-hidden rounded-2xl">
             {records.map((r) => {
-              const destName = getDestinationName(r.destStarId);
+              const destName = getDestinationName(r.destStarId, lang);
               return (
                 <li
                   key={r.id}

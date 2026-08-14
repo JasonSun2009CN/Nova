@@ -99,13 +99,13 @@ export function VoyageInstruments({ phase = null }: { phase?: VoyagePhase }) {
   }, [originStar, destStar]);
   const originName = useMemo(() => {
     if (originStarId === 'hip-sol') return t('common.originSolar');
-    if (originStar != null) return starDisplayName(originStar);
-    return getDestinationName(originStarId) ?? t('common.originSolar');
-  }, [originStarId, originStar, t]);
+    if (originStar != null) return starDisplayName(originStar, lang);
+    return getDestinationName(originStarId, lang) ?? t('common.originSolar');
+  }, [originStarId, originStar, t, lang]);
   const destName = useMemo(() => {
-    if (destStar != null) return starDisplayName(destStar);
-    return getDestinationName(destStarId);
-  }, [destStar, destStarId]);
+    if (destStar != null) return starDisplayName(destStar, lang);
+    return getDestinationName(destStarId, lang);
+  }, [destStar, destStarId, lang]);
 
   if (progress == null) return null;
 

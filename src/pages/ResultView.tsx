@@ -23,7 +23,7 @@ function StatRow({ label, value }: { label: string; value: string }) {
 }
 
 export function ResultView() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const progress = useVoyageStore((s) => s.progress);
   const originStarId = useVoyageStore((s) => s.originStarId);
   const destStarId = useVoyageStore((s) => s.destStarId);
@@ -50,11 +50,11 @@ export function ResultView() {
   if (progress == null) return null;
 
   const completed = progress.status === 'completed';
-  const destName = getDestinationName(destStarId);
+  const destName = getDestinationName(destStarId, lang);
   const originName =
     originStarId === 'hip-sol'
       ? t('common.originSolar')
-      : (getDestinationName(originStarId) ?? t('common.originSolar'));
+      : (getDestinationName(originStarId, lang) ?? t('common.originSolar'));
   const coordinateHours = (progress.elapsedFocusMs * progress.gamma) / (60 * 60 * 1000);
 
   const handleRestart = () => {
@@ -77,7 +77,7 @@ export function ResultView() {
   return (
     <section
       data-testid="result-view"
-      className="mx-auto flex w-full max-w-md animate-fade-up flex-col items-stretch gap-5"
+      className="glass-card mx-auto flex w-full max-w-md animate-fade-up flex-col items-stretch gap-5 rounded-2xl p-6"
     >
       <div className="text-center">
         <div

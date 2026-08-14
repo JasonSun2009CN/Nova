@@ -19,7 +19,7 @@ export function useFocusNotifications(): void {
     if (prev === 'running' && (status === 'completed' || status === 'aborted')) {
       sendFocusNotification(
         status === 'completed' ? 'complete' : 'aborted',
-        getDestinationName(destStarId),
+        getDestinationName(destStarId, lang),
         lang,
       );
     }

@@ -9,12 +9,12 @@ const MS_PER_MINUTE = 60_000;
 function originLabel(starId: string | null, lang: AppLanguage): string {
   if (starId == null) return lang === 'en' ? 'Deep space' : '深空出发';
   if (starId === 'hip-sol') return lang === 'en' ? 'Solar System' : '太阳系';
-  return getDestinationName(starId) ?? (lang === 'en' ? 'Solar System' : '太阳系');
+  return getDestinationName(starId, lang) ?? (lang === 'en' ? 'Solar System' : '太阳系');
 }
 
 function destinationLabel(starId: string | null, lang: AppLanguage): string {
   if (starId == null) return lang === 'en' ? 'Free drift' : '自由漂流';
-  return getDestinationName(starId) ?? (lang === 'en' ? 'Unknown star' : '未知星');
+  return getDestinationName(starId, lang) ?? (lang === 'en' ? 'Unknown star' : '未知星');
 }
 
 function formatFullDateTime(ts: number): string {
