@@ -4,6 +4,7 @@ import { AchievementDialog } from '@/components/Achievements/AchievementDialog';
 import { GlossaryDialog } from '@/components/GlossaryDialog';
 import { OnboardingDialog } from '@/components/OnboardingDialog';
 import { SpaceBackdrop } from '@/components/SpaceBackdrop';
+import { UpdateNotice } from '@/components/UpdateNotice';
 import { useAudioEngine } from '@/components/useAudioEngine';
 import { useFocusNotifications } from '@/components/useFocusNotifications';
 import { useI18n } from '@/i18n';
@@ -181,6 +182,8 @@ function App() {
       {onboardingOpen && <OnboardingDialog onComplete={handleOnboardingComplete} />}
 
       <GlossaryDialog open={glossaryOpen} onClose={() => setGlossaryOpen(false)} />
+
+      <UpdateNotice />
     </div>
   );
 }
