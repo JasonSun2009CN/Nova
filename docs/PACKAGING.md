@@ -45,20 +45,18 @@ rustup target add x86_64-apple-darwin
 
 跨平台产物（在对应平台或 CI 上构建）：
 
-| 平台        | 产物路径                                                                                           |
-| ----------- | -------------------------------------------------------------------------------------------------- |
-| Windows     | `src-tauri/target/x86_64-pc-windows-msvc/release/nova.exe` 与 `.../bundle/nsis/*.exe`              |
-| Linux x64   | `src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage` 与 `.../deb/*.deb`  |
-| Linux arm64 | `src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/*.AppImage` 与 `.../deb/*.deb` |
+| 平台      | 产物路径                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------- |
+| Windows   | `src-tauri/target/x86_64-pc-windows-msvc/release/nova.exe` 与 `.../bundle/nsis/*.exe`             |
+| Linux x64 | `src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage` 与 `.../deb/*.deb` |
 
-## GitHub CI 自动打包（5 平台）
+## GitHub CI 自动打包（4 平台）
 
 `.github/workflows/release.yml` 已配好，**推 `v*` 标签**（或手动 workflow_dispatch）即触发：
 
 - macOS（`aarch64-apple-darwin` + `x86_64-apple-darwin`）→ `.app` + `.dmg`
 - Windows x64 → `.exe` + NSIS 安装器
 - Linux x64 → `.AppImage` + `.deb`
-- Linux arm64（QEMU 容器内交叉编译）→ `.AppImage` + `.deb`
 - 末尾 `release` job 用 `softprops/action-gh-release` 自动发布成 GitHub Release
 
 ```bash
