@@ -55,7 +55,7 @@ jobs:
       - name: Install frontend deps
         run: pnpm install --frozen-lockfile
       - name: Build Tauri
-        run: pnpm tauri build --target x86_64-pc-windows-msvc --bundles app,nsis
+        run: pnpm tauri build --target x86_64-pc-windows-msvc --bundles nsis
       - name: Upload bundle
         uses: actions/upload-artifact@v4
         with:
@@ -84,7 +84,7 @@ jobs:
       - name: Install frontend deps
         run: pnpm install --frozen-lockfile
       - name: Build Tauri
-        run: pnpm tauri build --target x86_64-unknown-linux-gnu --bundles app,appimage,deb
+        run: pnpm tauri build --target x86_64-unknown-linux-gnu --bundles appimage,deb
       - name: Upload bundle
         uses: actions/upload-artifact@v4
         with:
@@ -112,7 +112,7 @@ jobs:
             . "$HOME/.cargo/env"
             rustup target add aarch64-unknown-linux-gnu
             pnpm install --frozen-lockfile
-            pnpm tauri build --target aarch64-unknown-linux-gnu --bundles app,appimage,deb
+            pnpm tauri build --target aarch64-unknown-linux-gnu --bundles appimage,deb
           '
       - name: Upload bundle
         uses: actions/upload-artifact@v4
