@@ -266,7 +266,7 @@ v0.1 ────────── v0.2 ────────── v0.3 ─
 
 **版本**：v1.0.0 (Release Candidate → Stable)
 **目标**：打磨体验，修复缺陷，生产可用
-**状态**：**S35 星表数据扩展已交付**（500ly 亮星 **17,789 颗**（HYG v35 r3，tier1 981 / tier2 16,807）+ 星云/星团 **34 个**（背景天空投影渲染，保持极简）+ 分块加载并行化；银河结构叠加**暂缓**（审美冲突），`feature/S35-star-catalog-expansion` 未合并）。**S37 体验打磨进行中**（无障碍 / 首次引导 / i18n 中英 / 首屏验证已完成，`feature/S37-polish` 未合并）；**Tauri 5 平台发布 workflow**（`release.yml`，tag 触发）。
+**状态**：**S35 星表数据扩展已交付**（500ly 亮星 **17,789 颗**（HYG v35 r3，tier1 981 / tier2 16,807）+ 星云/星团 **34 个**（背景天空投影渲染，保持极简）+ 分块加载并行化；银河结构叠加**暂缓**（审美冲突），`feature/S35-star-catalog-expansion` 未合并）。**S37 体验打磨进行中**（无障碍 / 首次引导 / i18n 中英 / 首屏验证已完成，`feature/S37-polish` 未合并）；**Tauri 5 平台发布 workflow**（`release.yml`，tag 触发）。**官网 + 更新检测已交付**（`website/` 纯静态官网 GitHub Pages 托管：亮/暗双主题 + 中英双语 + 各平台下载区 + `/app/` PWA 网页版；应用内更新检测 `UpdateNotice` 读 `latest.json`；`deploy-site.yml` Pages 部署；版本统一 0.6.0，见 ADR-0017）。
 
 ### 5.1 体验优化
 
@@ -290,7 +290,7 @@ v0.1 ────────── v0.2 ────────── v0.3 ─
 
 ### 5.4 发布准备
 
-- [ ] 正式版产品网站 / 落地页
+- [x] 正式版产品网站 / 落地页（`website/` 官网 GitHub Pages：亮/暗双主题 + 中英双语 + 各平台下载区 + `/app/` PWA 网页版，见 ADR-0017）
 - [ ] 用户手册 / FAQ
 - [ ] 安装包（可选：Electron 桌面版、PWA 离线安装）
 

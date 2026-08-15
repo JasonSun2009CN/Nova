@@ -39,7 +39,8 @@ export type SettingsKey =
   | 'currentStarId'
   | 'browserNotificationsEnabled'
   | 'hasCompletedOnboarding'
-  | 'language';
+  | 'language'
+  | 'skippedUpdateVersion';
 
 export type AmbientSoundTypeKey = 'none' | 'cmb' | 'pulsar';
 
@@ -61,6 +62,7 @@ export type SettingsValueMap = {
   browserNotificationsEnabled: boolean;
   hasCompletedOnboarding: boolean;
   language: AppLanguage;
+  skippedUpdateVersion: string | null;
 };
 
 export type SettingsEntry<K extends SettingsKey = SettingsKey> = Readonly<{

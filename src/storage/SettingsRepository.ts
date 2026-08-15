@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS: Readonly<SettingsValueMap> = {
   browserNotificationsEnabled: false,
   hasCompletedOnboarding: false,
   language: 'zh',
+  skippedUpdateVersion: null,
 };
 
 export class SettingsRepository {

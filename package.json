@@ -1,7 +1,7 @@
 {
   "name": "nova",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.6.0",
   "type": "module",
   "description": "Nova · 星际专注软件 - 让每一次专注都成为一次宇宙旅行",
   "packageManager": "pnpm@8.6.0",
@@ -13,6 +13,7 @@
     "preinstall": "npx only-allow pnpm",
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:pages": "tsc -b && vite build --base=/Nova/app/",
     "preview": "vite preview",
     "lint": "eslint \"**/*.{ts,tsx}\" --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint \"**/*.{ts,tsx}\" --fix",

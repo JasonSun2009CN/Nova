@@ -1,6 +1,6 @@
 [package]
 name = "nova"
-version = "0.1.0"
+version = "0.6.0"
 description = "Nova · 星际专注 - 让每一次专注都成为一次星际航行"
 authors = ["Jason"]
 edition = "2021"
