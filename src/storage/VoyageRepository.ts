@@ -10,6 +10,7 @@ export type VoyageCreateInput = {
   originCoords?: Cartesian3 | null;
   destCoords?: Cartesian3 | null;
   starsVisitedIds?: readonly string[];
+  category?: string | null;
   createdAtOverride?: number;
 };
 
@@ -56,6 +57,7 @@ export class VoyageRepository {
       originCoords: input.originCoords ?? null,
       destStarId: input.destStar?.id ?? null,
       destCoords: input.destCoords ?? null,
+      category: input.category ?? null,
       snapshot: structuredClone(input.snapshot),
       starsVisitedIds: input.starsVisitedIds != null ? Array.from(input.starsVisitedIds) : [],
       createdAt: input.createdAtOverride ?? input.snapshot.createdAt,

@@ -79,6 +79,15 @@ export function HistoryPanel({ variant = 'standalone' }: { variant?: 'standalone
                       >
                         {r.status === 'completed' ? t('history.completed') : t('history.aborted')}
                       </span>
+                      {r.category != null && r.category !== '' && (
+                        <span className="rounded-md border border-[var(--color-glass-border)] px-1.5 py-0.5 text-[0.625rem] text-deep-300">
+                          {r.category === 'work'
+                            ? t('category.work')
+                            : r.category === 'study'
+                              ? t('category.study')
+                              : r.category}
+                        </span>
+                      )}
                     </div>
                     <div className="mt-0.5 truncate text-xs text-deep-400">
                       {formatDateTime(r.createdAt)}

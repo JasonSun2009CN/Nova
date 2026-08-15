@@ -21,6 +21,7 @@ type VoyageStoreState = {
   snapshot: VoyageSnapshot | null;
   originStarId: string | null;
   destStarId: string | null;
+  category: string | null;
   lastSavedRecord: VoyageRecord | null;
   controllerReady: boolean;
   resumedFromSnapshot: boolean;
@@ -29,7 +30,11 @@ type VoyageStoreState = {
 
 type VoyageStoreActions = {
   prepare: (
-    opts: VoyageOptions & { originStarId?: string | null; destStarId?: string | null },
+    opts: VoyageOptions & {
+      originStarId?: string | null;
+      destStarId?: string | null;
+      category?: string | null;
+    },
   ) => void;
   start: () => VoyageProgress;
   pause: () => VoyageProgress;
@@ -178,18 +183,19 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
   snapshot: null,
   originStarId: null,
   destStarId: null,
+  category: null,
   lastSavedRecord: null,
   controllerReady: false,
   resumedFromSnapshot: false,
   voyagePhase: null,
 
   prepare: (opts) => {
-    const { originStarId = null, destStarId = null, ...voyageOpts } = opts;
+    const { originStarId = null, destStarId = null, category = null, ...voyageOpts } = opts;
     const controller = new VoyageController(voyageOpts);
     controller.setExternalTicker(isWorkerSupported());
     bindController(controller, set);
     lastLivePersistAt = 0;
-    set({ originStarId, destStarId, lastSavedRecord: null, resumedFromSnapshot: false });
+    set({ originStarId, destStarId, category, lastSavedRecord: null, resumedFromSnapshot: false });
   },
 
   start: () => {
@@ -299,6 +305,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
       snapshot: null,
       originStarId: null,
       destStarId: null,
+      category: null,
       controllerReady: false,
       resumedFromSnapshot: false,
       voyagePhase: null,
@@ -310,7 +317,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
   },
 
   saveToHistory: async () => {
-    const { snapshot, originStarId, destStarId, progress } = get();
+    const { snapshot, originStarId, destStarId, category, progress } = get();
     if (snapshot == null || progress == null) return null;
     if (progress.status !== 'completed' && progress.status !== 'aborted') return null;
 
@@ -319,6 +326,7 @@ export const useVoyageStore = create<VoyageStore>((set, get) => ({
       snapshot,
       originStar: originStarId != null ? { id: originStarId } : null,
       destStar: destStarId != null ? { id: destStarId } : null,
+      category,
     });
     set({ lastSavedRecord: record });
     void useHistoryStore.getState().refresh();

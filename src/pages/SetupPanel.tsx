@@ -49,6 +49,11 @@ function engineNameKey(id: string): I18nKey {
 
 const FOCUS_PRESETS: readonly number[] = [25, 45, 60, 90];
 
+const CATEGORY_PRESETS: readonly { id: 'work' | 'study'; labelKey: I18nKey }[] = [
+  { id: 'work', labelKey: 'category.work' },
+  { id: 'study', labelKey: 'category.study' },
+];
+
 export function SetupPanel() {
   const { t, lang } = useI18n();
   const defaultMinutes = useSettingsStore((s) => s.settings.defaultFocusMinutes);
@@ -57,6 +62,7 @@ export function SetupPanel() {
 
   const [minutes, setMinutes] = useState<number>(defaultMinutes);
   const [vOverC, setVOverC] = useState<number>(defaultVOverC);
+  const [category, setCategory] = useState<string | null>(null);
   const destStarId = useVoyageStore((s) => s.destStarId);
   const currentStarId = useSettingsStore((s) => s.settings.currentStarId) ?? 'hip-sol';
   const catalogStars = useCatalogStore((s) => s.stars);
@@ -180,6 +186,7 @@ export function SetupPanel() {
       vOverC: speed,
       originStarId,
       destStarId,
+      category,
     });
     useVoyageStore.getState().start();
   };
@@ -354,6 +361,43 @@ export function SetupPanel() {
                   </button>
                 </div>
               )}
+            </div>
+
+            <div className="min-w-[170px] flex-1">
+              <div className="mb-2 text-xs text-deep-400">{t('category.label')}</div>
+              <div className="flex flex-wrap items-center gap-2">
+                {CATEGORY_PRESETS.map(({ id, labelKey }) => {
+                  const active = category === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setCategory(active ? null : id)}
+                      className={twMerge(
+                        'h-8 cursor-pointer rounded-lg border px-3 text-sm transition-colors duration-200',
+                        active
+                          ? 'border-star-gold text-star-gold'
+                          : 'border-[var(--color-glass-border)] text-deep-300 hover:border-star-gold/50 hover:text-foreground',
+                      )}
+                    >
+                      {t(labelKey)}
+                    </button>
+                  );
+                })}
+              </div>
+              <input
+                type="text"
+                value={
+                  category != null && category !== 'work' && category !== 'study' ? category : ''
+                }
+                placeholder={t('category.customPlaceholder')}
+                aria-label={t('category.customPlaceholder')}
+                onChange={(e) =>
+                  setCategory(e.target.value.trim() === '' ? null : e.target.value.trim())
+                }
+                className="mt-2 h-9 w-full rounded-lg border border-[var(--color-glass-border)] bg-transparent px-3 text-sm text-foreground placeholder:text-deep-400 focus:border-star-blue focus:outline-none"
+              />
             </div>
 
             <div className="min-w-[190px] flex-1">
