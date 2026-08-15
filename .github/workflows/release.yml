@@ -106,7 +106,8 @@ jobs:
             set -euxo pipefail
             export DEBIAN_FRONTEND=noninteractive
             apt-get update
-            apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev nodejs npm
+            apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev xz-utils
+            curl -fsSL https://nodejs.org/dist/v20.18.1/node-v20.18.1-linux-arm64.tar.xz | tar -xJ -C /usr/local --strip-components=1
             npm install -g pnpm@8.6.0
             curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable
             . "$HOME/.cargo/env"
